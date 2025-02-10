@@ -1,21 +1,44 @@
 cmake_minimum_required(VERSION 3.13)
 
-# Initialize Pico SDK once for all child projects
-include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
+set(PICO_BOARD none CACHE STRING "Board type")
+set(PICO_PLATFORM rp2040)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 2.1.0)
+set(toolchainVersion 13_3_Rel1)
+set(picotoolVersion 2.1.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
+
+
+# Pull in Raspberry Pi Pico SDK (must be before project)
+include(pico_sdk_import.cmake)
+
 set(PICO_SDK_INCLUSION_DONE TRUE)
 
 # Project name for the parent
 project(hoja_bulk_compile C CXX ASM)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-
-if (PICO_SDK_VERSION_STRING VERSION_LESS "1.3.0")
-    message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
-endif()
 
 # Initialize the SDK
 pico_sdk_init()
 set(PICO_SDK_INIT_DONE TRUE)
+
+
+if (PICO_SDK_VERSION_STRING VERSION_LESS "2.1.0")
+    message(FATAL_ERROR "Raspberry Pi Pico SDK version 2.1.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
+endif()
 
 # Include HOJA Libarary
 set(HOJA_LIB_DIR        ${CMAKE_CURRENT_LIST_DIR}/library/HOJA-LIB-RP2040)
