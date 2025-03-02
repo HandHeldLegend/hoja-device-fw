@@ -41,8 +41,8 @@ extern adc_driver_cfg_s gcp_adc_hal;
 #define HOJA_ADC_RX_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &gcp_adc_2} 
 #define HOJA_ADC_RY_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &gcp_adc_2} 
 
-#define HOJA_ADC_LT_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &gcp_adc_hal, .ch_invert = 0} 
-#define HOJA_ADC_RT_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &gcp_adc_hal, .ch_invert = 0} 
+#define HOJA_ADC_LT_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &gcp_adc_hal, .ch_invert = 0} 
+#define HOJA_ADC_RT_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &gcp_adc_hal, .ch_invert = 0} 
 
 // ---------------------------------
 // ---------------------------------
