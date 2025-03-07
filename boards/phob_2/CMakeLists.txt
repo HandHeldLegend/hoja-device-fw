@@ -57,11 +57,25 @@ add_executable(${PROJECT_NAME}
     main.c
 )
 
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/pico_override.cmake")
+    message("Including pico_override.cmake for ${PROJECT_NAME}")
+    include(${CMAKE_CURRENT_LIST_DIR}/pico_override.cmake)
+    target_compile_definitions(${PROJECT_NAME}
+        PRIVATE
+        CYW43_DEFAULT_PIN_WL_REG_ON=${BT_ON_PIN}
+        CYW43_DEFAULT_PIN_WL_DATA_OUT=${BT_DATA_OUT_PIN}
+        CYW43_DEFAULT_PIN_WL_DATA_IN=${BT_DATA_IN_PIN}
+        CYW43_DEFAULT_PIN_WL_HOST_WAKE=${BT_WAKE_PIN}
+        CYW43_DEFAULT_PIN_WL_CLOCK=${BT_CLOCK_PIN}
+        CYW43_DEFAULT_PIN_WL_CS=${BT_CS_PIN}
+    )
+endif()
+
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
+    PICO_FLASH_SAFE_EXECUTE_PICO_SUPPORT_MULTICORE_LOCKOUT=1
     PICO_XOSC_STARTUP_DELAY_MULTIPLIER=64
     CYW43_LWIP=0
-    PICO_FLASH_ASSUME_COREX_SAFE=1
     )
 
 # Make your targets depend on the timestamp
