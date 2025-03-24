@@ -154,9 +154,9 @@ extern adc_driver_cfg_s progcc3_adc_2;
     {"Home"}, {"Capture"}, \
     {"Plus"}, {"Minus"}\
 }
-#define HOJA_RGB_PLAYER_GROUP_IDX   11
-#define HOJA_RGB_PLAYER_GROUP_SIZE  1
-#define HOJA_RGB_PLAYER_TYPE        1 // Numerical player type. Type 2 is for color based player type
+#define HOJA_RGB_NOTIF_GROUP_IDX   11
+#define HOJA_RGB_NOTIF_GROUP_SIZE  1
+
 // L   D   R   U
 // 12, 13, 14, 15
 // Corresponds to the group names in order

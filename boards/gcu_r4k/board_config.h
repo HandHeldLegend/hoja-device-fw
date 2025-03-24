@@ -4,7 +4,7 @@
 #include "driver_define_helper.h" 
 #include "rgb_define_helper.h" 
 
-#define HOJA_BT_LOGGING_DEBUG 0 
+#define HOJA_BT_LOGGING_DEBUG 0
 
 // Device stuff
 //#define HOJA_DEVICE_ID  0xC003 (GC Ultimate R4K)
@@ -86,8 +86,11 @@ extern adc_driver_cfg_s user_adc_hal;
 
 // Bluetooth Driver Setup
 #define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_ESP32HOJA
-#define BLUETOOTH_DRIVER_I2C_INSTANCE   1
-#define BLUETOOTH_DRIVER_ENABLE_PIN     26
+#define BLUETOOTH_DRIVER_I2C_INSTANCE   1 
+#define BLUETOOTH_DRIVER_ENABLE_PIN     26 
+
+#define BLUETOOTH_DRIVER_BATMON_ENABLE  1 // Enable battery monitoring by the ESP32
+#define BLUETOOTH_DRIVER_BATMON_ADC_GPIO 36 // Select the battery monitoring ESP32 ADC channel
 // ---------------------------------
 // ---------------------------------
 
@@ -171,8 +174,8 @@ extern adc_driver_cfg_s user_adc_hal;
     {"Power"} \
 }
 
-#define HOJA_RGB_PLAYER_GROUP_IDX   5
-#define HOJA_RGB_PLAYER_GROUP_SIZE  1
+#define HOJA_RGB_NOTIF_GROUP_IDX   5
+#define HOJA_RGB_NOTIF_GROUP_SIZE  1
 
 // L   D   R   U
 // 12, 13, 14, 15

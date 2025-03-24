@@ -30,9 +30,23 @@
 #define HOJA_I2C_0_GPIO_SCL     29
 #define I2C_INSTANCE_0          0
 
+#define HOJA_I2C_1_ENABLE       1
+#define HOJA_I2C_1_GPIO_SDA     22
+#define HOJA_I2C_1_GPIO_SCL     23
+#define I2C_INSTANCE_1          1
+
 // IMU Driver Setup
-// #define HOJA_IMU_CHAN_A_DRIVER          IMU_DRIVER_LSM6DSR
-// #define HOJA_IMU_CHAN_B_DRIVER          IMU_DRIVER_LSM6DSR
+#define HOJA_IMU_CHAN_A_DRIVER  IMU_DRIVER_LSM6DSR_I2C
+#define HOJA_IMU_CHAN_B_DRIVER  IMU_DRIVER_LSM6DSR_I2C
+
+#define HOJA_IMU_CHAN_A_I2C_INSTANCE 1
+#define HOJA_IMU_CHAN_B_I2C_INSTANCE 1
+
+#define HOJA_IMU_CHAN_A_SELECT 0
+#define HOJA_IMU_CHAN_B_SELECT 1
+
+#define HOJA_IMU_CHAN_A_INVERT_FLAGS    0b010010
+#define HOJA_IMU_CHAN_B_INVERT_FLAGS    0b100100
 
 // ---------------------------------
 // ---------------------------------
@@ -46,8 +60,8 @@ extern adc_driver_cfg_s p33_adc_mux;
 // HAL ADC (1 instance) 
 extern adc_driver_cfg_s p33_adc_hal; 
 
-#define HOJA_ADC_LX_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &p33_adc_mux} 
-#define HOJA_ADC_LY_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &p33_adc_mux} 
+#define HOJA_ADC_LX_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &p33_adc_mux} 
+#define HOJA_ADC_LY_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &p33_adc_mux} 
 
 #define HOJA_ADC_RX_CFG (adc_channel_cfg_s) {.ch_local = 3, .driver_cfg = &p33_adc_mux} 
 #define HOJA_ADC_RY_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &p33_adc_mux} 
@@ -71,9 +85,14 @@ extern adc_driver_cfg_s p33_adc_hal;
 // ---------------------------------
 
 // Bluetooth Driver Setup
-// #define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_ESP32HOJA
-// #define BLUETOOTH_DRIVER_I2C_INSTANCE   0
-// #define BLUETOOTH_DRIVER_ENABLE_PIN     14
+#define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_HAL
+#define BLUETOOTH_DRIVER_PIO_INSTANCE   1 
+#define BLUETOOTH_DRIVER_ENABLE_PIN     17 
+#define BLUETOOTH_DRIVER_DATA_OUT       18 
+#define BLUETOOTH_DRIVER_DATA_IN        18 
+#define BLUETOOTH_DRIVER_WAKE           18 
+#define BLUETOOTH_DRIVER_CLOCK          19 
+#define BLUETOOTH_DRIVER_CS             20
 // ---------------------------------
 // ---------------------------------
 
@@ -87,12 +106,11 @@ extern adc_driver_cfg_s p33_adc_hal;
 // Battery Driver Setup
 #define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
 #define HOJA_BATTERY_I2C_INSTANCE   0
-#define HOJA_BATTERY_CAPACITY_MAH   1300
 #define HOJA_BATTERY_PART_CODE      "CTR-003"
-#define HOJA_BATTERY_CONSUME_RATE   150 // mA
 
-// extern adc_driver_cfg_s p33_battery_adc_1;
-// #define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &battery_adc_1} 
+#define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &p33_adc_hal} 
+#define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.05f 
+
 // ---------------------------------
 // ---------------------------------
 
@@ -160,7 +178,9 @@ extern adc_driver_cfg_s p33_adc_hal;
 }
 #define HOJA_RGB_PLAYER_GROUP_IDX   15
 #define HOJA_RGB_PLAYER_GROUP_SIZE  4
-#define HOJA_RGB_PLAYER_TYPE        1 // Numerical player type. Type 2 is for color based player type
+
+#define HOJA_RGB_NOTIF_GROUP_IDX 11
+#define HOJA_RGB_NOTIF_GROUP_SIZE 1
 
 // L   D   R   U
 // 12, 13, 14, 15

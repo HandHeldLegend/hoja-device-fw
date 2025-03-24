@@ -19,6 +19,11 @@ adc_driver_cfg_s user_adc_2 = {
     .mcp3002_cfg = {.cs_gpio = 22, .spi_instance = 0}
     };
 
+adc_driver_cfg_s battery_adc_1 = {
+    .driver_type = ADC_DRIVER_HAL,
+    .driver_instance  = 0,
+    };
+
 void _local_setup_btn(uint32_t gpio)
 {
     gpio_init(gpio);

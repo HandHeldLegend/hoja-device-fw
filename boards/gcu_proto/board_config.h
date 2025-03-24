@@ -101,9 +101,10 @@ extern adc_driver_cfg_s gcp_adc_hal;
 // Battery Driver Setup
 #define HOJA_BATTERY_I2C_INSTANCE   1
 #define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
-#define HOJA_BATTERY_CAPACITY_MAH   1200
 #define HOJA_BATTERY_PART_CODE      "BDT 903035"
-#define HOJA_BATTERY_CONSUME_RATE   225 // mA
+
+#define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &gcp_adc_hal} 
+
 // ---------------------------------
 // ---------------------------------
 

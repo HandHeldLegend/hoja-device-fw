@@ -94,9 +94,11 @@
 // Battery Driver Setup
 #define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
 #define HOJA_BATTERY_I2C_INSTANCE   1
-#define HOJA_BATTERY_CAPACITY_MAH   525
 #define HOJA_BATTERY_PART_CODE      "HAC-006"
-#define HOJA_BATTERY_CONSUME_RATE   225 // mA
+
+extern adc_driver_cfg_s battery_adc_1;
+#define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 3, .driver_cfg = &battery_adc_1} 
+
 // ---------------------------------
 // ---------------------------------
 
@@ -165,8 +167,8 @@
 
 // If we don't have a specific player group
 // we can use another group for notifications
-#define HOJA_RGB_PLAYER_GROUP_IDX   6
-#define HOJA_RGB_PLAYER_GROUP_SIZE  1
+#define HOJA_RGB_NOTIF_GROUP_IDX   6
+#define HOJA_RGB_NOTIF_GROUP_SIZE  1
 
 // U D L R is the order
 // 0,  2,  3,  1

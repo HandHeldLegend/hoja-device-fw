@@ -6,6 +6,11 @@
 #include "pico/stdlib.h"
 #include "pico/bootrom.h" 
 
+adc_driver_cfg_s battery_adc_1 = {
+    .driver_type = ADC_DRIVER_HAL,
+    .driver_instance  = 0,
+    };
+
 void _local_setup_btn(uint32_t gpio)
 {
     gpio_init(gpio);

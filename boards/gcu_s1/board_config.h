@@ -164,8 +164,8 @@ extern adc_driver_cfg_s user_adc_hal;
     {"Power"} \
 }
 
-#define HOJA_RGB_PLAYER_GROUP_IDX   5
-#define HOJA_RGB_PLAYER_GROUP_SIZE  1
+#define HOJA_RGB_NOTIF_GROUP_IDX   5
+#define HOJA_RGB_NOTIF_GROUP_SIZE  1
 
 // L   D   R   U
 // 12, 13, 14, 15
