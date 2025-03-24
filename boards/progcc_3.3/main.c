@@ -28,7 +28,7 @@ button_remap_s user_map = {
     .button_stick_left = MAPCODE_B_STICKL,
     .button_stick_right = MAPCODE_B_STICKR,
 };
-*/ 
+*/
 
 adc_driver_cfg_s p33_adc_hal = {
     .driver_type = ADC_DRIVER_HAL,

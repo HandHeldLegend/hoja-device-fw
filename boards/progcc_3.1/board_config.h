@@ -8,7 +8,7 @@
 #define HOJA_BT_LOGGING_DEBUG 0
 
 // Device stuff
-//#define HOJA_DEVICE_ID  0xA004 // A002 is 3+, A003 is 3+ (Haptic), A004 is 3.1
+// #define HOJA_DEVICE_ID  0xA004 // A002 is 3+, A003 is 3+ (Haptic), A004 is 3.1
 
 #define HOJA_FW_VERSION 0x0A30
 
@@ -83,7 +83,7 @@ extern adc_driver_cfg_s user_adc_2;
 
 #define HOJA_HAPTICS_DEBUG 0
 
-//#define HOJA_HDRUMBLE_CHAN_B_PIN 24 // UNUSED CH B
+// #define HOJA_HDRUMBLE_CHAN_B_PIN 24 // UNUSED CH B
 // ---------------------------------
 // ---------------------------------
 
@@ -104,9 +104,11 @@ extern adc_driver_cfg_s user_adc_2;
 // Battery Driver Setup
 #define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
 #define HOJA_BATTERY_I2C_INSTANCE   0
-#define HOJA_BATTERY_CAPACITY_MAH   1300
 #define HOJA_BATTERY_PART_CODE      "CTR-003"
-#define HOJA_BATTERY_CONSUME_RATE   225 // mA
+
+extern adc_driver_cfg_s battery_adc_1;
+#define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &battery_adc_1} 
+
 // ---------------------------------
 // ---------------------------------
 
@@ -174,7 +176,10 @@ extern adc_driver_cfg_s user_adc_2;
 }
 #define HOJA_RGB_PLAYER_GROUP_IDX   15
 #define HOJA_RGB_PLAYER_GROUP_SIZE  4
-#define HOJA_RGB_PLAYER_TYPE        1 // Numerical player type. Type 2 is for color based player type
+
+#define HOJA_RGB_NOTIF_GROUP_IDX 11
+#define HOJA_RGB_NOTIF_GROUP_SIZE 1
+
 // L   D   R   U
 // 12, 13, 14, 15
 // Corresponds to the group names in order

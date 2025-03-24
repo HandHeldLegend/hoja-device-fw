@@ -95,9 +95,11 @@ extern adc_driver_cfg_s user_adc_2;
 // Battery Driver Setup
 #define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
 #define HOJA_BATTERY_I2C_INSTANCE   0
-#define HOJA_BATTERY_CAPACITY_MAH   1300
 #define HOJA_BATTERY_PART_CODE      "CTR-003"
-#define HOJA_BATTERY_CONSUME_RATE   225 // mA
+
+extern adc_driver_cfg_s battery_adc_1;
+#define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &battery_adc_1} 
+
 // ---------------------------------
 // ---------------------------------
 
@@ -163,8 +165,8 @@ extern adc_driver_cfg_s user_adc_2;
     {"Home"}, {"Capture"}, \
     {"Plus"}, {"Minus"}\
 }
-#define HOJA_RGB_PLAYER_GROUP_IDX   11
-#define HOJA_RGB_PLAYER_GROUP_SIZE  1
+#define HOJA_RGB_NOTIF_GROUP_IDX   11
+#define HOJA_RGB_NOTIF_GROUP_SIZE  1
 #define HOJA_RGB_PLAYER_TYPE        1 // Numerical player type. Type 2 is for color based player type
 
 // L   D   R   U
