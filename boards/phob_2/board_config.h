@@ -12,6 +12,8 @@
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
 #define HOJA_MANUFACTURER   "PhobGCC"
 
+#define HOJA_DISABLE_TOURNEY_MACRO 1
+
 // ---------------------------------
 // ---------------------------------
 

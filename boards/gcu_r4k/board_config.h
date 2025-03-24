@@ -17,6 +17,8 @@
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
 #define HOJA_MANUFACTURER   "HHL" 
 
+#define HOJA_DISABLE_TOURNEY_MACRO 1
+
 // ---------------------------------
 // ---------------------------------
 
@@ -34,8 +36,8 @@
 #define I2C_INSTANCE_1          1 
 
 // IMU Driver Setup
-#define HOJA_IMU_CHAN_A_DRIVER          IMU_DRIVER_LSM6DSR 
-#define HOJA_IMU_CHAN_B_DRIVER          IMU_DRIVER_LSM6DSR 
+#define HOJA_IMU_CHAN_A_DRIVER          IMU_DRIVER_LSM6DSR_SPI 
+#define HOJA_IMU_CHAN_B_DRIVER          IMU_DRIVER_LSM6DSR_SPI 
 
 #define HOJA_IMU_CHAN_A_CS_PIN          0 
 #define HOJA_IMU_CHAN_A_SPI_INSTANCE    0 
