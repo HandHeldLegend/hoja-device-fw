@@ -47,7 +47,7 @@ set(BOARDS_DIR  ${CMAKE_CURRENT_LIST_DIR}/boards)
 set(ROOT_DIR    ${CMAKE_CURRENT_LIST_DIR})
 
 # Define your list of directories
-set(BULK_PROJECTS_DIRS
+set(BULK_PROJECTS_DIRS 
     boards/progcc_3 
     boards/progcc_3p 
     boards/progcc_3.1 
@@ -58,7 +58,8 @@ set(BULK_PROJECTS_DIRS
     boards/gcu_proto 
     boards/gcu_s1 
     boards/phob_2 
-    boards/pico_w
+    boards/pico_w 
+    boards/phobri_64 
 )
 
 # Iterate through the list
