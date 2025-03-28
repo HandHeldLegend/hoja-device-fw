@@ -28,7 +28,7 @@
 // ADS7142 (1 only)
 extern adc_driver_cfg_s phobri_adc_1;
 
-#define HOJA_ADC_LX_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &phobri_adc_1} 
+#define HOJA_ADC_LX_CFG (adc_channel_cfg_s) {.ch_local = 0, .ch_invert = 1, .driver_cfg = &phobri_adc_1} 
 #define HOJA_ADC_LY_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &phobri_adc_1} 
 // ---------------------------------
 // ---------------------------------
