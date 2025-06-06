@@ -116,7 +116,7 @@ extern adc_driver_cfg_s user_adc_hal;
 #define HOJA_DEVICE_NAME            HOJA_PRODUCT
 #define HOJA_DEVICE_MAKER           HOJA_MANUFACTURER
 #define HOJA_DEVICE_MANIFEST_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r4k/manifest.json"
-#define HOJA_DEVICE_FIRMWARE_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r4k/gcu_proto.uf2"
+#define HOJA_DEVICE_FIRMWARE_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r4k/gcu_r4k.uf2"
 #define HOJA_DEVICE_MANUAL_URL      "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z"
 #define HOJA_DEVICE_FCC_ELABEL      ""
 #define HOJA_DEVICE_SNES_SUPPORTED      1
