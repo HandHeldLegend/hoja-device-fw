@@ -67,7 +67,7 @@ extern adc_driver_cfg_s user_adc_2;
 #define HOJA_HAPTICS_CHAN_A_PIN    21
 #define HOJA_HAPTICS_CHAN_B_PIN    24
 
-#define HOJA_HAPTICS_MAX        0.3f // -30
+#define HOJA_HAPTICS_MAX        1.0f // -30
 
 #define HOJA_HAPTICS_MIN_LO     0.0625f // -2
 #define HOJA_HAPTICS_MIN_HI     0.000f
