@@ -49,7 +49,7 @@
 // ---------------------------------
 
 // Enable smoothing for 3.1
-#define ADC_SMOOTHING_STRENGTH      8
+#define ADC_SMOOTHING_STRENGTH      12
 
 // MCP3002 (2 of them)
 extern adc_driver_cfg_s user_adc_1;
@@ -72,7 +72,7 @@ extern adc_driver_cfg_s user_adc_2;
 #define HOJA_HAPTICS_CHAN_A_PIN    21
 // NO CH B HERE #define HOJA_HAPTICS_CHAN_B_PIN    24
 
-#define HOJA_HAPTICS_MAX        0.55f
+#define HOJA_HAPTICS_MAX        0.75f
 
 #define HOJA_HAPTICS_MIN_LO     0.0f // 
 #define HOJA_HAPTICS_MIN_HI     0.0f  // 
