@@ -19,7 +19,7 @@
 #define HOJA_MANUFACTURER   "HHL"
 
 #define HOJA_USB_VID        0x2E8A // Raspberry Pi
-#define HOJA_USB_PID        0x10DE // ProGCC PID
+#define HOJA_USB_PID        0x10DF // ProGCC PID
 
 // ---------------------------------
 // ---------------------------------
