@@ -60,6 +60,7 @@ set(BULK_PROJECTS_DIRS
     boards/phob_2 
     boards/pico_w 
     boards/phobri_64 
+    boards/padbox_gs 
 )
 
 # Iterate through the list

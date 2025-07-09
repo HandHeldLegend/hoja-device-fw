@@ -13,6 +13,9 @@
 
 #define HOJA_PRODUCT        "GCU-R4K" 
 
+#define HOJA_USB_VID        0x2E8A // Raspberry Pi
+#define HOJA_USB_PID        0x10DD // GC Ultimate PID
+
 // URL that will display to open a config tool
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
 #define HOJA_MANUFACTURER   "HHL" 

@@ -18,6 +18,9 @@
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
 #define HOJA_MANUFACTURER   "HHL"
 
+#define HOJA_USB_VID        0x2E8A // Raspberry Pi
+#define HOJA_USB_PID        0x10DE // ProGCC PID
+
 // ---------------------------------
 // ---------------------------------
 
