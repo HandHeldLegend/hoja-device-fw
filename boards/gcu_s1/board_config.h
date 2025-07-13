@@ -15,6 +15,9 @@
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
 #define HOJA_MANUFACTURER   "HHL" 
 
+#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
+#define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
+
 #define HOJA_DISABLE_TOURNEY_MACRO 1
 
 // ---------------------------------

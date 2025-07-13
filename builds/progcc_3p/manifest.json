@@ -1,5 +1,10 @@
 {
   "changelog": "",
+<<<<<<< HEAD
+  "fw_version": 1752373652,
+  "checksum": "668db6b91febbdc3225102cdf665eb8382aaa44fe5c80f079cf87c44e969a633"
+=======
   "fw_version": 1752373195,
   "checksum": "062056f06d0f8d3d0d98d8e6b92b85b36e4f2bcd9d895739d4d23827ab736c62"
+>>>>>>> origin/main
 }

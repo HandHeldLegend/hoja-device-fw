@@ -8,12 +8,16 @@
 
 #define HOJA_PRODUCT        "ProGCC 3"
 
-#define HOJA_USB_VID        0x2E8A // Raspberry Pi
-#define HOJA_USB_PID        0x10DF // ProGCC PID
-
 // URL that will display to open a config tool
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
 #define HOJA_MANUFACTURER   "HHL"
+
+#define HOJA_USB_VID        0x2E8A // Raspberry Pi
+#define HOJA_USB_PID        0x10DF // ProGCC PID
+
+// https://docs.handheldlegend.com/s/sinput/doc/buttons-format-esVqGUAjpb
+#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000000}
+#define HOJA_SINPUT_GAMEPAD_TYPE       7 // ProCon Type
 
 // ---------------------------------
 // ---------------------------------
