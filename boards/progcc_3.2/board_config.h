@@ -7,10 +7,6 @@
 #define HOJA_BT_LOGGING_DEBUG 0
 
 // Device stuff
-//#define HOJA_DEVICE_ID  0xA004 // A002 is 3+, A003 is 3+ (Haptic), A004 is 3.1
-
-#define HOJA_FW_VERSION 0x0A30
-
 #define HOJA_PRODUCT        "ProGCC 3.2"
 
 #define HOJA_USB_VID        0x2E8A // Raspberry Pi
@@ -19,6 +15,10 @@
 // URL that will display to open a config tool
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
 #define HOJA_MANUFACTURER   "HHL"
+
+// https://docs.handheldlegend.com/s/sinput/doc/buttons-format-esVqGUAjpb
+#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000000}
+#define HOJA_SINPUT_GAMEPAD_TYPE       7 // ProCon Type
 
 // ---------------------------------
 // ---------------------------------

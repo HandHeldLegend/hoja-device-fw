@@ -7,14 +7,15 @@
 #define HOJA_BT_LOGGING_DEBUG 0
 
 // Device stuff
-//#define HOJA_DEVICE_ID  0xC003 (GC Ultimate R4K)
-
-#define HOJA_FW_VERSION 0x0A30 
-
 #define HOJA_PRODUCT        "GCU-R4K" 
 
 #define HOJA_USB_VID        0x2E8A // Raspberry Pi
 #define HOJA_USB_PID        0x10DD // GC Ultimate PID
+
+#define HOJA_SINPUT_ESP32TYPE 1
+
+#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
+#define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
 
 // URL that will display to open a config tool
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 

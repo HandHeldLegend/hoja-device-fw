@@ -7,15 +7,16 @@
 #define HOJA_BT_LOGGING_DEBUG 0
 
 // Device stuff
-//#define HOJA_DEVICE_ID  0xB001
-
-#define HOJA_FW_VERSION 0x0A30
-
 #define HOJA_PRODUCT        "SuperGamepad+"
 
 // URL that will display to open a config tool
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
 #define HOJA_MANUFACTURER   "HHL"
+
+// https://docs.handheldlegend.com/s/sinput/doc/buttons-format-esVqGUAjpb
+#define HOJA_SINPUT_BUTTON_USAGE_MASK {0b11111111, 0b00001100, 0b00000011, 0b00000000}
+#define HOJA_SINPUT_GAMEPAD_TYPE 7 // SW Pro (Nintendo ABXY)
+#define HOJA_SINPUT_GAMEPAD_SUBTYPE 1 
 
 #define HOJA_DISABLE_TOURNEY_MACRO 1
 
