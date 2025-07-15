@@ -15,8 +15,9 @@
 
 // https://docs.handheldlegend.com/s/sinput/doc/buttons-format-esVqGUAjpb
 #define HOJA_SINPUT_BUTTON_USAGE_MASK {0b11111111, 0b00001100, 0b00000011, 0b00000000}
-#define HOJA_SINPUT_GAMEPAD_TYPE 7 // SW Pro (Nintendo ABXY)
+#define HOJA_SINPUT_GAMEPAD_TYPE 0
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE 1 
+#define HOJA_SINPUT_GAMEPAD_FACESTYLE 3
 
 #define HOJA_DISABLE_TOURNEY_MACRO 1
 
