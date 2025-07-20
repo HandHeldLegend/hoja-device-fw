@@ -79,7 +79,7 @@ extern adc_driver_cfg_s p33_adc_hal;
 #define HOJA_HAPTICS_CHAN_A_PIN    21
 #define HOJA_HAPTICS_CHAN_B_PIN    24
 
-#define HOJA_HAPTICS_MAX        0.625f 
+#define HOJA_HAPTICS_MAX        0.35f 
 
 #define HOJA_HAPTICS_MIN_LO     0.12f
 #define HOJA_HAPTICS_MIN_HI     0.10f
