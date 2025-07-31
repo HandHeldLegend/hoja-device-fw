@@ -81,10 +81,10 @@ extern adc_driver_cfg_s user_adc_hal;
 #define HOJA_HAPTICS_CHAN_A_PIN     8
 #define HOJA_HAPTICS_CHAN_B_PIN     3
 
-#define HOJA_HAPTICS_MAX        0.625f
+#define HOJA_HAPTICS_MAX        0.5f
 
-#define HOJA_HAPTICS_MIN_LO     0.1f
-#define HOJA_HAPTICS_MIN_HI     0.1f
+#define HOJA_HAPTICS_MIN_LO     0.085f
+#define HOJA_HAPTICS_MIN_HI     0.085f
 
 #define HOJA_HAPTICS_DEBUG 0
 // ---------------------------------
@@ -178,6 +178,15 @@ extern adc_driver_cfg_s user_adc_hal;
     {"X"}, \
     {"Y"}, \
     {"Power"} \
+}
+
+#define HOJA_RGB_GROUP_DEFAULTS { \
+    (rgb_s) {.r = 0xB4, .g = 0xB4, .b = 0xB4},  /* L Stick */ \
+    (rgb_s) {.r = 0x06, .g = 0xFE, .b = 0x23},  /* A */ \
+    (rgb_s) {.r = 0xF2, .g = 0x60, .b = 0x50},  /* B */ \
+    (rgb_s) {.r = 0x0E, .g = 0x86, .b = 0xE1},  /* X */ \
+    (rgb_s) {.r = 0xE1, .g = 0xFF, .b = 0x00},  /* Y */ \
+    (rgb_s) {.r = 0xB4, .g = 0xB4, .b = 0xB4}   /* Power */ \
 }
 
 #define HOJA_RGB_NOTIF_GROUP_IDX   5
