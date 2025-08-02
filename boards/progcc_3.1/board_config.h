@@ -19,7 +19,9 @@
 
 // https://docs.handheldlegend.com/s/sinput/doc/buttons-format-esVqGUAjpb
 #define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000000}
-#define HOJA_SINPUT_GAMEPAD_TYPE       0 // Not used
+#define HOJA_SINPUT_GAMEPAD_SUBTYPE    0 // Base ProGCC
+#define HOJA_SINPUT_GAMEPAD_TYPE       7 // ProCon Type
+#define HOJA_SINPUT_GAMEPAD_FACESTYLE  3 // ProCon Face Style
 
 // ---------------------------------
 // ---------------------------------
