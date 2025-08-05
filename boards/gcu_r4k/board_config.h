@@ -10,12 +10,12 @@
 #define HOJA_PRODUCT        "GCU-R4K" 
 
 #define HOJA_USB_VID        0x2E8A // Raspberry Pi
-//#define HOJA_USB_PID        0x10DD // GC Ultimate PID
+#define HOJA_USB_PID        0x10DD // GC Ultimate PID
 
 #define HOJA_SINPUT_ESP32TYPE 1
 
 #define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
-#define HOJA_SINPUT_GAMEPAD_SUBTYPE    0x1F //0  // GC Ultimate
+#define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
 #define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
 #define HOJA_SINPUT_GAMEPAD_FACESTYLE  2  // GameCube Face Style
 
