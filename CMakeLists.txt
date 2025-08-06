@@ -53,6 +53,7 @@ set(BULK_PROJECTS_DIRS
     boards/progcc_3.1 
     boards/progcc_3.2 
     boards/progcc_3.3 
+    boards/progcc_4.0 
     boards/super_gamepad 
     boards/gcu_r4k 
     boards/gcu_proto 
