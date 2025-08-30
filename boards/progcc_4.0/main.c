@@ -87,7 +87,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_C, false);
     sleep_us(5);
     data->trigger_l = !gpio_get(PGPIO_PUSH_F);
-    data->trigger_r = !gpio_get(PGPIO_PUSH_G);
+    data->trigger_zr = !gpio_get(PGPIO_PUSH_G);
     data->dpad_left = !gpio_get(PGPIO_PUSH_H);
     data->trigger_gr = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_C, true);
@@ -95,7 +95,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_D, false);
     sleep_us(5);
     data->trigger_zl = !gpio_get(PGPIO_PUSH_F);
-    data->trigger_zr = !gpio_get(PGPIO_PUSH_G);
+    data->trigger_r = !gpio_get(PGPIO_PUSH_G);
     data->dpad_up = !gpio_get(PGPIO_PUSH_H);
     data->button_a = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_D, true);

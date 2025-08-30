@@ -6,7 +6,7 @@
 
 #define HOJA_BT_LOGGING_DEBUG 0 
 
-#define HOJA_PRODUCT        "GCU-S1" 
+#define HOJA_PRODUCT        "GCU-R5" 
 
 #define HOJA_USB_VID        0x2E8A // Raspberry Pi
 #define HOJA_USB_PID        0x10DD // GC Ultimate PID
@@ -26,28 +26,36 @@
 // ---------------------------------
 
 // SPI HAL Setup
-#define HOJA_SPI_0_ENABLE     1 
-#define HOJA_SPI_0_GPIO_CLK   6 
-#define HOJA_SPI_0_GPIO_MOSI  7 
-#define HOJA_SPI_0_GPIO_MISO  4 
-#define SPI_INSTANCE_0        0 
+// #define HOJA_SPI_0_ENABLE     1 
+// #define HOJA_SPI_0_GPIO_CLK   6 
+// #define HOJA_SPI_0_GPIO_MOSI  7 
+// #define HOJA_SPI_0_GPIO_MISO  4 
+// #define SPI_INSTANCE_0        0 
 
 // I2C HAL Setup
-//#define HOJA_I2C_1_ENABLE       1 
-//#define HOJA_I2C_1_GPIO_SDA     22 
-//#define HOJA_I2C_1_GPIO_SCL     23 
-//#define I2C_INSTANCE_1          1 
+#define HOJA_I2C_0_ENABLE       1
+#define HOJA_I2C_0_GPIO_SDA     24
+#define HOJA_I2C_0_GPIO_SCL     25
+#define I2C_INSTANCE_0          0
+
+#define HOJA_I2C_1_ENABLE       1
+#define HOJA_I2C_1_GPIO_SDA     22
+#define HOJA_I2C_1_GPIO_SCL     23
+#define I2C_INSTANCE_1          1
 
 // IMU Driver Setup
-#define HOJA_IMU_CHAN_A_DRIVER          IMU_DRIVER_LSM6DSR_SPI 
-#define HOJA_IMU_CHAN_B_DRIVER          IMU_DRIVER_LSM6DSR_SPI 
+#define HOJA_IMU_CHAN_A_DRIVER          IMU_DRIVER_LSM6DSR_I2C 
+#define HOJA_IMU_CHAN_B_DRIVER          IMU_DRIVER_LSM6DSR_I2C 
 
-#define HOJA_IMU_CHAN_A_CS_PIN          0 
-#define HOJA_IMU_CHAN_A_SPI_INSTANCE    0 
-#define HOJA_IMU_CHAN_A_INVERT_FLAGS    0b000010 
-#define HOJA_IMU_CHAN_B_CS_PIN          2 
-#define HOJA_IMU_CHAN_B_SPI_INSTANCE    0 
-#define HOJA_IMU_CHAN_B_INVERT_FLAGS    0b000010 
+#define HOJA_IMU_CHAN_A_I2C_INSTANCE 0
+#define HOJA_IMU_CHAN_B_I2C_INSTANCE 0
+
+#define HOJA_IMU_CHAN_A_SELECT 1
+#define HOJA_IMU_CHAN_B_SELECT 0
+
+#define HOJA_IMU_CHAN_A_INVERT_FLAGS    0b010010 
+#define HOJA_IMU_CHAN_B_INVERT_FLAGS    0b010010 
+
 // ---------------------------------
 // ---------------------------------
 
@@ -60,15 +68,14 @@ extern adc_driver_cfg_s user_adc_mux;
 // HAL ADC (1 instance) 
 extern adc_driver_cfg_s user_adc_hal; 
 
-#define HOJA_ADC_LX_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &user_adc_mux} 
-#define HOJA_ADC_LY_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &user_adc_mux} 
+#define HOJA_ADC_LX_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &user_adc_mux} 
+#define HOJA_ADC_LY_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &user_adc_mux} 
 
 #define HOJA_ADC_RX_CFG (adc_channel_cfg_s) {.ch_local = 3, .driver_cfg = &user_adc_mux} 
 #define HOJA_ADC_RY_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &user_adc_mux} 
 
-#define HOJA_ADC_LT_CFG (adc_channel_cfg_s) {.ch_local = 3, .driver_cfg = &user_adc_hal, .ch_invert = 1} 
-#define HOJA_ADC_RT_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &user_adc_hal, .ch_invert = 1} 
-
+#define HOJA_ADC_LT_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &user_adc_hal, .ch_invert = 1} 
+#define HOJA_ADC_RT_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &user_adc_hal, .ch_invert = 1} 
 // ---------------------------------
 // ---------------------------------
 
@@ -76,45 +83,44 @@ extern adc_driver_cfg_s user_adc_hal;
 // No helper driver used
 #define HOJA_HAPTICS_DRIVER         HAPTICS_DRIVER_LRA_HAL
 #define HOJA_HAPTICS_CHAN_A_PIN     8
-#define HOJA_HAPTICS_CHAN_B_PIN     3
+#define HOJA_HAPTICS_CHAN_B_PIN     9
 
-#define HOJA_HAPTICS_MAX        0.625f 
+#define HOJA_HAPTICS_MAX        0.625f
 
-#define HOJA_HAPTICS_MIN_LO     0.12f
-#define HOJA_HAPTICS_MIN_HI     0.10f
+#define HOJA_HAPTICS_MIN_LO     0.1f
+#define HOJA_HAPTICS_MIN_HI     0.0975f
 
 #define HOJA_HAPTICS_DEBUG 0
 // ---------------------------------
 // ---------------------------------
 
 // Bluetooth Driver Setup
-// #define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_ESP32HOJA
-// #define BLUETOOTH_DRIVER_I2C_INSTANCE   1
-// #define BLUETOOTH_DRIVER_ENABLE_PIN     26
-// ---------------------------------
-// ---------------------------------
-
-// USB Mux Driver Setup
-// #define HOJA_USB_MUX_DRIVER         USB_MUX_DRIVER_PI3USB4000A
-// #define USB_MUX_DRIVER_ENABLE_PIN   24
-// #define USB_MUX_DRIVER_SELECT_PIN   25
+#define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_HAL
+#define BLUETOOTH_DRIVER_PIO_INSTANCE   1 
+#define BLUETOOTH_DRIVER_ENABLE_PIN     0 
+#define BLUETOOTH_DRIVER_DATA_OUT       1 
+#define BLUETOOTH_DRIVER_DATA_IN        1 
+#define BLUETOOTH_DRIVER_WAKE           1 
+#define BLUETOOTH_DRIVER_CLOCK          2 
+#define BLUETOOTH_DRIVER_CS             3
 // ---------------------------------
 // ---------------------------------
 
 // Battery Driver Setup
-// #define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
-// #define HOJA_BATTERY_I2C_INSTANCE   1
-// #define HOJA_BATTERY_CAPACITY_MAH   1200
-// #define HOJA_BATTERY_PART_CODE      "BDT 903035"
-// #define HOJA_BATTERY_CONSUME_RATE   225 // mA
+#define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
+#define HOJA_BATTERY_I2C_INSTANCE   1
+#define HOJA_BATTERY_PART_CODE      "BDT 903035"
+
+#define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &user_adc_hal} 
+#define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.05f 
 // ---------------------------------
 // ---------------------------------
 
 // Device Information Setup 
 #define HOJA_DEVICE_NAME            HOJA_PRODUCT
 #define HOJA_DEVICE_MAKER           HOJA_MANUFACTURER
-#define HOJA_DEVICE_MANIFEST_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_s1/manifest.json"
-#define HOJA_DEVICE_FIRMWARE_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_s1/gcu_s1.uf2"
+#define HOJA_DEVICE_MANIFEST_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r5/manifest.json"
+#define HOJA_DEVICE_FIRMWARE_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r5/gcu_r5.uf2"
 #define HOJA_DEVICE_MANUAL_URL      "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z"
 #define HOJA_DEVICE_FCC_ELABEL      ""
 #define HOJA_DEVICE_SNES_SUPPORTED      1
@@ -137,9 +143,9 @@ extern adc_driver_cfg_s user_adc_hal;
 // NESBUS Setup
 #define HOJA_NESBUS_DRIVER          NESBUS_DRIVER_HAL
 #define NESBUS_DRIVER_PIO_INSTANCE  1
-#define NESBUS_DRIVER_DATA_PIN      20
+#define NESBUS_DRIVER_DATA_PIN      19
 #define NESBUS_DRIVER_CLOCK_PIN     21
-#define NESBUS_DRIVER_LATCH_PIN     19
+#define NESBUS_DRIVER_LATCH_PIN     20
 
 // ---------------------------------
 // ---------------------------------
@@ -147,18 +153,18 @@ extern adc_driver_cfg_s user_adc_hal;
 // JOYBUS Setup
 #define HOJA_JOYBUS_N64_DRIVER          JOYBUS_N64_DRIVER_HAL
 #define JOYBUS_N64_DRIVER_PIO_INSTANCE  1
-#define JOYBUS_N64_DRIVER_DATA_PIN      20
+#define JOYBUS_N64_DRIVER_DATA_PIN      19
 
 #define HOJA_JOYBUS_GC_DRIVER           JOYBUS_GC_DRIVER_HAL
 #define JOYBUS_GC_DRIVER_PIO_INSTANCE  1
-#define JOYBUS_GC_DRIVER_DATA_PIN      20
+#define JOYBUS_GC_DRIVER_DATA_PIN      19
 
 // ---------------------------------
 // ---------------------------------
 
 // RGB Setup
 #define HOJA_RGB_DRIVER         RGB_DRIVER_HAL
-#define RGB_DRIVER_OUTPUT_PIN   27
+#define RGB_DRIVER_OUTPUT_PIN   7
 #define RGB_DRIVER_LED_COUNT    32
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
 #define RGB_DRIVER_PIO_INSTANCE 0

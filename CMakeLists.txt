@@ -10,9 +10,9 @@ if(WIN32)
 else()
     set(USERHOME $ENV{HOME})
 endif()
-set(sdkVersion 2.1.1)
+set(sdkVersion 2.2.0)
 set(toolchainVersion 14_2_Rel1)
-set(picotoolVersion 2.1.1)
+set(picotoolVersion 2.2.0)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
@@ -55,9 +55,10 @@ set(BULK_PROJECTS_DIRS
     boards/progcc_3.3 
     boards/progcc_4.0 
     boards/super_gamepad 
+    boards/gcu_r5
+    boards/gcu_s1 
     boards/gcu_r4k 
     boards/gcu_proto 
-    boards/gcu_s1 
     boards/phob_2 
     boards/pico_w 
     boards/phobri_64 

@@ -94,12 +94,12 @@ extern adc_driver_cfg_s p33_adc_hal;
 // Bluetooth Driver Setup
 #define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_HAL
 #define BLUETOOTH_DRIVER_PIO_INSTANCE   1 
-#define BLUETOOTH_DRIVER_ENABLE_PIN     17 
-#define BLUETOOTH_DRIVER_DATA_OUT       18 
-#define BLUETOOTH_DRIVER_DATA_IN        18 
-#define BLUETOOTH_DRIVER_WAKE           18 
-#define BLUETOOTH_DRIVER_CLOCK          19 
-#define BLUETOOTH_DRIVER_CS             20
+#define BLUETOOTH_DRIVER_ENABLE_PIN     0 
+#define BLUETOOTH_DRIVER_DATA_OUT       1 
+#define BLUETOOTH_DRIVER_DATA_IN        1 
+#define BLUETOOTH_DRIVER_WAKE           1 
+#define BLUETOOTH_DRIVER_CLOCK          7 
+#define BLUETOOTH_DRIVER_CS             8
 // ---------------------------------
 // ---------------------------------
 
