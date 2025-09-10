@@ -14,6 +14,8 @@
 
 #define HOJA_DISABLE_TOURNEY_MACRO 1
 
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_AXBY
+
 // ---------------------------------
 // ---------------------------------
 

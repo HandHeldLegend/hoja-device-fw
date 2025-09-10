@@ -22,6 +22,8 @@
 
 #define HOJA_DISABLE_TOURNEY_MACRO 1
 
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_BAYX
+
 // ---------------------------------
 // ---------------------------------
 
@@ -202,7 +204,7 @@ extern adc_driver_cfg_s p33_adc_hal;
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    0, 1, 2, 3, /* A, B, X, Y */\
+    1, 0, 3, 2, /* S, E, W, N */\
     4, 5, 6, /* D-Pad, L Stick, R Stick */\
     -1, -1, -1, -1, /* L, R, ZL, ZR */\
     -1, -1, /* Home, Capture */\

@@ -180,7 +180,7 @@ extern adc_driver_cfg_s user_adc_hal;
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    3, 2, 4, 5, /* A, B, X, Y */\
+    3, 2, 4, 5, /* S, E, W, N */\
     -1, -1, -1, /* D-Pad, L Stick, R Stick */\
     0, 1, 7, 6, /* L, R, ZL, ZR */\
     -1, -1, /* Home, Capture */\

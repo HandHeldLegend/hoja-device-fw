@@ -4,7 +4,7 @@
 #include "driver_define_helper.h" 
 #include "rgb_define_helper.h" 
 
-#define HOJA_BT_LOGGING_DEBUG 0
+#define HOJA_BT_LOGGING_DEBUG 1
 
 // Device stuff
 #define HOJA_PRODUCT        "GCU-R4K" 
@@ -13,6 +13,8 @@
 #define HOJA_USB_PID        0x10DD // GC Ultimate PID
 
 #define HOJA_SINPUT_ESP32TYPE 1
+
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_AXBY
 
 #define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
@@ -209,8 +211,11 @@ extern adc_driver_cfg_s user_adc_hal;
 
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
+
+
+
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    1, 2, 3, 4, /* A, B, X, Y */\
+    1, 3, 2, 4, /* S, E, W, N */\
     -1, 0, -1, /* D-Pad, L Stick, R Stick */\
     -1, -1, -1, -1, /* L, R, ZL, ZR */\
     -1, -1, /* Home, Capture */\

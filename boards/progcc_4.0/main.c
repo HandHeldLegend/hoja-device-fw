@@ -73,7 +73,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->button_capture = !gpio_get(PGPIO_PUSH_F);
     data->button_stick_right = !gpio_get(PGPIO_PUSH_G);
     data->trigger_gl = !gpio_get(PGPIO_PUSH_H);
-    data->button_y = !gpio_get(PGPIO_PUSH_I);
+    data->button_west = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_A, true);
 
     gpio_put(PGPIO_SCAN_B, false);
@@ -81,7 +81,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->button_stick_left = !gpio_get(PGPIO_PUSH_F);
     data->button_home = !gpio_get(PGPIO_PUSH_G);
     data->dpad_down = !gpio_get(PGPIO_PUSH_H);
-    data->button_b = !gpio_get(PGPIO_PUSH_I);
+    data->button_south = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_B, true);
 
     gpio_put(PGPIO_SCAN_C, false);
@@ -97,7 +97,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->trigger_zl = !gpio_get(PGPIO_PUSH_F);
     data->trigger_r = !gpio_get(PGPIO_PUSH_G);
     data->dpad_up = !gpio_get(PGPIO_PUSH_H);
-    data->button_a = !gpio_get(PGPIO_PUSH_I);
+    data->button_east = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_D, true);
 
     gpio_put(PGPIO_SCAN_E, false);
@@ -105,7 +105,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->button_minus = !gpio_get(PGPIO_PUSH_F);
     data->button_plus = !gpio_get(PGPIO_PUSH_G);
     data->dpad_right = !gpio_get(PGPIO_PUSH_H);
-    data->button_x = !gpio_get(PGPIO_PUSH_I);
+    data->button_north = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_E, true);
 
     data->button_shipping = !gpio_get(PGPIO_BUTTON_POWER);

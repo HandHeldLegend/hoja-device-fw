@@ -22,6 +22,8 @@
 #define HOJA_SINPUT_GAMEPAD_TYPE       7 // ProCon Type
 #define HOJA_SINPUT_GAMEPAD_FACESTYLE  3 // ProCon Face Style
 
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_BAYX
+
 // ---------------------------------
 // ---------------------------------
 
@@ -201,7 +203,7 @@ extern adc_driver_cfg_s battery_adc_1;
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    0, 1, 2, 3, /* A, B, X, Y */\
+    1, 0, 3, 2, /* S, E, W, N */\
     4, 5, 6, /* D-Pad, L Stick, R Stick */\
     7, 8, 9, 10, /* L, R, ZL, ZR */\
     11, 12, /* Home, Capture */\

@@ -15,6 +15,8 @@
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
 #define HOJA_MANUFACTURER   "HHL" 
 
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_AXBY
+
 #define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
 #define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
@@ -203,7 +205,7 @@ extern adc_driver_cfg_s user_adc_hal;
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    2, 3, 4, 5, /* A, B, X, Y */\
+    2, 4, 3, 5, /* S, E, W, N */\
     6, 0, 1, /* D-Pad, L Stick, R Stick */\
     -1, -1, -1, -1, /* L, R, ZL, ZR */\
     -1, -1, /* Home, Capture */\

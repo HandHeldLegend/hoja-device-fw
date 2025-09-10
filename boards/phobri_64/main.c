@@ -46,11 +46,11 @@ bool cb_hoja_buttons_init()
 
 void cb_hoja_read_buttons(button_data_s *data)
 {
-    data->button_a  = !gpio_get(PGPIO_A);
-    data->button_b  = !gpio_get(PGPIO_B);
+    data->button_south  = !gpio_get(PGPIO_A);
+    data->button_east  = !gpio_get(PGPIO_B);
 
-    data->button_x      = !gpio_get(PGPIO_CUP);
-    data->button_y      = !gpio_get(PGPIO_CDOWN);
+    data->button_north      = !gpio_get(PGPIO_CUP);
+    data->button_west      = !gpio_get(PGPIO_CDOWN);
     data->trigger_l     = !gpio_get(PGPIO_CLEFT);
     data->trigger_r     = !gpio_get(PGPIO_CRIGHT);
 

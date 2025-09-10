@@ -18,6 +18,8 @@
 
 #define HOJA_DISABLE_TOURNEY_MACRO 1
 
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_AXBY
+
 #define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
 #define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
@@ -187,7 +189,7 @@ extern adc_driver_cfg_s gcp_adc_hal;
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    -1, -1, -1, -1, /* A, B, X, Y */\
+    -1, -1, -1, -1, /* S, E, W, N */\
     -1, 0, -1, /* D-Pad, L Stick, R Stick */\
     -1, -1, -1, -1, /* L, R, ZL, ZR */\
     -1, -1, /* Home, Capture */\

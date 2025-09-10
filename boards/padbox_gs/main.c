@@ -56,10 +56,10 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->dpad_left     = !gpio_get(PGPIO_BTN_DLEFT);
     data->dpad_right    = !gpio_get(PGPIO_BTN_DRIGHT);
 
-    data->button_a      = !gpio_get(PGPIO_BTN_A);
-    data->button_b      = !gpio_get(PGPIO_BTN_B);
-    data->button_x      = !gpio_get(PGPIO_BTN_X);
-    data ->button_y     = !gpio_get(PGPIO_BTN_Y);
+    data->button_south     = !gpio_get(PGPIO_BTN_A);
+    data->button_east      = !gpio_get(PGPIO_BTN_B);
+    data->button_west      = !gpio_get(PGPIO_BTN_X);
+    data->button_north     = !gpio_get(PGPIO_BTN_Y);
 
     data->button_plus   = !gpio_get(PGPIO_BTN_MENU);
     data->button_minus  = !gpio_get(PGPIO_BTN_BACK);
@@ -73,7 +73,6 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->trigger_r     = !gpio_get(PGPIO_BTN_TR);
     data->trigger_zl    = !gpio_get(PGPIO_BTN_TZL);
     data->trigger_zr    = !gpio_get(PGPIO_BTN_TZR);
-    
 
 }
 
