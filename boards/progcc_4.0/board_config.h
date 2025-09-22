@@ -15,7 +15,17 @@
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
 #define HOJA_MANUFACTURER   "HHL" 
 
-#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b11111111, 0b00001111, 0b00000001}
+#define HOJA_INPUT_ENABLE_SEWN 1
+#define HOJA_INPUT_ENABLE_DPAD 1
+#define HOJA_INPUT_ENABLE_STARTSELECT 1
+#define HOJA_INPUT_ENABLE_HOME 1
+#define HOJA_INPUT_ENABLE_CAPTURE 1
+#define HOJA_INPUT_ENABLE_BUMPERS 1
+#define HOJA_INPUT_ENABLE_TRIGGERS 1
+#define HOJA_INPUT_ENABLE_UPPERGRIPS 1
+#define HOJA_INPUT_ENABLE_LOWERGRIPS 0
+#define HOJA_INPUT_ENABLE_POWER 1
+
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    1  // ProGCC 4
 #define HOJA_SINPUT_GAMEPAD_TYPE       7  // ProCon Type
 #define HOJA_SINPUT_GAMEPAD_FACESTYLE  3  // ProCon Face Style
@@ -117,8 +127,8 @@ extern adc_driver_cfg_s p33_adc_hal;
 #define HOJA_BATTERY_I2C_INSTANCE   1
 #define HOJA_BATTERY_PART_CODE      "BDT 903035"
 
-#define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &p33_adc_hal} 
-#define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.05f 
+// #define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &p33_adc_hal} 
+// #define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.05f 
 // ---------------------------------
 // ---------------------------------
 
@@ -174,7 +184,6 @@ extern adc_driver_cfg_s p33_adc_hal;
 #define RGB_DRIVER_LED_COUNT    32
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
 #define RGB_DRIVER_PIO_INSTANCE 0
-#define RGB_DRIVER_REFRESHRATE  120 // HZ
 
 #define HOJA_RGB_GROUPS_NUM 8
 #define HOJA_RGB_GROUP_NAMES { \

@@ -4,7 +4,7 @@
 #include "driver_define_helper.h" 
 #include "rgb_define_helper.h" 
 
-#define HOJA_BT_LOGGING_DEBUG 1
+#define HOJA_BT_LOGGING_DEBUG 0
 
 // Device stuff
 #define HOJA_PRODUCT        "GCU-R4K" 
@@ -16,7 +16,17 @@
 
 #define HOJA_SEWN_TYPE  SEWN_LAYOUT_AXBY
 
-#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
+#define HOJA_INPUT_ENABLE_SEWN 1
+#define HOJA_INPUT_ENABLE_DPAD 1
+#define HOJA_INPUT_ENABLE_STARTSELECT 1
+#define HOJA_INPUT_ENABLE_HOME 1
+#define HOJA_INPUT_ENABLE_CAPTURE 1
+#define HOJA_INPUT_ENABLE_BUMPERS 1
+#define HOJA_INPUT_ENABLE_TRIGGERS 1
+#define HOJA_INPUT_ENABLE_UPPERGRIPS 0
+#define HOJA_INPUT_ENABLE_LOWERGRIPS 0
+#define HOJA_INPUT_ENABLE_POWER 1
+
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
 #define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
 #define HOJA_SINPUT_GAMEPAD_FACESTYLE  2  // GameCube Face Style
@@ -172,7 +182,6 @@ extern adc_driver_cfg_s user_adc_hal;
 #define RGB_DRIVER_LED_COUNT    12
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
 #define RGB_DRIVER_PIO_INSTANCE 0
-#define RGB_DRIVER_REFRESHRATE  120 // HZ
 
 #define HOJA_RGB_GROUPS_NUM 6
 #define HOJA_RGB_GROUP_NAMES { \

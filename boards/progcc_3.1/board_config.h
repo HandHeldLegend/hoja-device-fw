@@ -17,8 +17,17 @@
 #define HOJA_USB_VID        0x2E8A // Raspberry Pi
 #define HOJA_USB_PID        0x10DF // ProGCC PID
 
-// https://docs.handheldlegend.com/s/sinput/doc/buttons-format-esVqGUAjpb
-#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000000}
+#define HOJA_INPUT_ENABLE_SEWN 1
+#define HOJA_INPUT_ENABLE_DPAD 1
+#define HOJA_INPUT_ENABLE_STARTSELECT 1
+#define HOJA_INPUT_ENABLE_HOME 1
+#define HOJA_INPUT_ENABLE_CAPTURE 1
+#define HOJA_INPUT_ENABLE_BUMPERS 1
+#define HOJA_INPUT_ENABLE_TRIGGERS 1
+#define HOJA_INPUT_ENABLE_UPPERGRIPS 0
+#define HOJA_INPUT_ENABLE_LOWERGRIPS 0
+#define HOJA_INPUT_ENABLE_POWER 0
+
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0 // Base ProGCC
 #define HOJA_SINPUT_GAMEPAD_TYPE       7 // ProCon Type
 #define HOJA_SINPUT_GAMEPAD_FACESTYLE  3 // ProCon Face Style
@@ -171,7 +180,6 @@ extern adc_driver_cfg_s battery_adc_1;
 #define RGB_DRIVER_LED_COUNT    32
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
 #define RGB_DRIVER_PIO_INSTANCE 0
-#define RGB_DRIVER_REFRESHRATE  120 // HZ
 
 #define HOJA_RGB_GROUPS_NUM 16
 #define HOJA_RGB_GROUP_NAMES { \
