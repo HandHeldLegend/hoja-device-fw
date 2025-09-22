@@ -8,6 +8,17 @@
 
 #define HOJA_PRODUCT        "Padbox GS" 
 
+#define HOJA_INPUT_ENABLE_SEWN 1
+#define HOJA_INPUT_ENABLE_DPAD 1
+#define HOJA_INPUT_ENABLE_STARTSELECT 1
+#define HOJA_INPUT_ENABLE_HOME 1
+#define HOJA_INPUT_ENABLE_CAPTURE 1
+#define HOJA_INPUT_ENABLE_BUMPERS 1
+#define HOJA_INPUT_ENABLE_TRIGGERS 0
+#define HOJA_INPUT_ENABLE_UPPERGRIPS 0
+#define HOJA_INPUT_ENABLE_LOWERGRIPS 0
+#define HOJA_INPUT_ENABLE_POWER 0
+
 // URL that will display to open a config tool
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
 #define HOJA_MANUFACTURER   "arkodd.com" 
@@ -147,7 +158,6 @@ extern adc_driver_cfg_s user_adc_hal;
 #define RGB_DRIVER_LED_COUNT    32
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
 #define RGB_DRIVER_PIO_INSTANCE 0
-#define RGB_DRIVER_REFRESHRATE  120 // HZ
 
 #define HOJA_RGB_GROUPS_NUM 8
 #define HOJA_RGB_GROUP_NAMES { \
@@ -180,7 +190,7 @@ extern adc_driver_cfg_s user_adc_hal;
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    3, 2, 4, 5, /* A, B, X, Y */\
+    3, 2, 4, 5, /* S, E, W, N */\
     -1, -1, -1, /* D-Pad, L Stick, R Stick */\
     0, 1, 7, 6, /* L, R, ZL, ZR */\
     -1, -1, /* Home, Capture */\

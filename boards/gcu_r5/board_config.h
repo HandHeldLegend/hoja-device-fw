@@ -15,7 +15,19 @@
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
 #define HOJA_MANUFACTURER   "HHL" 
 
-#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_AXBY
+
+#define HOJA_INPUT_ENABLE_SEWN 1
+#define HOJA_INPUT_ENABLE_DPAD 1
+#define HOJA_INPUT_ENABLE_STARTSELECT 1
+#define HOJA_INPUT_ENABLE_HOME 1
+#define HOJA_INPUT_ENABLE_CAPTURE 1
+#define HOJA_INPUT_ENABLE_BUMPERS 1
+#define HOJA_INPUT_ENABLE_TRIGGERS 1
+#define HOJA_INPUT_ENABLE_UPPERGRIPS 0
+#define HOJA_INPUT_ENABLE_LOWERGRIPS 0
+#define HOJA_INPUT_ENABLE_POWER 1
+
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
 #define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
 #define HOJA_SINPUT_GAMEPAD_FACESTYLE  2  // GameCube Face Style
@@ -111,8 +123,9 @@ extern adc_driver_cfg_s user_adc_hal;
 #define HOJA_BATTERY_I2C_INSTANCE   1
 #define HOJA_BATTERY_PART_CODE      "BDT 903035"
 
-#define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &user_adc_hal} 
-#define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.05f 
+// #define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &user_adc_hal} 
+// #define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.05f 
+
 // ---------------------------------
 // ---------------------------------
 
@@ -203,7 +216,7 @@ extern adc_driver_cfg_s user_adc_hal;
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    2, 3, 4, 5, /* A, B, X, Y */\
+    2, 4, 3, 5, /* S, E, W, N */\
     6, 0, 1, /* D-Pad, L Stick, R Stick */\
     -1, -1, -1, -1, /* L, R, ZL, ZR */\
     -1, -1, /* Home, Capture */\

@@ -14,7 +14,19 @@
 
 #define HOJA_SINPUT_ESP32TYPE 1
 
-#define HOJA_SINPUT_BUTTON_USAGE_MASK  {0b11111111, 0b00111111, 0b00001111, 0b00000001}
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_AXBY
+
+#define HOJA_INPUT_ENABLE_SEWN 1
+#define HOJA_INPUT_ENABLE_DPAD 1
+#define HOJA_INPUT_ENABLE_STARTSELECT 1
+#define HOJA_INPUT_ENABLE_HOME 1
+#define HOJA_INPUT_ENABLE_CAPTURE 1
+#define HOJA_INPUT_ENABLE_BUMPERS 1
+#define HOJA_INPUT_ENABLE_TRIGGERS 1
+#define HOJA_INPUT_ENABLE_UPPERGRIPS 0
+#define HOJA_INPUT_ENABLE_LOWERGRIPS 0
+#define HOJA_INPUT_ENABLE_POWER 1
+
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
 #define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
 #define HOJA_SINPUT_GAMEPAD_FACESTYLE  2  // GameCube Face Style
@@ -170,7 +182,6 @@ extern adc_driver_cfg_s user_adc_hal;
 #define RGB_DRIVER_LED_COUNT    12
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
 #define RGB_DRIVER_PIO_INSTANCE 0
-#define RGB_DRIVER_REFRESHRATE  120 // HZ
 
 #define HOJA_RGB_GROUPS_NUM 6
 #define HOJA_RGB_GROUP_NAMES { \
@@ -209,8 +220,11 @@ extern adc_driver_cfg_s user_adc_hal;
 
 // This will relate an input button
 // to a group index found in HOJA_RGB_GROUPINGS
+
+
+
 #define RGB_REACT_GROUP_ASSIGNMENT {\
-    1, 2, 3, 4, /* A, B, X, Y */\
+    1, 3, 2, 4, /* S, E, W, N */\
     -1, 0, -1, /* D-Pad, L Stick, R Stick */\
     -1, -1, -1, -1, /* L, R, ZL, ZR */\
     -1, -1, /* Home, Capture */\
