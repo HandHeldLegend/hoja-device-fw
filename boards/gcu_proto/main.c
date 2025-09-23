@@ -66,10 +66,12 @@ bool cb_hoja_buttons_init()
     return true;
 }
 
+#define SLEEP_TIME_US 15
+
 void cb_hoja_read_buttons(button_data_s *data)
 {
     gpio_put(PGPIO_SCAN_A, false);
-    sleep_us(5);
+    sleep_us(SLEEP_TIME_US);
     data->button_south  = !gpio_get(PGPIO_PUSH_A);
     data->button_east   = !gpio_get(PGPIO_PUSH_B);
     data->button_west   = !gpio_get(PGPIO_PUSH_C);
@@ -77,7 +79,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_A, true);
 
     gpio_put(PGPIO_SCAN_B, false);
-    sleep_us(5);
+    sleep_us(SLEEP_TIME_US);
     data->dpad_up       = !gpio_get(PGPIO_PUSH_A);
     data->dpad_left     = !gpio_get(PGPIO_PUSH_B);
     data->dpad_down     = !gpio_get(PGPIO_PUSH_C);
@@ -85,7 +87,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_B, true);
 
     gpio_put(PGPIO_SCAN_C, false);
-    sleep_us(5);
+    sleep_us(SLEEP_TIME_US);
     data->trigger_l     = !gpio_get(PGPIO_PUSH_A);
     data->trigger_zl    = !gpio_get(PGPIO_PUSH_B);
     data->trigger_r     = !gpio_get(PGPIO_PUSH_C);
@@ -93,7 +95,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_C, true);
 
     gpio_put(PGPIO_SCAN_D, false);
-    sleep_us(5);
+    sleep_us(SLEEP_TIME_US);
     data->button_stick_left     = !gpio_get(PGPIO_PUSH_A);
     data->button_plus           = !gpio_get(PGPIO_PUSH_B);
     data->button_stick_right    = !gpio_get(PGPIO_PUSH_C);
