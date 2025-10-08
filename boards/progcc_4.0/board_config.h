@@ -80,11 +80,17 @@ extern adc_driver_cfg_s p33_adc_mux;
 // HAL ADC (1 instance) 
 extern adc_driver_cfg_s p33_adc_hal; 
 
-#define HOJA_ADC_LX_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &p33_adc_mux} 
-#define HOJA_ADC_LY_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &p33_adc_mux} 
+// lx (adc_channel_cfg_s) {.ch_local = 3, .driver_cfg = &p33_adc_mux} 
+// ly (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &p33_adc_mux} 
 
-#define HOJA_ADC_RX_CFG (adc_channel_cfg_s) {.ch_local = 3, .driver_cfg = &p33_adc_mux} 
-#define HOJA_ADC_RY_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &p33_adc_mux} 
+// rx (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &p33_adc_mux} 
+//ry (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &p33_adc_mux} 
+
+#define HOJA_ADC_LX_CFG (adc_channel_cfg_s) {.ch_local = 3, .driver_cfg = &p33_adc_mux, .ch_invert = 1}
+#define HOJA_ADC_LY_CFG (adc_channel_cfg_s) {.ch_local = 1, .driver_cfg = &p33_adc_mux, .ch_invert = 1}
+
+#define HOJA_ADC_RX_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &p33_adc_mux, .ch_invert = 0}
+#define HOJA_ADC_RY_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &p33_adc_mux, .ch_invert = 1}
 // ---------------------------------
 // ---------------------------------
 
@@ -98,6 +104,7 @@ extern adc_driver_cfg_s p33_adc_hal;
 
 #define HOJA_HAPTICS_MIN_LO     0.1f
 #define HOJA_HAPTICS_MIN_HI     0.0975f
+#define HOJA_HAPTICS_CHAN_SWAP      1
 
 #define HOJA_HAPTICS_DEBUG 0
 // ---------------------------------

@@ -123,9 +123,10 @@ extern adc_driver_cfg_s user_adc_hal;
 #define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
 #define HOJA_BATTERY_I2C_INSTANCE   1
 #define HOJA_BATTERY_PART_CODE      "BDT 903035"
+#define HOJA_BATTERY_CAPACITY       1200
 
-// #define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 2, .driver_cfg = &user_adc_hal} 
-// #define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.05f 
+#define HOJA_FUELGAUGE_DRIVER       FUELGAUGE_DRIVER_BQ27621G1
+#define HOJA_FUELGAUGE_I2C_INSTANCE 1
 
 // ---------------------------------
 // ---------------------------------
@@ -145,12 +146,6 @@ extern adc_driver_cfg_s user_adc_hal;
 // Flash Memory Setup
 // TO DO
 #define HOJA_FLASH_BYTES 1
-// ---------------------------------
-// ---------------------------------
-
-// Static Buttons Memory Setup
-#define HOJA_BUTTONS_SUPPORTED_MAIN     0b1111111111111111 // ALL buttons supported
-#define HOJA_BUTTONS_SUPPORTED_SYSTEM   0b111 // Home, Capture, Sync
 // ---------------------------------
 // ---------------------------------
 

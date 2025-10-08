@@ -113,6 +113,7 @@
 #define HOJA_BATTERY_PART_CODE      "HAC-006"
 
 extern adc_driver_cfg_s battery_adc_1;
+#define HOJA_FUELGAUGE_DRIVER       FUELGAUGE_DRIVER_ADC
 #define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 3, .driver_cfg = &battery_adc_1} 
 
 // ---------------------------------

@@ -112,8 +112,12 @@ extern adc_driver_cfg_s user_adc_2;
 #define HOJA_BATTERY_I2C_INSTANCE   0
 #define HOJA_BATTERY_PART_CODE      "CTR-003"
 
+// Fuel Gauge Setup
+#define HOJA_FUELGAUGE_DRIVER       FUELGAUGE_DRIVER_ADC
+
 extern adc_driver_cfg_s battery_adc_1;
 #define HOJA_BATTERY_ADC_CFG (adc_channel_cfg_s) {.ch_local = 0, .driver_cfg = &battery_adc_1} 
+#define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.125f
 
 // ---------------------------------
 // ---------------------------------
