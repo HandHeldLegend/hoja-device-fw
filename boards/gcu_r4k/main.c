@@ -94,7 +94,13 @@ void cb_hoja_read_buttons(button_data_s *data)
 
     gpio_put(PGPIO_SCAN_D, false);
     sleep_us(BUTTON_SLEEP_US);
-    data->trigger_l     = !gpio_get(PGPIO_PUSH_H);
+
+    bool l_pressed = !gpio_get(PGPIO_PUSH_H);
+    static uint8_t l_bounced = 0;
+    l_bounced = ((l_bounced << 1) | (l_pressed & 1)) & 0xFF;
+
+    data->trigger_l = (l_bounced > 0) ? true : false;
+
     data ->button_north     = !gpio_get(PGPIO_PUSH_G);
     data->button_capture = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_D, true);
@@ -102,7 +108,13 @@ void cb_hoja_read_buttons(button_data_s *data)
     gpio_put(PGPIO_SCAN_E, false);
     sleep_us(BUTTON_SLEEP_US);
     data->button_stick_left = !gpio_get(PGPIO_PUSH_H);
-    data->trigger_r         = !gpio_get(PGPIO_PUSH_G);
+
+    bool r_pressed = !gpio_get(PGPIO_PUSH_G);
+    static uint8_t r_bounced = 0;
+    r_bounced = ((r_bounced << 1) | (r_pressed & 1)) & 0xFF;
+
+    data->trigger_r = (r_bounced > 0) ? true : false;
+
     data->dpad_right        = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_E, true);
 
