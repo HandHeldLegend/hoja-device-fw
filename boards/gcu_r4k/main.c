@@ -1,5 +1,6 @@
 #include "hoja.h" 
 #include "input/button.h" 
+#include "utilities/static_config.h"
 #include "board_config.h" 
 #include "main.h" 
 #include "hardware/gpio.h" 
@@ -68,6 +69,21 @@ bool cb_hoja_buttons_init()
 }
 
 #define BUTTON_SLEEP_US 15
+
+void cb_hoja_read_inputs()
+{
+
+}
+
+void cb_hoja_read_hover()
+{
+
+}
+
+void cb_hoja_read_joysticks()
+{
+
+}
 
 void cb_hoja_read_buttons(button_data_s *data)
 {
