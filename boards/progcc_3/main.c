@@ -126,7 +126,7 @@ void cb_hoja_read_buttons(button_data_s *data)
     data->button_stick_right    = !gpio_get(PGPIO_BUTTON_RS);
     data->button_stick_left     = !gpio_get(PGPIO_BUTTON_LS);
 
-    data->button_safemode   = !gpio_get(PGPIO_BUTTON_MODE);
+    data->button_sync = !gpio_get(PGPIO_BUTTON_MODE);
 
 }
 

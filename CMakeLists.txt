@@ -61,7 +61,6 @@ set(BULK_PROJECTS_DIRS
     boards/gcu_proto 
     boards/phob_2 
     boards/pico_w 
-    boards/phobri_64 
     boards/padbox_gs 
 )
 
