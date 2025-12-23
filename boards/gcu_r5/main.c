@@ -1,26 +1,28 @@
 #include "hoja.h" 
-#include "input/button.h" 
 #include "board_config.h" 
 #include "main.h" 
 #include "hardware/gpio.h" 
 #include "pico/stdlib.h" 
-#include "pico/bootrom.h" 
+#include "pico/bootrom.h"
+#include "hal/sys_hal.h" 
+#include "hal/adc_hal.h"
+#include "drivers/mux/tmux1204.h"
 
-adc_driver_cfg_s user_adc_hal = {
-    .driver_type = ADC_DRIVER_HAL,
-    .driver_instance = 0,
-    };
+mux_tmux1204_driver_s mux_driver = {
+    .a0_gpio=4, .a1_gpio=5\
+};
 
-adc_driver_cfg_s user_adc_mux = {
-    .driver_type = ADC_DRIVER_TMUX1204,
-    .driver_instance  = 0,
-    .tmux1204_cfg = {
-        .a0_gpio    = 4,
-        .a1_gpio    = 5,
-        .host_cfg   = &user_adc_hal,
-        .host_ch_local = 3
-        }
-    };
+adc_hal_driver_s joystick_driver = {
+    .gpio = 29
+};
+
+adc_hal_driver_s trigger_driver_l = {
+    .gpio = 27
+};
+
+adc_hal_driver_s trigger_driver_r = {
+    .gpio = 26
+};
 
 void _local_setup_btn(uint32_t gpio)
 {
@@ -46,10 +48,10 @@ void _local_setup_scan(uint32_t gpio)
     gpio_put(gpio, true);
 }
 
-bool cb_hoja_buttons_init()
+void cb_hoja_init()
 {
     stdio_init_all();
-    
+
     _local_setup_btn(PGPIO_BUTTON_MODE);
     // Set up GPIO for input buttons
     _local_setup_scan(PGPIO_SCAN_A);
@@ -63,56 +65,95 @@ bool cb_hoja_buttons_init()
     _local_setup_push(PGPIO_PUSH_H);
     _local_setup_push(PGPIO_PUSH_I);
 
-    return true;
+    tmux1204_init(&mux_driver);
+    adc_hal_init(&trigger_driver_l);
+    adc_hal_init(&trigger_driver_r);
+    adc_hal_init(&joystick_driver);
 }
 
 #define BUTTON_SLEEP_US 15
 
-void cb_hoja_read_buttons(button_data_s *data)
+void cb_hoja_read_input(mapper_input_s *input)
 {
+    adc_hal_read(&trigger_driver_l);
+    adc_hal_read(&trigger_driver_r);
+
+    bool *out = input->presses;
+
     gpio_put(PGPIO_SCAN_A, false);
     sleep_us(BUTTON_SLEEP_US);
-    data->dpad_up               = !gpio_get(PGPIO_PUSH_H);
-    data->button_stick_right    = !gpio_get(PGPIO_PUSH_G);
-    data->button_plus           = !gpio_get(PGPIO_PUSH_I);
+    out[INPUT_CODE_UP] = !gpio_get(PGPIO_PUSH_H);
+    out[INPUT_CODE_RS] = !gpio_get(PGPIO_PUSH_G);
+    out[INPUT_CODE_START] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_A, true);
 
     gpio_put(PGPIO_SCAN_B, false);
     sleep_us(BUTTON_SLEEP_US);
-    data->dpad_down = !gpio_get(PGPIO_PUSH_H);
-    data->button_south  = !gpio_get(PGPIO_PUSH_G);
-    data->button_minus = !gpio_get(PGPIO_PUSH_I);
+    out[INPUT_CODE_DOWN] = !gpio_get(PGPIO_PUSH_H);
+    out[INPUT_CODE_SOUTH] = !gpio_get(PGPIO_PUSH_G);
+    out[INPUT_CODE_SELECT] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_B, true);
 
     gpio_put(PGPIO_SCAN_C, false);
     sleep_us(BUTTON_SLEEP_US);
-    data->dpad_left     = !gpio_get(PGPIO_PUSH_H);
-    data->button_east      = !gpio_get(PGPIO_PUSH_G);
-    data->button_home   = !gpio_get(PGPIO_PUSH_I);
+    out[INPUT_CODE_LEFT]     = !gpio_get(PGPIO_PUSH_H);
+    out[INPUT_CODE_EAST]      = !gpio_get(PGPIO_PUSH_G);
+    out[INPUT_CODE_HOME]   = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_C, true);
 
     gpio_put(PGPIO_SCAN_D, false);
     sleep_us(BUTTON_SLEEP_US);
-    data->trigger_l     = !gpio_get(PGPIO_PUSH_H);
-    data ->button_north     = !gpio_get(PGPIO_PUSH_G);
-    data->button_capture = !gpio_get(PGPIO_PUSH_I);
+    out[INPUT_CODE_LB] = !gpio_get(PGPIO_PUSH_H);
+    out[INPUT_CODE_NORTH] = !gpio_get(PGPIO_PUSH_G);
+    out[INPUT_CODE_SHARE] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_D, true);
 
     gpio_put(PGPIO_SCAN_E, false);
     sleep_us(BUTTON_SLEEP_US);
-    data->button_stick_left = !gpio_get(PGPIO_PUSH_H);
-    data->trigger_r         = !gpio_get(PGPIO_PUSH_G);
-    data->dpad_right        = !gpio_get(PGPIO_PUSH_I);
+    out[INPUT_CODE_LS] = !gpio_get(PGPIO_PUSH_H);
+    out[INPUT_CODE_RB] = !gpio_get(PGPIO_PUSH_G);
+    out[INPUT_CODE_RIGHT] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_E, true);
 
     gpio_put(PGPIO_SCAN_F, false);
     sleep_us(BUTTON_SLEEP_US);
-    data->trigger_zl    = !gpio_get(PGPIO_PUSH_H);
-    data->trigger_zr    = !gpio_get(PGPIO_PUSH_G);
-    data->button_west      = !gpio_get(PGPIO_PUSH_I);
+    out[INPUT_CODE_LT]    = !gpio_get(PGPIO_PUSH_H);
+    out[INPUT_CODE_RT]    = !gpio_get(PGPIO_PUSH_G);
+    out[INPUT_CODE_WEST]      = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_F, true);
 
-    data->button_shipping = !gpio_get(PGPIO_BUTTON_MODE);
+    input->button_shipping = !gpio_get(PGPIO_BUTTON_MODE);
+    out[INPUT_CODE_MISC3] = input->button_shipping;
+    input->button_sync = (out[INPUT_CODE_START] > 0);
+
+    input->inputs[INPUT_CODE_LT_ANALOG] = trigger_driver_l.output;
+    input->inputs[INPUT_CODE_RT_ANALOG] = trigger_driver_r.output;
+
+    // DEBUG
+    if(out[INPUT_CODE_SHARE]) sys_hal_bootloader();
+}
+
+// CH2 = LX
+// CH0 = LY
+// CH3 = RY
+// CH1 = RX
+void cb_hoja_read_joystick(uint16_t *input)
+{
+    tmux1204_switch_channel(&mux_driver, 2);
+    adc_hal_read(&joystick_driver);
+    input[0] = joystick_driver.output;
+    
+    tmux1204_switch_channel(&mux_driver, 0);
+    adc_hal_read(&joystick_driver);
+    input[1] = joystick_driver.output;
+
+    tmux1204_switch_channel(&mux_driver, 3);
+    adc_hal_read(&joystick_driver);
+    input[2] = joystick_driver.output;
+
+    tmux1204_switch_channel(&mux_driver, 1);
+    adc_hal_read(&joystick_driver);
+    input[3] = joystick_driver.output;
 }
 
 int main()

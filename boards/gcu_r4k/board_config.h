@@ -12,20 +12,9 @@
 #define HOJA_USB_VID        0x2E8A // Raspberry Pi
 #define HOJA_USB_PID        0x10DD // GC Ultimate PID
 
+#define HOJA_SEWN_TYPE      SEWN_LAYOUT_AXBY
+
 #define HOJA_SINPUT_ESP32TYPE 1
-
-#define HOJA_SEWN_TYPE  SEWN_LAYOUT_AXBY
-
-#define HOJA_INPUT_ENABLE_SEWN 1
-#define HOJA_INPUT_ENABLE_DPAD 1
-#define HOJA_INPUT_ENABLE_STARTSELECT 1
-#define HOJA_INPUT_ENABLE_HOME 1
-#define HOJA_INPUT_ENABLE_CAPTURE 1
-#define HOJA_INPUT_ENABLE_BUMPERS 1
-#define HOJA_INPUT_ENABLE_TRIGGERS 1
-#define HOJA_INPUT_ENABLE_UPPERGRIPS 0
-#define HOJA_INPUT_ENABLE_LOWERGRIPS 0
-#define HOJA_INPUT_ENABLE_POWER 1
 
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
 #define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
@@ -69,6 +58,7 @@
 
 // Disable smoothing
 #define ADC_SMOOTHING_STRENGTH      0
+#define HOJA_ANALOG_DEFAULT_DISTANCE 1400.0f
 
 // ---------------------------------
 // ---------------------------------
@@ -95,6 +85,7 @@
 
 #define BLUETOOTH_DRIVER_BATMON_ENABLE  1 // Enable battery monitoring by the ESP32
 #define BLUETOOTH_DRIVER_BATMON_ADC_GPIO 36 // Select the battery monitoring ESP32 ADC channel
+#define HOJA_BLUETOOTH_FCC_ID           "2BM3E-GCU-R4K"
 // ---------------------------------
 // ---------------------------------
 
@@ -110,7 +101,7 @@
 #define HOJA_BATTERY_I2C_INSTANCE   1
 #define HOJA_BATTERY_CAPACITY_MAH   1200
 #define HOJA_BATTERY_PART_CODE      "BDT 903035"
-#define HOJA_BATTERY_CONSUME_RATE   225 // mA
+#define HOJA_BATTERY_PMIC_PART_NUMBER "BQ25180"
 // ---------------------------------
 // ---------------------------------
 
@@ -120,7 +111,6 @@
 #define HOJA_DEVICE_MANIFEST_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r4k/manifest.json"
 #define HOJA_DEVICE_FIRMWARE_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r4k/gcu_r4k.uf2"
 #define HOJA_DEVICE_MANUAL_URL      "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z"
-#define HOJA_DEVICE_FCC_ELABEL      ""
 #define HOJA_DEVICE_SNES_SUPPORTED      1
 #define HOJA_DEVICE_JOYBUS_SUPPORTED    1
 // ---------------------------------
@@ -438,6 +428,7 @@
 #define RGB_DRIVER_LED_COUNT    12
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
 #define RGB_DRIVER_PIO_INSTANCE 0
+#define RGB_DRIVER_REFRESHRATE  90 // HZ
 
 #define HOJA_RGB_GROUPS_NUM 6
 #define HOJA_RGB_GROUP_NAMES { \
@@ -460,8 +451,6 @@
 #define HOJA_RGB_NOTIF_GROUP_IDX   5
 #define HOJA_RGB_NOTIF_GROUP_SIZE  1
 
-// L   D   R   U
-// 12, 13, 14, 15
 // Corresponds to the group names in order
 // Filled out with any LED index corresponding to a group
 #define HOJA_RGB_GROUPINGS { \

@@ -1,5 +1,6 @@
 #include "hoja.h" 
 #include "utilities/static_config.h"
+#include "hal/sys_hal.h"
 
 #include "input_shared_types.h"
 
@@ -84,7 +85,7 @@ void cb_hoja_read_input(mapper_input_s *input)
     adc_hal_read(&trigger_driver_1);
     adc_hal_read(&trigger_driver_2);
 
-    uint16_t *out = input->inputs;
+    bool *out = input->presses;
 
     gpio_put(PGPIO_SCAN_A, false);
     sleep_us(BUTTON_SLEEP_US);
@@ -118,7 +119,6 @@ void cb_hoja_read_input(mapper_input_s *input)
     gpio_put(PGPIO_SCAN_E, false);
     sleep_us(BUTTON_SLEEP_US);
     out[INPUT_CODE_LS] = !gpio_get(PGPIO_PUSH_H);
-
     out[INPUT_CODE_RB] = !gpio_get(PGPIO_PUSH_G);
     out[INPUT_CODE_RIGHT] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_E, true);
@@ -134,8 +134,11 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_MISC3] = input->button_shipping;
     input->button_sync = (out[INPUT_CODE_START] > 0);
 
-    out[INPUT_CODE_LT_ANALOG] = trigger_driver_2.output;
-    out[INPUT_CODE_RT_ANALOG] = trigger_driver_1.output;
+    input->inputs[INPUT_CODE_LT_ANALOG] = trigger_driver_2.output;
+    input->inputs[INPUT_CODE_RT_ANALOG] = trigger_driver_1.output;
+
+    // DEBUG
+    if(out[INPUT_CODE_SHARE]) sys_hal_bootloader();
 }
 
 void cb_hoja_read_joystick(uint16_t *input)
