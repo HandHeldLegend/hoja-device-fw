@@ -52,15 +52,15 @@ set(BULK_PROJECTS_DIRS
     boards/progcc_3p 
     boards/progcc_3.1 
     boards/progcc_3.2 
-    boards/progcc_3.3 
-    boards/progcc_4.0 
+    #boards/progcc_3.3 
+    #boards/progcc_4.0 
     boards/super_gamepad 
     boards/gcu_r5
     boards/gcu_s1 
     boards/gcu_r4k 
     boards/gcu_proto 
     boards/phob_2 
-    boards/pico_w 
+    #boards/pico_w 
     boards/padbox_gs 
 )
 

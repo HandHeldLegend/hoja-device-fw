@@ -68,11 +68,12 @@
 #define HOJA_HAPTICS_DRIVER         HAPTICS_DRIVER_LRA_HAL
 #define HOJA_HAPTICS_CHAN_A_PIN     8
 #define HOJA_HAPTICS_CHAN_B_PIN     3
+#define HOJA_HAPTICS_CHAN_SWAP 1
 
-#define HOJA_HAPTICS_MAX        0.5f
+#define HOJA_HAPTICS_MAX        0.55f
 
-#define HOJA_HAPTICS_MIN_LO     0.085f
-#define HOJA_HAPTICS_MIN_HI     0.085f
+#define HOJA_HAPTICS_MIN_LO     0.135f
+#define HOJA_HAPTICS_MIN_HI     0.10f
 
 #define HOJA_HAPTICS_DEBUG 0
 // ---------------------------------

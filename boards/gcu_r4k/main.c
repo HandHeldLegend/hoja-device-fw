@@ -3,6 +3,7 @@
 #include "hal/sys_hal.h"
 
 #include "input_shared_types.h"
+#include "utilities/settings.h"
 
 #include "board_config.h" 
 #include "main.h" 
@@ -23,11 +24,11 @@ adc_mcp3002_driver_s joystick_driver_2 = {
     .spi_instance = 0,
 };
 
-adc_hal_driver_s trigger_driver_1 = {
+adc_hal_driver_s trigger_driver_r = {
     .gpio = 28
 };
 
-adc_hal_driver_s trigger_driver_2 = {
+adc_hal_driver_s trigger_driver_l = {
     .gpio = 29
 };
 
@@ -74,16 +75,16 @@ void cb_hoja_init()
 
     mcp3002_init(&joystick_driver_1);
     mcp3002_init(&joystick_driver_2);
-    adc_hal_init(&trigger_driver_1);
-    adc_hal_init(&trigger_driver_2);
+    adc_hal_init(&trigger_driver_r);
+    adc_hal_init(&trigger_driver_l);
 }
 
 #define BUTTON_SLEEP_US 15
 
 void cb_hoja_read_input(mapper_input_s *input)
 {
-    adc_hal_read(&trigger_driver_1);
-    adc_hal_read(&trigger_driver_2);
+    adc_hal_read(&trigger_driver_r);
+    adc_hal_read(&trigger_driver_l);
 
     bool *out = input->presses;
 
@@ -134,11 +135,27 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_MISC3] = input->button_shipping;
     input->button_sync = (out[INPUT_CODE_START] > 0);
 
-    input->inputs[INPUT_CODE_LT_ANALOG] = trigger_driver_2.output;
-    input->inputs[INPUT_CODE_RT_ANALOG] = trigger_driver_1.output;
+    input->inputs[INPUT_CODE_LT_ANALOG] = 0xFFF - trigger_driver_l.output;
+    input->inputs[INPUT_CODE_RT_ANALOG] = 0xFFF - trigger_driver_r.output;
 
+    /*
+    const uint16_t threshold = 200;
+
+    if(input->inputs[INPUT_CODE_LT_ANALOG] > (hover_config->config[INPUT_CODE_LT_ANALOG].max + threshold))
+    {
+        out[INPUT_CODE_LT] |= 1;
+    }
+    else out[INPUT_CODE_LT] |= 0;
+
+    if(input->inputs[INPUT_CODE_RT_ANALOG] > (hover_config->config[INPUT_CODE_RT_ANALOG].max + threshold))
+    {
+        out[INPUT_CODE_RT] |= 1;
+    }
+    else out[INPUT_CODE_RT] |= 0;
+
+    */
     // DEBUG
-    if(out[INPUT_CODE_SHARE]) sys_hal_bootloader();
+    //if(out[INPUT_CODE_SHARE]) sys_hal_bootloader();
 }
 
 void cb_hoja_read_joystick(uint16_t *input)

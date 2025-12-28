@@ -19,6 +19,8 @@
 #define HOJA_SINPUT_GAMEPAD_TYPE       11 // GameCube Type
 #define HOJA_SINPUT_GAMEPAD_FACESTYLE  2  // GameCube Face Style
 
+#define HOJA_SEWN_TYPE      SEWN_LAYOUT_AXBY
+
 #define HOJA_DISABLE_TOURNEY_MACRO 1
 
 // ---------------------------------
@@ -72,10 +74,10 @@
 #define HOJA_HAPTICS_CHAN_B_PIN     9
 #define HOJA_HAPTICS_CHAN_SWAP      1
 
-#define HOJA_HAPTICS_MAX        0.625f
+#define HOJA_HAPTICS_MAX        0.55f
 
-#define HOJA_HAPTICS_MIN_LO     0.1f
-#define HOJA_HAPTICS_MIN_HI     0.0975f
+#define HOJA_HAPTICS_MIN_LO     0.135f
+#define HOJA_HAPTICS_MIN_HI     0.10f
 
 #define HOJA_HAPTICS_DEBUG 0
 // ---------------------------------
@@ -92,7 +94,7 @@
 #define BLUETOOTH_DRIVER_CS             3
 
 #define HOJA_BLUETOOTH_PART_NUMBER      "RPI RM2"
-#define HOJA_BLUETOOTH_FCC_ID           "GCU-R5"
+#define HOJA_BLUETOOTH_FCC_ID           "N/A"
 // ---------------------------------
 // ---------------------------------
 
@@ -116,7 +118,6 @@
 #define HOJA_DEVICE_MANIFEST_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r5/manifest.json"
 #define HOJA_DEVICE_FIRMWARE_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r5/gcu_r5.uf2"
 #define HOJA_DEVICE_MANUAL_URL      "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z"
-#define HOJA_DEVICE_FCC_ELABEL      "This is an FCC Label for GCU-R5"
 #define HOJA_DEVICE_SNES_SUPPORTED      1
 #define HOJA_DEVICE_JOYBUS_SUPPORTED    1
 // ---------------------------------
@@ -469,7 +470,6 @@
     RGB_GROUP(6), \
     RGB_GROUP(8) \
 }
-
 // ---------------------------------
 // ---------------------------------
 

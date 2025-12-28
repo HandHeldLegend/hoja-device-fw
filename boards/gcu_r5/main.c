@@ -8,6 +8,8 @@
 #include "hal/adc_hal.h"
 #include "drivers/mux/tmux1204.h"
 
+#include "utilities/settings.h"
+
 mux_tmux1204_driver_s mux_driver = {
     .a0_gpio=4, .a1_gpio=5\
 };
@@ -129,14 +131,24 @@ void cb_hoja_read_input(mapper_input_s *input)
     input->inputs[INPUT_CODE_LT_ANALOG] = trigger_driver_l.output;
     input->inputs[INPUT_CODE_RT_ANALOG] = trigger_driver_r.output;
 
+    const uint16_t threshold = 200;
+
+    if(trigger_driver_l.output < (hover_config->config[INPUT_CODE_LT_ANALOG].max + threshold))
+    {
+        out[INPUT_CODE_LT] |= 1;
+    }
+    else out[INPUT_CODE_LT] |= 0;
+
+    if(trigger_driver_r.output > (hover_config->config[INPUT_CODE_RT_ANALOG].max + threshold))
+    {
+        out[INPUT_CODE_RT] |= 1;
+    }
+    else out[INPUT_CODE_RT] |= 0;
+
     // DEBUG
-    if(out[INPUT_CODE_SHARE]) sys_hal_bootloader();
+    //if(out[INPUT_CODE_SHARE]) sys_hal_bootloader();
 }
 
-// CH2 = LX
-// CH0 = LY
-// CH3 = RY
-// CH1 = RX
 void cb_hoja_read_joystick(uint16_t *input)
 {
     tmux1204_switch_channel(&mux_driver, 2);

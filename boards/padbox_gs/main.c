@@ -1,15 +1,29 @@
 #include "hoja.h" 
-#include "input/button.h" 
+#include "input_shared_types.h"
+
 #include "board_config.h" 
 #include "main.h" 
 #include "hardware/gpio.h" 
 #include "pico/stdlib.h" 
 #include "pico/bootrom.h" 
 
-adc_driver_cfg_s user_adc_hal = {
-    .driver_type = ADC_DRIVER_HAL,
-    .driver_instance = 0,
-    };
+#include "hal/adc_hal.h"
+
+adc_hal_driver_s joystick_driver_lx = {
+    .gpio = 29
+};
+
+adc_hal_driver_s joystick_driver_ly = {
+    .gpio = 28
+};
+
+adc_hal_driver_s joystick_driver_rx = {
+    .gpio = 27
+};
+
+adc_hal_driver_s joystick_driver_ry = {
+    .gpio = 26,
+};
 
 void _local_setup_btn(uint32_t gpio)
 {
@@ -18,7 +32,7 @@ void _local_setup_btn(uint32_t gpio)
     gpio_set_dir(gpio, GPIO_IN);
 }
 
-bool cb_hoja_buttons_init()
+void cb_hoja_init()
 {
     stdio_init_all();
     
@@ -45,35 +59,53 @@ bool cb_hoja_buttons_init()
     _local_setup_btn(PGPIO_BTN_DLEFT);
     _local_setup_btn(PGPIO_BTN_DRIGHT);
 
-    return true;
+    adc_hal_init(&joystick_driver_lx);
+    adc_hal_init(&joystick_driver_rx);
+    adc_hal_init(&joystick_driver_ly);
+    adc_hal_init(&joystick_driver_ry);
 }
 
-void cb_hoja_read_buttons(button_data_s *data)
+void cb_hoja_read_joystick(uint16_t *input)
 {
-
-    data->dpad_up       = !gpio_get(PGPIO_BTN_DUP);
-    data->dpad_down     = !gpio_get(PGPIO_BTN_DDOWN);
-    data->dpad_left     = !gpio_get(PGPIO_BTN_DLEFT);
-    data->dpad_right    = !gpio_get(PGPIO_BTN_DRIGHT);
-
-    data->button_south     = !gpio_get(PGPIO_BTN_A);
-    data->button_east      = !gpio_get(PGPIO_BTN_B);
-    data->button_west      = !gpio_get(PGPIO_BTN_X);
-    data->button_north     = !gpio_get(PGPIO_BTN_Y);
-
-    data->button_plus   = !gpio_get(PGPIO_BTN_MENU);
-    data->button_minus  = !gpio_get(PGPIO_BTN_BACK);
-    data->button_home   = !gpio_get(PGPIO_BTN_HOME);
-    data->button_capture = !gpio_get(PGPIO_BTN_CAPTURE);
-
-    data->button_stick_left     = !gpio_get(PGPIO_BTN_SL);
-    data->button_stick_right    = !gpio_get(PGPIO_BTN_SR);
+    adc_hal_read(&joystick_driver_lx);
+    input[0] = joystick_driver_lx.output;
     
-    data->trigger_l     = !gpio_get(PGPIO_BTN_TL);
-    data->trigger_r     = !gpio_get(PGPIO_BTN_TR);
-    data->trigger_zl    = !gpio_get(PGPIO_BTN_TZL);
-    data->trigger_zr    = !gpio_get(PGPIO_BTN_TZR);
+    adc_hal_read(&joystick_driver_ly);
+    input[1] = 0xFFF - joystick_driver_ly.output;
 
+    adc_hal_read(&joystick_driver_rx);
+    input[2] = joystick_driver_rx.output;
+
+    adc_hal_read(&joystick_driver_ry);
+    input[3] = 0xFFF - joystick_driver_rx.output;
+}
+
+void cb_hoja_read_input(mapper_input_s *input)
+{
+    bool *out = input->presses;
+
+    out[INPUT_CODE_UP]      = !gpio_get(PGPIO_BTN_DUP);
+    out[INPUT_CODE_DOWN]    = !gpio_get(PGPIO_BTN_DDOWN);
+    out[INPUT_CODE_LEFT]    = !gpio_get(PGPIO_BTN_DLEFT);
+    out[INPUT_CODE_RIGHT]   = !gpio_get(PGPIO_BTN_DRIGHT);
+
+    out[INPUT_CODE_SOUTH]   = !gpio_get(PGPIO_BTN_A);
+    out[INPUT_CODE_EAST]    = !gpio_get(PGPIO_BTN_B);
+    out[INPUT_CODE_WEST]    = !gpio_get(PGPIO_BTN_X);
+    out[INPUT_CODE_NORTH]   = !gpio_get(PGPIO_BTN_Y);
+
+    out[INPUT_CODE_START]   = !gpio_get(PGPIO_BTN_MENU);
+    out[INPUT_CODE_SELECT]  = !gpio_get(PGPIO_BTN_BACK);
+    out[INPUT_CODE_HOME]    = !gpio_get(PGPIO_BTN_HOME);
+    out[INPUT_CODE_SHARE]   = !gpio_get(PGPIO_BTN_CAPTURE);
+
+    out[INPUT_CODE_LS]   = !gpio_get(PGPIO_BTN_SL);
+    out[INPUT_CODE_RB]   = !gpio_get(PGPIO_BTN_SR);
+    
+    out[INPUT_CODE_LB]   = !gpio_get(PGPIO_BTN_TL);
+    out[INPUT_CODE_RB]   = !gpio_get(PGPIO_BTN_TR);
+    out[INPUT_CODE_LT]   = !gpio_get(PGPIO_BTN_TZL);
+    out[INPUT_CODE_RT]   = !gpio_get(PGPIO_BTN_TZR);
 }
 
 int main()
