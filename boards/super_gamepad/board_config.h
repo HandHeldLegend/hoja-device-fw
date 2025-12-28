@@ -54,6 +54,7 @@
 #define HOJA_BATTERY_PMIC_PART_NUMBER "BQ25180"
 
 #define HOJA_FUELGAUGE_DRIVER       FUELGAUGE_DRIVER_ADC
+#define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.125f
 
 // ---------------------------------
 // ---------------------------------
