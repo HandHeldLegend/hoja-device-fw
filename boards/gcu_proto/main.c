@@ -118,6 +118,9 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_HOME] = input->button_shipping;
 
     input->button_sync = out[INPUT_CODE_START];
+
+    input->inputs[INPUT_CODE_LT_ANALOG] = trigger_driver_l.output;
+    input->inputs[INPUT_CODE_RT_ANALOG] = trigger_driver_r.output;
 }
 
 void cb_hoja_read_joystick(uint16_t *input)
