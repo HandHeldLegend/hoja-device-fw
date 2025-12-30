@@ -70,7 +70,7 @@
 #define HOJA_HAPTICS_CHAN_B_PIN     3
 #define HOJA_HAPTICS_CHAN_SWAP 1
 
-#define HOJA_HAPTICS_MAX        0.55f
+#define HOJA_HAPTICS_MAX        0.45f
 
 #define HOJA_HAPTICS_MIN_LO     0.135f
 #define HOJA_HAPTICS_MIN_HI     0.10f
