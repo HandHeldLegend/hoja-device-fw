@@ -9,6 +9,8 @@
 
 #include "drivers/adc/mcp3002.h"
 
+#define TESTSS PICO_BOARD
+
 adc_mcp3002_driver_s joystick_driver_l = {
     .cs_gpio = 1,
     .spi_instance = 0,

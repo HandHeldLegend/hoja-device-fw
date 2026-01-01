@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.13)
-
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -18,67 +17,75 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-set(PICO_BOARD pico_w CACHE STRING "Board type")
 
-# Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
-set(PICO_SDK_INCLUSION_DONE TRUE)
+project(hoja-device-fw)
 
-# Project name for the parent
-project(hoja_bulk_compile C CXX ASM)
-
-if (PICO_SDK_VERSION_STRING VERSION_LESS "2.1.0")
-    message(FATAL_ERROR "Raspberry Pi Pico SDK version 2.1.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
-endif()
-
-# Initialize the SDK
-pico_sdk_init()
-set(PICO_SDK_INIT_DONE TRUE)
-
-# Include HOJA Libarary
-set(HOJA_LIB_DIR        ${CMAKE_CURRENT_LIST_DIR}/library/HOJA-LIB-RP2040)
-set(HOJA_LIBOUTPUT_DIR  ${CMAKE_CURRENT_LIST_DIR}/library/artifacts)
-add_subdirectory(${HOJA_LIB_DIR} ${HOJA_LIBOUTPUT_DIR})
-set(HOJA_LIB_ADDED TRUE)
+include(ExternalProject)
 
 # Set up peripheral directories
 set(SCRIPTS_DIR ${CMAKE_CURRENT_LIST_DIR}/scripts)
 set(BOARDS_DIR  ${CMAKE_CURRENT_LIST_DIR}/boards)
 set(ROOT_DIR    ${CMAKE_CURRENT_LIST_DIR})
+set(EXTERNAL_BOARD_DEF_DIR ${CMAKE_CURRENT_LIST_DIR}/picoboards)
 
-# Define your list of directories
-set(BULK_PROJECTS_DIRS 
-    boards/progcc_3 
-    boards/progcc_3p 
-    boards/progcc_3.1 
-    boards/progcc_3.2 
-    #boards/progcc_3.3 
-    #boards/progcc_4.0 
-    boards/super_gamepad 
-    boards/gcu_r5
-    boards/gcu_s1 
-    boards/gcu_r4k 
-    boards/gcu_proto 
-    boards/phob_2 
-    #boards/pico_w 
-    boards/padbox_gs 
+set(MY_LIST 
+    progcc_3:pico
+    progcc_3.2:pico
 )
 
-# Iterate through the list
-foreach(DIR ${BULK_PROJECTS_DIRS})
-    get_filename_component(PROJECT_NAME "${DIR}" NAME)
+set(PICO_SDK_INIT_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-    # Copy CMakeLists
-    file(COPY "${SCRIPTS_DIR}/CMakeLists.txt"
-     DESTINATION "${ROOT_DIR}/boards/${PROJECT_NAME}")
+foreach(ITEM ${MY_LIST})
+    # This regex matches:
+    # 1. ^([^:]+)  -> Everything from the start that is NOT a colon (Group 1: BOARD_NAME)
+    # 2. :         -> The literal colon separator
+    # 3. (.+)$     -> Everything remaining until the end (Group 2: BOARD_TYPE)
+    string(REGEX MATCH "^([^:]+):(.+)$" MATCHED "${ITEM}")
+    
+    if(MATCHED)
+        set(BOARD_NAME "${CMAKE_MATCH_1}")
+        set(BOARD_TYPE "${CMAKE_MATCH_2}")
 
-    # Set the build folder for this project
-    set(HOJA_BUILD_DIR ${ROOT_DIR}/boards/${PROJECT_NAME}/build)
-    # Create builds directory for this project
-    set(HOJA_BUILDS_PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/builds/${PROJECT_NAME})
-    # Make the dir if it doesn't exist
-    file(MAKE_DIRECTORY ${HOJA_BUILDS_PROJECT_DIR})
+        file(COPY "${SCRIPTS_DIR}/CMakeLists.txt"
+             DESTINATION "${BOARDS_DIR}/${BOARD_NAME}")
+        
+        ExternalProject_Add(${BOARD_NAME}_${BOARD_TYPE}
+            PREFIX ${BOARD_NAME}
+            SOURCE_DIR "${BOARDS_DIR}/${BOARD_NAME}"
+            BINARY_DIR "${CMAKE_BINARY_DIR}/subprojects/${BOARD_NAME}"
+            CMAKE_ARGS
+                "--no-warn-unused-cli"
+                "-DPICO_SDK_PATH=${PICO_SDK_PATH}"
+                "-DCMAKE_BUILD_TYPE=Debug"
+                "-DPICO_SDK_INIT_PATH=${ROOT_DIR}"
+                "-DTARGET_BOARD=${BOARD_TYPE}"
+                "-DTARGET_NAME=${BOARD_NAME}"
+                "-DPICO_DEOPTIMIZED_DEBUG=1"
+            BUILD_ALWAYS 1 # force dependency checking
+            INSTALL_COMMAND ""
+            )
 
-    # Add/Run this CMAKE
-    add_subdirectory(${DIR} ${HOJA_BUILD_DIR})
+    endif()
 endforeach()
+
+
+
+# Iterate through the list
+#foreach(DIR ${BULK_PROJECTS_DIRS})
+#    get_filename_component(PROJECT_NAME "${DIR}" NAME)
+#
+#    # Copy CMakeLists
+#    file(COPY "${SCRIPTS_DIR}/CMakeLists.txt"
+#     DESTINATION "${ROOT_DIR}/boards/${PROJECT_NAME}")
+#
+#    # Set the build folder for this project
+#    set(HOJA_BUILD_DIR ${ROOT_DIR}/boards/${PROJECT_NAME}/build)
+#    # Create builds directory for this project
+#    set(HOJA_BUILDS_PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/builds/${PROJECT_NAME})
+#    # Make the dir if it doesn't exist
+#    file(MAKE_DIRECTORY ${HOJA_BUILDS_PROJECT_DIR})
+#
+#    # Add/Run this CMAKE
+#    add_subdirectory(${DIR} ${HOJA_BUILD_DIR})
+#endforeach()
