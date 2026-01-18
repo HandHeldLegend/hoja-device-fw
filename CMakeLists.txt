@@ -6,6 +6,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(EXTERNAL_BOARD_DEF_DIR ${CMAKE_CURRENT_LIST_DIR}/picoboards)
 set(PICO_BOARD_HEADER_DIRS ${EXTERNAL_BOARD_DEF_DIR} )
 
+message(STATUS "Debug: intellisense_focus is set to ${DEBUG_VARIANT_VAL}")
+
 # == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
 if(WIN32)
     set(USERHOME $ENV{USERPROFILE})
@@ -48,6 +50,49 @@ set(MY_LIST
 
 set(PICO_SDK_INIT_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+# 1. Initialize the start of the JSON file
+set(CPP_PROPS_CONTENT "{\n    \"configurations\": [\n")
+set(CONFIGS_LIST "")
+
+foreach(ITEM ${MY_LIST})
+    string(REGEX MATCH "^([^:]+):(.+)$" MATCHED "${ITEM}")
+    
+    if(MATCHED)
+        set(BOARD_NAME "${CMAKE_MATCH_1}")
+        set(BOARD_TYPE "${CMAKE_MATCH_2}")
+
+        # 2. Append a configuration block for this board to a list
+        set(BLOCK "        {
+            \"name\": \"${BOARD_NAME}\",
+            \"includePath\": [
+                \"\${workspaceFolder}/boards/${BOARD_NAME}/**\",
+                \"\${workspaceFolder}/library/HOJA-LIB-RP2040/**\",
+                \"\${userHome}/.pico-sdk/sdk/2.2.0/**\"
+            ],
+            \"forcedInclude\": [
+                \"\${userHome}/.pico-sdk/sdk/2.2.0/src/common/pico_base_headers/include/pico.h\",
+                \"\${workspaceFolder}/build/generated/pico_base/pico/config_autogen.h\"
+            ],
+            \"defines\": [],
+            \"compilerPath\": \"c:/users/mitch/.pico-sdk/toolchain/14_2_rel1/bin/arm-none-eabi-g++.exe\",
+            \"compileCommands\": \"\${workspaceFolder}/build/subprojects/${BOARD_NAME}/compile_commands.json\",
+            \"cStandard\": \"c17\",
+            \"cppStandard\": \"c++14\",
+            \"intelliSenseMode\": \"linux-gcc-arm\",
+            \"configurationProvider\": \"ms-vscode.cmake-tools\"
+        }")
+        list(APPEND CONFIGS_LIST "${BLOCK}")
+    endif()
+endforeach()
+
+# 3. Join all blocks with commas and close the JSON structure
+string(REPLACE ";" ",\n" JOINED_CONFIGS "${CONFIGS_LIST}")
+string(APPEND CPP_PROPS_CONTENT "${JOINED_CONFIGS}")
+string(APPEND CPP_PROPS_CONTENT "\n    ],\n    \"version\": 4\n}")
+
+# 4. Write the file to the .vscode directory
+file(WRITE "${CMAKE_CURRENT_LIST_DIR}/.vscode/c_cpp_properties.json" "${CPP_PROPS_CONTENT}")
+
 foreach(ITEM ${MY_LIST})
     # This regex matches:
     # 1. ^([^:]+)  -> Everything from the start that is NOT a colon (Group 1: BOARD_NAME)
@@ -67,6 +112,7 @@ foreach(ITEM ${MY_LIST})
             SOURCE_DIR "${BOARDS_DIR}/${BOARD_NAME}"
             BINARY_DIR "${CMAKE_BINARY_DIR}/subprojects/${BOARD_NAME}"
             CMAKE_ARGS
+                "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
                 "--no-warn-unused-cli"
                 "-DUSE_EXTERNAL_BOARD_DEF=TRUE"
                 "-DPICO_SDK_PATH=${PICO_SDK_PATH}"
