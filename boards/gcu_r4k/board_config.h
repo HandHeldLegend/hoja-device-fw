@@ -4,7 +4,7 @@
 #include "driver_define_helper.h" 
 #include "rgb_define_helper.h" 
 
-#define HOJA_BT_LOGGING_DEBUG 0
+#define HOJA_BT_LOGGING_DEBUG 1
 
 // Device stuff
 #define HOJA_PRODUCT        "GCU-R4K" 

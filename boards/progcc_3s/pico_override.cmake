@@ -1,0 +1,6 @@
+set(BT_ON_PIN 17)
+set(BT_DATA_OUT_PIN 18)
+set(BT_DATA_IN_PIN  18)
+set(BT_WAKE_PIN     18)
+set(BT_CLOCK_PIN    19)
+set(BT_CS_PIN       20)

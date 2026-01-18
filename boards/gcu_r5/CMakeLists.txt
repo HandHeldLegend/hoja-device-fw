@@ -2,40 +2,55 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-if(NOT DEFINED PICO_SDK_INIT_DONE)
-    include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
-    set(CMAKE_C_STANDARD 11)
-    set(CMAKE_CXX_STANDARD 17)
-endif()
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(NOT DEFINED PROJECT_NAME)
-    get_filename_component(PROJECT_NAME "${CMAKE_CURRENT_LIST_DIR}" NAME)
-endif()
+set(PICO_BOARD ${TARGET_BOARD})
+message("${TARGET_BOARD}")
 
-if(NOT DEFINED PICO_SDK_INIT_DONE)
-    project(${PROJECT_NAME} C CXX ASM)
-    pico_sdk_init()
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
 else()
-    project(${PROJECT_NAME})
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 2.2.0)
+set(toolchainVersion 14_2_Rel1)
+set(picotoolVersion 2.2.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
+set(PICO_BOARD_HEADER_DIRS "${EXTERNAL_BOARD_DEF_DIR}" )
+include(${PICO_SDK_INIT_PATH}/pico_sdk_import.cmake)
+
+if (PICO_SDK_VERSION_STRING VERSION_LESS "2.2.0")
+    message(FATAL_ERROR "Raspberry Pi Pico SDK version 2.2.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
 endif()
 
-if(NOT DEFINED HOJA_LIB_ADDED)
-    set(HOJA_LIB_DIR        ${CMAKE_CURRENT_LIST_DIR}/../../library/HOJA-LIB-RP2040)
-    set(HOJA_LIBOUTPUT_DIR  ${CMAKE_CURRENT_LIST_DIR}/../../library/artifacts)
-    add_subdirectory(${HOJA_LIB_DIR} ${HOJA_LIBOUTPUT_DIR})
+
+
+project(${TARGET_NAME} C CXX ASM)
+
+pico_sdk_init()
+
+if (PICO_BOARD MATCHES "_w")
+    set(HOJA_USE_BT_HAL TRUE)
+else()
+    set(HOJA_USE_BT_HAL FALSE)
 endif()
 
-if(NOT DEFINED SCRIPTS_DIR)
-    set(SCRIPTS_DIR ${CMAKE_CURRENT_LIST_DIR}/../../scripts)
-endif()
+set(HOJA_LIB_DIR        ${CMAKE_CURRENT_LIST_DIR}/../../library/HOJA-LIB-RP2040)
+set(HOJA_LIBOUTPUT_DIR  ${CMAKE_CURRENT_LIST_DIR}/../../library/artifacts/${TARGET_BOARD})
+add_subdirectory(${HOJA_LIB_DIR} ${HOJA_LIBOUTPUT_DIR})
 
-if(NOT DEFINED HOJA_BUILD_DIR)
-    set(HOJA_BUILD_DIR   ${CMAKE_CURRENT_LIST_DIR}/build)
-endif()
+set(SCRIPTS_DIR ${CMAKE_CURRENT_LIST_DIR}/../../scripts)
 
-if(NOT DEFINED HOJA_BUILDS_PROJECT_DIR)
-    set(HOJA_BUILDS_PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/../../builds/${PROJECT_NAME})
-endif()
+set(HOJA_BUILD_DIR   ${CMAKE_CURRENT_LIST_DIR}/build)
+
+set(HOJA_BUILDS_PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/../../builds/${PROJECT_NAME})
 
 add_custom_target(
     ${PROJECT_NAME}_TIMESTAMP_GEN ALL
@@ -56,20 +71,6 @@ add_custom_target(${PROJECT_NAME}_TIMESTAMP ALL
 add_executable(${PROJECT_NAME}
     main.c
 )
-
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/pico_override.cmake")
-    message("Including pico_override.cmake for ${PROJECT_NAME}")
-    include(${CMAKE_CURRENT_LIST_DIR}/pico_override.cmake)
-    target_compile_definitions(${PROJECT_NAME}
-        PRIVATE
-        CYW43_DEFAULT_PIN_WL_REG_ON=${BT_ON_PIN}
-        CYW43_DEFAULT_PIN_WL_DATA_OUT=${BT_DATA_OUT_PIN}
-        CYW43_DEFAULT_PIN_WL_DATA_IN=${BT_DATA_IN_PIN}
-        CYW43_DEFAULT_PIN_WL_HOST_WAKE=${BT_WAKE_PIN}
-        CYW43_DEFAULT_PIN_WL_CLOCK=${BT_CLOCK_PIN}
-        CYW43_DEFAULT_PIN_WL_CS=${BT_CS_PIN}
-    )
-endif()
 
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
@@ -94,9 +95,9 @@ include_directories(
 )
 
 target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        hoja_lib
-    )
+    PRIVATE
+    hoja_lib
+)
 
 pico_enable_stdio_usb(${PROJECT_NAME} 0)
 pico_enable_stdio_uart(${PROJECT_NAME} 0)

@@ -1,109 +1,84 @@
-#include "driver_define_helper.h"
-#include "rgb_define_helper.h"
+//#ifndef BOARD_CONFIG_H
+//#define BOARD_CONFIG_H
+
+#include "driver_define_helper.h" 
+#include "rgb_define_helper.h" 
 
 #define HOJA_BT_LOGGING_DEBUG 0
 
 // Device stuff
-#define HOJA_PRODUCT        "ProGCC 3.2"
+#define HOJA_PRODUCT        "Latte Jr 1" 
+
+//#define HOJA_USB_VID        0x2E8A // Raspberry Pi
+//#define HOJA_USB_PID        0x10DD // GC Ultimate PID
+
+#define HOJA_SEWN_TYPE  SEWN_LAYOUT_ABXY
+
+#define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
+#define HOJA_SINPUT_GAMEPAD_TYPE       0  // Default
+#define HOJA_SINPUT_GAMEPAD_FACESTYLE  0  // Default
 
 // URL that will display to open a config tool
-#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
-#define HOJA_MANUFACTURER   "HHL"
+#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
+#define HOJA_MANUFACTURER   "HHL" 
 
-#define HOJA_USB_VID        0x2E8A // Raspberry Pi
-#define HOJA_USB_PID        0x10DF // ProGCC PID
-
-#define HOJA_SINPUT_GAMEPAD_SUBTYPE    0 // Base ProGCC
-#define HOJA_SINPUT_GAMEPAD_TYPE       7 // ProCon Type
-#define HOJA_SINPUT_GAMEPAD_FACESTYLE  3 // ProCon Face Style
-
-#define HOJA_SEWN_TYPE  SEWN_LAYOUT_BAYX
+#define HOJA_DISABLE_TOURNEY_MACRO 1
 
 // ---------------------------------
 // ---------------------------------
-
-// SPI HAL Setup
-#define HOJA_SPI_0_ENABLE     1
-#define HOJA_SPI_0_GPIO_CLK   18
-#define HOJA_SPI_0_GPIO_MOSI  19
-#define HOJA_SPI_0_GPIO_MISO  20
-#define SPI_INSTANCE_0        0
 
 // I2C HAL Setup
-#define HOJA_I2C_0_ENABLE       1
-#define HOJA_I2C_0_GPIO_SDA     28
-#define HOJA_I2C_0_GPIO_SCL     29
-#define I2C_INSTANCE_0          0
+#define HOJA_I2C_0_ENABLE       1 
+#define HOJA_I2C_0_GPIO_SDA     12
+#define HOJA_I2C_0_GPIO_SCL     13 
+#define I2C_INSTANCE_0          0 
 
-// IMU Driver Setup
-#define HOJA_IMU_CHAN_A_DRIVER          IMU_DRIVER_LSM6DSR_SPI
-#define HOJA_IMU_CHAN_B_DRIVER          IMU_DRIVER_LSM6DSR_SPI
-
-#define HOJA_IMU_CHAN_A_CS_PIN          17 
-#define HOJA_IMU_CHAN_A_SPI_INSTANCE    0
-#define HOJA_IMU_CHAN_A_INVERT_FLAGS    0b100100
-
-#define HOJA_IMU_CHAN_B_CS_PIN          25 
-#define HOJA_IMU_CHAN_B_SPI_INSTANCE    0
-#define HOJA_IMU_CHAN_B_INVERT_FLAGS    0b010010
-// ---------------------------------
-// ---------------------------------
-
-// Disable smoothing for 3.2
+// Disable smoothing
 #define ADC_SMOOTHING_STRENGTH      0
+
 // ---------------------------------
 // ---------------------------------
 
 // Haptic Driver Setup
 // No helper driver used
-#define HOJA_HAPTICS_DRIVER        HAPTICS_DRIVER_LRA_HAL
-#define HOJA_HAPTICS_CHAN_A_PIN    21
-#define HOJA_HAPTICS_CHAN_B_PIN    24
-
-#define HOJA_HAPTICS_MAX        0.55f
-
-#define HOJA_HAPTICS_MIN_LO     0.135f
-#define HOJA_HAPTICS_MIN_HI     0.10f
-
-#define HOJA_HAPTICS_DEBUG 0
-
+//#define HOJA_HAPTICS_DRIVER         HAPTICS_DRIVER_LRA_HAL
+//#define HOJA_HAPTICS_CHAN_A_PIN     12
+//#define HOJA_HAPTICS_CHAN_B_PIN     25
+//
+//#define HOJA_HAPTICS_MAX        0.5f
+//
+//#define HOJA_HAPTICS_MIN_LO     0.085f
+//#define HOJA_HAPTICS_MIN_HI     0.085f
+//
+//#define HOJA_HAPTICS_DEBUG 0
 // ---------------------------------
 // ---------------------------------
 
 // Bluetooth Driver Setup
-#define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_ESP32HOJA
-#define BLUETOOTH_DRIVER_I2C_INSTANCE   0
-#define BLUETOOTH_DRIVER_ENABLE_PIN     14
+// Bluetooth Driver Setup
+//#define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_HAL
+//#define BLUETOOTH_DRIVER_PIO_INSTANCE   1 
 // ---------------------------------
 // ---------------------------------
 
-// USB Mux Driver Setup
-#define HOJA_USB_MUX_DRIVER         USB_MUX_DRIVER_PI3USB4000A
-#define USB_MUX_DRIVER_ENABLE_PIN   27
-#define USB_MUX_DRIVER_SELECT_PIN   1
-// ---------------------------------
-// ---------------------------------
-
-// Battery Driver Setup
-#define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
-#define HOJA_BATTERY_I2C_INSTANCE   0
-#define HOJA_BATTERY_PART_CODE      "CTR-003"
-#define HOJA_BATTERY_CAPACITY_MAH   1200
-#define HOJA_BATTERY_PMIC_PART_NUMBER "BQ25180"
-
-// Fuel Gauge Setup
-#define HOJA_FUELGAUGE_DRIVER       FUELGAUGE_DRIVER_ADC
-#define HOJA_BATTERY_VOLTAGE_MEASURE_OFFSET 0.125f
-
+//#define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
+//#define HOJA_BATTERY_I2C_INSTANCE   0
+//#define HOJA_BATTERY_PART_CODE      "JD 603040"
+//#define HOJA_BATTERY_CAPACITY_MAH   800
+//#define HOJA_BATTERY_PMIC_PART_NUMBER "BQ25180"
+//#define HOJA_FUELGAUGE_DRIVER       FUELGAUGE_DRIVER_BQ27621G1
+//#define HOJA_FUELGAUGE_I2C_INSTANCE 0
+//#define HOJA_BATTERY_FUELGAUGE_PART_NUMBER "BQ27621G1"
 // ---------------------------------
 // ---------------------------------
 
 // Device Information Setup 
 #define HOJA_DEVICE_NAME            HOJA_PRODUCT
 #define HOJA_DEVICE_MAKER           HOJA_MANUFACTURER
-#define HOJA_DEVICE_MANIFEST_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/progcc_3.2/manifest.json"
-#define HOJA_DEVICE_FIRMWARE_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/progcc_3.2/progcc_3.2.uf2"
-#define HOJA_DEVICE_MANUAL_URL      "https://docs.handheldlegend.com/s/portal/doc/user-guide-wQRaUfU6EM"
+#define HOJA_DEVICE_MANIFEST_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw-2350/main/builds/latte_1/manifest.json"
+#define HOJA_DEVICE_FIRMWARE_URL    "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw-2350/main/builds/latte_1/latte_1.uf2"
+#define HOJA_DEVICE_MANUAL_URL      "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z"
+#define HOJA_DEVICE_FCC_ELABEL      ""
 #define HOJA_DEVICE_SNES_SUPPORTED      1
 #define HOJA_DEVICE_JOYBUS_SUPPORTED    1
 // ---------------------------------
@@ -118,9 +93,9 @@
 // NESBUS Setup
 #define HOJA_NESBUS_DRIVER          NESBUS_DRIVER_HAL
 #define NESBUS_DRIVER_PIO_INSTANCE  1
-#define NESBUS_DRIVER_DATA_PIN      3
-#define NESBUS_DRIVER_CLOCK_PIN     4
-#define NESBUS_DRIVER_LATCH_PIN     5
+#define NESBUS_DRIVER_DATA_PIN      0
+#define NESBUS_DRIVER_CLOCK_PIN     2
+#define NESBUS_DRIVER_LATCH_PIN     1
 
 // ---------------------------------
 // ---------------------------------
@@ -128,68 +103,100 @@
 // JOYBUS Setup
 #define HOJA_JOYBUS_N64_DRIVER          JOYBUS_N64_DRIVER_HAL
 #define JOYBUS_N64_DRIVER_PIO_INSTANCE  1
-#define JOYBUS_N64_DRIVER_DATA_PIN      3
+#define JOYBUS_N64_DRIVER_DATA_PIN      0
 
 #define HOJA_JOYBUS_GC_DRIVER           JOYBUS_GC_DRIVER_HAL
 #define JOYBUS_GC_DRIVER_PIO_INSTANCE  1
-#define JOYBUS_GC_DRIVER_DATA_PIN      3
+#define JOYBUS_GC_DRIVER_DATA_PIN      0
 
 // ---------------------------------
 // ---------------------------------
-
-// RGB Setup
-#define HOJA_RGB_DRIVER         RGB_DRIVER_HAL
-#define RGB_DRIVER_OUTPUT_PIN   23
-#define RGB_DRIVER_LED_COUNT    32
-#define RGB_DRIVER_ORDER        RGB_ORDER_GRB
-#define RGB_DRIVER_PIO_INSTANCE 0
 
 // INPUT Setup
 // Follows convention of mapper_input_code_t
 #define HOJA_INPUT_SLOTS { \
-    (inputInfoSlot_s) {/*South*/.input_name="B", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=2}, \
-    (inputInfoSlot_s) {/*East*/.input_name="A", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=1}, \
-    (inputInfoSlot_s) {/*West*/.input_name="Y", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=4}, \
-    (inputInfoSlot_s) {/*North*/.input_name="X", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=3}, \
-    (inputInfoSlot_s) {/*Up*/.input_name="D Up", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=5}, \
-    (inputInfoSlot_s) {/*Down*/.input_name="D Down", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=6}, \
-    (inputInfoSlot_s) {/*Left*/.input_name="D Left", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=7}, \
-    (inputInfoSlot_s) {/*Right*/.input_name="D Right", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=8}, \
-    (inputInfoSlot_s) {/*LB*/.input_name="L", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=11}, \
-    (inputInfoSlot_s) {/*RB*/.input_name="R", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=12}, \
-    (inputInfoSlot_s) {/*LT*/.input_name="ZL", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=13}, \
-    (inputInfoSlot_s) {/*LTANALOG*/0}, \
-    (inputInfoSlot_s) {/*RT*/.input_name="ZR", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=14}, \
-    (inputInfoSlot_s) {/*RTANALOG*/0}, \
-    (inputInfoSlot_s) {/*LP1*/0}, \
-    (inputInfoSlot_s) {/*RP1*/0}, \
+    (inputInfoSlot_s) {/*South*/.input_name="1", .input_type=INPUT_TYPE_HOVER, .rgb_group=5}, \
+    (inputInfoSlot_s) {/*East*/.input_name="2", .input_type=INPUT_TYPE_HOVER, .rgb_group=6}, \
+    (inputInfoSlot_s) {/*West*/.input_name="4", .input_type=INPUT_TYPE_HOVER, .rgb_group=8}, \
+    (inputInfoSlot_s) {/*North*/.input_name="5", .input_type=INPUT_TYPE_HOVER, .rgb_group=9}, \
+    (inputInfoSlot_s) {/*Up*/.input_name="D Up", .input_type=INPUT_TYPE_HOVER, .rgb_group=1}, \
+    (inputInfoSlot_s) {/*Down*/.input_name="D Down", .input_type=INPUT_TYPE_HOVER, .rgb_group=3}, \
+    (inputInfoSlot_s) {/*Left*/.input_name="D Left", .input_type=INPUT_TYPE_HOVER, .rgb_group=2}, \
+    (inputInfoSlot_s) {/*Right*/.input_name="D Right", .input_type=INPUT_TYPE_HOVER, .rgb_group=4}, \
+    (inputInfoSlot_s) {/*LB*/.input_name="6", .input_type=INPUT_TYPE_HOVER, .rgb_group=10}, \
+    (inputInfoSlot_s) {/*RB*/.input_name="3", .input_type=INPUT_TYPE_HOVER, .rgb_group=7}, \
+    (inputInfoSlot_s) {/*LT*/0}, \
+    (inputInfoSlot_s) {/*LTANALOG*/.input_name="L", .input_type=INPUT_TYPE_HOVER}, \
+    (inputInfoSlot_s) {/*RT*/0}, \
+    (inputInfoSlot_s) {/*RTANALOG*/.input_name="R", .input_type=INPUT_TYPE_HOVER}, \
+    (inputInfoSlot_s) {/*LP1*/.input_name="GL", .input_type=INPUT_TYPE_DIGITAL}, \
+    (inputInfoSlot_s) {/*RP1*/.input_name="GR", .input_type=INPUT_TYPE_DIGITAL}, \
     (inputInfoSlot_s) {/*LP2*/0}, \
     (inputInfoSlot_s) {/*RP2*/0}, \
-    (inputInfoSlot_s) {/*Start*/.input_name="Plus", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=17}, \
-    (inputInfoSlot_s) {/*Select*/.input_name="Minus", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=18}, \
-    (inputInfoSlot_s) {/*Home*/.input_name="Home", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=15}, \
-    (inputInfoSlot_s) {/*Share*/.input_name="Capture", .input_type=INPUT_TYPE_DIGITAL, .rgb_group=16}, \
-    (inputInfoSlot_s) {/*MISC3*/0}, \
+    (inputInfoSlot_s) {/*Start*/.input_name="Plus", .input_type=INPUT_TYPE_DIGITAL}, \
+    (inputInfoSlot_s) {/*Select*/.input_name="Minus", .input_type=INPUT_TYPE_DIGITAL}, \
+    (inputInfoSlot_s) {/*Home*/.input_name="Home", .input_type=INPUT_TYPE_DIGITAL}, \
+    (inputInfoSlot_s) {/*Share*/.input_name="Capture", .input_type=INPUT_TYPE_DIGITAL}, \
+    (inputInfoSlot_s) {/*MISC3*/.input_name="Power", .input_type=INPUT_TYPE_DIGITAL}, \
     (inputInfoSlot_s) {/*MISC4*/0}, \
     (inputInfoSlot_s) {/*TP1*/0}, \
     (inputInfoSlot_s) {/*TP2*/0}, \
-    (inputInfoSlot_s) {/*LS*/.input_name="LS", .input_type=INPUT_TYPE_DIGITAL}, \
-    (inputInfoSlot_s) {/*LX_RIGHT*/.input_name="LX+", .input_type=INPUT_TYPE_JOYSTICK, .rgb_group=9}, \
-    (inputInfoSlot_s) {/*LX_LEFT*/.input_name="LX-", .input_type=INPUT_TYPE_JOYSTICK}, \
-    (inputInfoSlot_s) {/*LY_UP*/.input_name="LY+", .input_type=INPUT_TYPE_JOYSTICK}, \
-    (inputInfoSlot_s) {/*LY_DOWN*/.input_name="LY-", .input_type=INPUT_TYPE_JOYSTICK}, \
-    (inputInfoSlot_s) {/*RS*/.input_name="RS", .input_type=INPUT_TYPE_DIGITAL}, \
-    (inputInfoSlot_s) {/*RX_RIGHT*/.input_name="RX+", .input_type=INPUT_TYPE_JOYSTICK, .rgb_group=10}, \
-    (inputInfoSlot_s) {/*RX_LEFT*/.input_name="RX-", .input_type=INPUT_TYPE_JOYSTICK}, \
-    (inputInfoSlot_s) {/*RY_UP*/.input_name="RY+", .input_type=INPUT_TYPE_JOYSTICK}, \
-    (inputInfoSlot_s) {/*RY_DOWN*/.input_name="RY-", .input_type=INPUT_TYPE_JOYSTICK} \
+    (inputInfoSlot_s) {/*LS*/0}, \
+    (inputInfoSlot_s) {/*LX_RIGHT*/ 0}, \
+    (inputInfoSlot_s) {/*LX_LEFT*/  0}, \
+    (inputInfoSlot_s) {/*LY_UP*/    0}, \
+    (inputInfoSlot_s) {/*LY_DOWN*/  0}, \
+    (inputInfoSlot_s) {/*RS*/       0}, \
+    (inputInfoSlot_s) {/*RX_RIGHT*/ 0}, \
+    (inputInfoSlot_s) {/*RX_LEFT*/  0}, \
+    (inputInfoSlot_s) {/*RY_UP*/    0}, \
+    (inputInfoSlot_s) {/*RY_DOWN*/  0} \
+}
+
+#define HOJA_HOVER_INVERTS {\
+    /*South*/   0,\
+    /*East*/    0,\
+    /*West*/    0,\
+    /*North*/   0,\
+    /*Up*/      0,\
+    /*Down*/    0,\
+    /*Left*/    0,\
+    /*Right*/   0,\
+    /*LB*/      0,\
+    /*RB*/      0,\
+    /*LT*/      0,\
+    /*LTANALOG*/1,\
+    /*RT*/      0,\
+    /*RTANALOG*/1,\
+    /*LP1*/     0,\
+    /*RP1*/     0,\
+    /*LP2*/     0,\
+    /*RP2*/     0,\
+    /*Start*/   0,\
+    /*Select*/  0,\
+    /*Home*/    0,\
+    /*Share*/   0,\
+    /*MISC3*/   0,\
+    /*MISC4*/   0,\
+    /*TP1*/     0,\
+    /*TP2*/     0,\
+    /*LS*/      0,\
+    /*LX_RIGHT*/0,\
+    /*LX_LEFT*/ 0,\
+    /*LY_UP*/   0,\
+    /*LY_DOWN*/ 0,\
+    /*RS*/      0,\
+    /*RX_RIGHT*/0,\
+    /*RX_LEFT*/ 0,\
+    /*RY_UP*/   0,\
+    /*RY_DOWN*/ 0\
 }
 
 #define HOJA_INPUT_DEFAULTS_SWITCH { \
-    /*South*/       SWITCH_CODE_B, \
-    /*East*/        SWITCH_CODE_A, \
-    /*West*/        SWITCH_CODE_Y, \
-    /*North*/       SWITCH_CODE_X, \
+    /*South*/       SWITCH_CODE_A, \
+    /*East*/        SWITCH_CODE_B, \
+    /*West*/        SWITCH_CODE_X, \
+    /*North*/       SWITCH_CODE_Y, \
     /*Up*/          SWITCH_CODE_UP, \
     /*Down*/        SWITCH_CODE_DOWN, \
     /*Left*/        SWITCH_CODE_LEFT, \
@@ -197,9 +204,9 @@
     /*LB*/          SWITCH_CODE_L, \
     /*RB*/          SWITCH_CODE_R, \
     /*LT*/          SWITCH_CODE_ZL, \
-    /*LTANALOG*/    SWITCH_CODE_UNUSED, \
+    /*LTANALOG*/    SWITCH_CODE_ZL, \
     /*RT*/          SWITCH_CODE_ZR, \
-    /*RTANALOG*/    SWITCH_CODE_UNUSED, \
+    /*RTANALOG*/    SWITCH_CODE_ZR, \
     /*LP1*/         SWITCH_CODE_UNUSED, \
     /*RP1*/         SWITCH_CODE_UNUSED, \
     /*LP2*/         SWITCH_CODE_UNUSED, \
@@ -225,19 +232,19 @@
 }
 
 #define HOJA_INPUT_DEFAULTS_SNES { \
-    /*South*/       SNES_CODE_B, \
-    /*East*/        SNES_CODE_A, \
-    /*West*/        SNES_CODE_Y, \
-    /*North*/       SNES_CODE_X, \
+    /*South*/       SNES_CODE_A, \
+    /*East*/        SNES_CODE_B, \
+    /*West*/        SNES_CODE_X, \
+    /*North*/       SNES_CODE_Y, \
     /*Up*/          SNES_CODE_UP, \
     /*Down*/        SNES_CODE_DOWN, \
     /*Left*/        SNES_CODE_LEFT, \
     /*Right*/       SNES_CODE_RIGHT, \
     /*LB*/          SNES_CODE_L, \
     /*RB*/          SNES_CODE_R, \
-    /*LT*/          SNES_CODE_L, \
+    /*LT*/          SNES_CODE_UNUSED, \
     /*LTANALOG*/    SNES_CODE_UNUSED, \
-    /*RT*/          SNES_CODE_R, \
+    /*RT*/          SNES_CODE_UNUSED, \
     /*RTANALOG*/    SNES_CODE_UNUSED, \
     /*LP1*/         SNES_CODE_UNUSED, \
     /*RP1*/         SNES_CODE_UNUSED, \
@@ -264,8 +271,8 @@
 }
 
 #define HOJA_INPUT_DEFAULTS_N64 { \
-    /*South*/       N64_CODE_B, \
-    /*East*/        N64_CODE_A, \
+    /*South*/       N64_CODE_A, \
+    /*East*/        N64_CODE_B, \
     /*West*/        N64_CODE_CDOWN, \
     /*North*/       N64_CODE_CUP, \
     /*Up*/          N64_CODE_UP, \
@@ -275,9 +282,9 @@
     /*LB*/          N64_CODE_CLEFT, \
     /*RB*/          N64_CODE_CRIGHT, \
     /*LT*/          N64_CODE_Z, \
-    /*LTANALOG*/    N64_CODE_UNUSED, \
+    /*LTANALOG*/    N64_CODE_Z, \
     /*RT*/          N64_CODE_R, \
-    /*RTANALOG*/    N64_CODE_UNUSED, \
+    /*RTANALOG*/    N64_CODE_R, \
     /*LP1*/         N64_CODE_UNUSED, \
     /*RP1*/         N64_CODE_UNUSED, \
     /*LP2*/         N64_CODE_UNUSED, \
@@ -303,10 +310,10 @@
 }
 
 #define HOJA_INPUT_DEFAULTS_GAMECUBE { \
-    /*South*/       GAMECUBE_CODE_B, \
-    /*East*/        GAMECUBE_CODE_A, \
-    /*West*/        GAMECUBE_CODE_Y, \
-    /*North*/       GAMECUBE_CODE_X, \
+    /*South*/       GAMECUBE_CODE_A, \
+    /*East*/        GAMECUBE_CODE_B, \
+    /*West*/        GAMECUBE_CODE_X, \
+    /*North*/       GAMECUBE_CODE_Y, \
     /*Up*/          GAMECUBE_CODE_UP, \
     /*Down*/        GAMECUBE_CODE_DOWN, \
     /*Left*/        GAMECUBE_CODE_LEFT, \
@@ -314,9 +321,9 @@
     /*LB*/          GAMECUBE_CODE_UNUSED, \
     /*RB*/          GAMECUBE_CODE_Z, \
     /*LT*/          GAMECUBE_CODE_L, \
-    /*LTANALOG*/    GAMECUBE_CODE_UNUSED, \
+    /*LTANALOG*/    GAMECUBE_CODE_L_ANALOG, \
     /*RT*/          GAMECUBE_CODE_R, \
-    /*RTANALOG*/    GAMECUBE_CODE_UNUSED, \
+    /*RTANALOG*/    GAMECUBE_CODE_R_ANALOG, \
     /*LP1*/         GAMECUBE_CODE_UNUSED, \
     /*RP1*/         GAMECUBE_CODE_UNUSED, \
     /*LP2*/         GAMECUBE_CODE_UNUSED, \
@@ -342,20 +349,20 @@
 }
 
 #define HOJA_INPUT_DEFAULTS_XINPUT { \
-    /*South*/       XINPUT_CODE_B, \
-    /*East*/        XINPUT_CODE_A, \
-    /*West*/        XINPUT_CODE_Y, \
-    /*North*/       XINPUT_CODE_X, \
+    /*South*/       XINPUT_CODE_A, \
+    /*East*/        XINPUT_CODE_B, \
+    /*West*/        XINPUT_CODE_X, \
+    /*North*/       XINPUT_CODE_Y, \
     /*Up*/          XINPUT_CODE_UP, \
     /*Down*/        XINPUT_CODE_DOWN, \
     /*Left*/        XINPUT_CODE_LEFT, \
     /*Right*/       XINPUT_CODE_RIGHT, \
     /*LB*/          XINPUT_CODE_LB, \
     /*RB*/          XINPUT_CODE_RB, \
-    /*LT*/          XINPUT_CODE_LT_ANALOG, \
-    /*LTANALOG*/    XINPUT_CODE_UNUSED, \
-    /*RT*/          XINPUT_CODE_RT_ANALOG, \
-    /*RTANALOG*/    XINPUT_CODE_UNUSED, \
+    /*LT*/          XINPUT_CODE_UNUSED, \
+    /*LTANALOG*/    XINPUT_CODE_LT_ANALOG, \
+    /*RT*/          XINPUT_CODE_UNUSED, \
+    /*RTANALOG*/    XINPUT_CODE_RT_ANALOG, \
     /*LP1*/         XINPUT_CODE_UNUSED, \
     /*RP1*/         XINPUT_CODE_UNUSED, \
     /*LP2*/         XINPUT_CODE_UNUSED, \
@@ -392,9 +399,9 @@
     /*LB*/          SINPUT_CODE_LB, \
     /*RB*/          SINPUT_CODE_RB, \
     /*LT*/          SINPUT_CODE_LT, \
-    /*LTANALOG*/    SINPUT_CODE_UNUSED, \
+    /*LTANALOG*/    SINPUT_CODE_LT_ANALOG, \
     /*RT*/          SINPUT_CODE_RT, \
-    /*RTANALOG*/    SINPUT_CODE_UNUSED, \
+    /*RTANALOG*/    SINPUT_CODE_RT_ANALOG, \
     /*LP1*/         SINPUT_CODE_UNUSED, \
     /*RP1*/         SINPUT_CODE_UNUSED, \
     /*LP2*/         SINPUT_CODE_UNUSED, \
@@ -403,7 +410,7 @@
     /*Select*/      SINPUT_CODE_SELECT, \
     /*Home*/        SINPUT_CODE_GUIDE, \
     /*Share*/       SINPUT_CODE_SHARE, \
-    /*MISC3*/       SINPUT_CODE_UNUSED, \
+    /*MISC3*/       SINPUT_CODE_MISC_3, \
     /*MISC4*/       SINPUT_CODE_UNUSED, \
     /*TP1*/         SINPUT_CODE_UNUSED, \
     /*TP2*/         SINPUT_CODE_UNUSED, \
@@ -419,40 +426,49 @@
     /*RY_DOWN*/     SINPUT_CODE_RY_DOWN  \
 }
 
-#define HOJA_RGB_GROUPS_NUM 19
-#define HOJA_RGB_GROUP_NAMES { \
-    {"A"}, {"B"}, {"X"}, {"Y"}, \
-    {"D Up"}, {"D Down"}, {"D Left"}, {"D Right"}, {"L Stick"}, {"R Stick"}, \
-    {"L"}, {"R"}, {"ZL"}, {"ZR"}, \
-    {"Home"}, {"Capture"}, \
-    {"Plus"}, {"Minus"}, {"Player"} \
-}
-#define HOJA_RGB_PLAYER_GROUP_IDX   18
-#define HOJA_RGB_PLAYER_GROUP_SIZE  4
+// ---------------------------------
+// ---------------------------------
 
-#define HOJA_RGB_NOTIF_GROUP_IDX 14
-#define HOJA_RGB_NOTIF_GROUP_SIZE 1
+// RGB Setup
+#define HOJA_RGB_DRIVER         RGB_DRIVER_HAL
+#define RGB_DRIVER_OUTPUT_PIN   11
+#define RGB_DRIVER_LED_COUNT    24
+#define RGB_DRIVER_ORDER        RGB_ORDER_GRB
+#define RGB_DRIVER_PIO_INSTANCE 0
+
+#define HOJA_RGB_GROUPS_NUM 11
+#define HOJA_RGB_GROUP_NAMES { \
+    {"D Up"}, \
+    {"D Left"}, \
+    {"D Down"}, \
+    {"D Right"}, \
+    {"1"}, /*g5*/ \
+    {"2"}, \
+    {"3"}, \
+    {"4"}, \
+    {"5"}, \
+    {"6"}, \
+    {"Player"},\
+}
+
+//#define HOJA_RGB_NOTIF_GROUP_IDX   5
+//#define HOJA_RGB_NOTIF_GROUP_SIZE  1
 
 #define HOJA_RGB_GROUPINGS { \
-    RGB_GROUP(22), \
-    RGB_GROUP(23), \
-    RGB_GROUP(21), \
-    RGB_GROUP(20), \
-    RGB_GROUP(15), \
-    RGB_GROUP(13), \
-    RGB_GROUP(12), \
-    RGB_GROUP(14), \
-    RGB_GROUP(8, 9, 10, 11), \
-    RGB_GROUP(0, 1, 2, 3), \
-    RGB_GROUP(26), \
-    RGB_GROUP(25), \
-    RGB_GROUP(27), \
-    RGB_GROUP(24), \
-    RGB_GROUP(18), \
-    RGB_GROUP(17), \
-    RGB_GROUP(19), \
-    RGB_GROUP(16), \
-    RGB_GROUP(7, 6, 5, 4)  \
+    RGB_GROUP(0), /*Up*/ \
+    RGB_GROUP(1), /*Left*/ \
+    RGB_GROUP(2), /*Down*/ \
+    RGB_GROUP(3), /*Right*/ \
+    RGB_GROUP(9), /*1*/ \
+    RGB_GROUP(8), /*2*/ \
+    RGB_GROUP(7), /*3*/ \
+    RGB_GROUP(4), /*4*/ \
+    RGB_GROUP(5), /*5*/ \
+    RGB_GROUP(6), /*6*/ \
+    RGB_GROUP(10, 11, 12, 13) \
 }
+
 // ---------------------------------
 // ---------------------------------
+
+//#endif

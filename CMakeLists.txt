@@ -3,6 +3,9 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(EXTERNAL_BOARD_DEF_DIR ${CMAKE_CURRENT_LIST_DIR}/picoboards)
+set(PICO_BOARD_HEADER_DIRS ${EXTERNAL_BOARD_DEF_DIR} )
+
 # == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
 if(WIN32)
     set(USERHOME $ENV{USERPROFILE})
@@ -27,11 +30,20 @@ include(ExternalProject)
 set(SCRIPTS_DIR ${CMAKE_CURRENT_LIST_DIR}/scripts)
 set(BOARDS_DIR  ${CMAKE_CURRENT_LIST_DIR}/boards)
 set(ROOT_DIR    ${CMAKE_CURRENT_LIST_DIR})
-set(EXTERNAL_BOARD_DEF_DIR ${CMAKE_CURRENT_LIST_DIR}/picoboards)
+
+set(USE_EXTERNAL_BOARD_DEF TRUE)
 
 set(MY_LIST 
     progcc_3:pico
     progcc_3.2:pico
+    progcc_3s:lattepro_w
+    gcu_r4k:pico
+    gcu_r5:gcur5_w
+    gcu_s1:pico
+    latte_jr:pico2
+    latte_pro:lattepro_w
+    padbox_gs:pico
+    padbox_gs_c:pico
 )
 
 set(PICO_SDK_INIT_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -56,12 +68,14 @@ foreach(ITEM ${MY_LIST})
             BINARY_DIR "${CMAKE_BINARY_DIR}/subprojects/${BOARD_NAME}"
             CMAKE_ARGS
                 "--no-warn-unused-cli"
+                "-DUSE_EXTERNAL_BOARD_DEF=TRUE"
                 "-DPICO_SDK_PATH=${PICO_SDK_PATH}"
+                "-DEXTERNAL_BOARD_DEF_DIR=${EXTERNAL_BOARD_DEF_DIR}"
                 "-DCMAKE_BUILD_TYPE=Debug"
                 "-DPICO_SDK_INIT_PATH=${ROOT_DIR}"
                 "-DTARGET_BOARD=${BOARD_TYPE}"
                 "-DTARGET_NAME=${BOARD_NAME}"
-                "-DPICO_DEOPTIMIZED_DEBUG=1"
+                "-DPICO_DEOPTIMIZED_DEBUG=0"
             BUILD_ALWAYS 1 # force dependency checking
             INSTALL_COMMAND ""
             )

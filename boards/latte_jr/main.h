@@ -1,0 +1,21 @@
+#define PGPIO_BTN_POWER 4   
+
+#define PGPIO_EN_TRIGGER_L 9
+#define PGPIO_EN_DPAD 10
+
+#define PGPIO_BTN_CAPTURE 14
+#define PGPIO_BTN_MINUS 15
+
+#define PGPIO_BTN_GL 17
+
+#define PGPIO_BTN_HOME 19
+#define PGPIO_BTN_PLUS 20
+
+#define PGPIO_BTN_GR 23
+
+#define PGPIO_EN_TRIGGER_R 24
+
+#define PGPIO_EN_SEWN 25 
+
+
+  

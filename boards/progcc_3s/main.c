@@ -1,6 +1,4 @@
 #include "hoja.h"
-#include "input_shared_types.h"
-
 #include "input/mapper.h"
 #include "board_config.h"
 #include "main.h"
@@ -9,21 +7,15 @@
 #include "pico/bootrom.h" 
 
 #include "hal/adc_hal.h"
-#include "drivers/adc/mcp3002.h"
 
-adc_mcp3002_driver_s joystick_driver_l = {
-    .cs_gpio = 16,
-    .spi_instance = 0,
-};
-
-adc_mcp3002_driver_s joystick_driver_r = {
-    .cs_gpio = 22,
-    .spi_instance = 0,
-};
-
-adc_hal_driver_s battery_adc = {
-    .gpio = 26
-};
+adc_hal_driver_s joystick_driver_ly = {
+    .gpio = 26};
+adc_hal_driver_s joystick_driver_lx = {
+    .gpio = 27};
+adc_hal_driver_s joystick_driver_rx = {
+    .gpio = 28};
+adc_hal_driver_s joystick_driver_ry = {
+    .gpio = 29};
 
 void _local_setup_btn(uint32_t gpio)
 {
@@ -47,22 +39,18 @@ void _local_setup_scan(uint32_t gpio)
     gpio_put(gpio, true);
 }
 
-uint16_t cb_hoja_read_battery()
-{
-    adc_hal_read(&battery_adc);
-    return battery_adc.output;
-}
-
 void cb_hoja_read_joystick(uint16_t *input)
 {
-    mcp3002_read(&joystick_driver_l);
-    mcp3002_read(&joystick_driver_r);
+    adc_hal_read(&joystick_driver_lx);
+    adc_hal_read(&joystick_driver_ly);
+    adc_hal_read(&joystick_driver_rx);
+    adc_hal_read(&joystick_driver_ry);
 
-    input[0] = joystick_driver_l.output_ch_0;
-    input[1] = joystick_driver_l.output_ch_1;
+    input[0] = joystick_driver_lx.output;
+    input[1] = joystick_driver_ly.output;
 
-    input[2] = joystick_driver_r.output_ch_0;
-    input[3] = joystick_driver_r.output_ch_1;
+    input[2] = joystick_driver_rx.output;
+    input[3] = joystick_driver_ry.output;
 }
 
 void cb_hoja_init()
@@ -84,9 +72,10 @@ void cb_hoja_init()
     _local_setup_scan(PGPIO_SCAN_C);
     _local_setup_scan(PGPIO_SCAN_D);
 
-    mcp3002_init(&joystick_driver_l);
-    mcp3002_init(&joystick_driver_r);
-    adc_hal_init(&battery_adc);
+    adc_hal_init(&joystick_driver_ly);
+    adc_hal_init(&joystick_driver_lx);
+    adc_hal_init(&joystick_driver_ry);
+    adc_hal_init(&joystick_driver_rx);
 }
 
 #define SCAN_TIME_US 25
@@ -94,7 +83,7 @@ void cb_hoja_init()
 void cb_hoja_read_input(mapper_input_s *input)
 {
     bool *out = input->presses;
-
+    
     // Keypad version
     gpio_put(PGPIO_SCAN_A, false);
     sleep_us(SCAN_TIME_US);
@@ -132,7 +121,6 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_LS]  = !gpio_get(PGPIO_BUTTON_LS);
 
     input->button_safemode   = !gpio_get(PGPIO_BUTTON_MODE);
-    input->button_shipping   = out[INPUT_CODE_RS] && out[INPUT_CODE_LS];
     input->button_sync       = input->button_safemode;
 }
 
