@@ -105,15 +105,15 @@ pico_board_cmake_set_default(PICO_FLASH_SIZE_BYTES, (4 * 1024 * 1024))
 // If CYW43_USES_VSYS_PIN is defined then CYW43 uses the VSYS GPIO (defined by PICO_VSYS_PIN) for other purposes.
 // If this is the case, to use the VSYS GPIO it's necessary to ensure CYW43 is not using it.
 // This can be achieved by wrapping the use of the VSYS GPIO in cyw43_thread_enter / cyw43_thread_exit.
-//#ifndef CYW43_USES_VSYS_PIN
-//#define CYW43_USES_VSYS_PIN 1
-//#endif
+#ifndef CYW43_USES_VSYS_PIN
+#define CYW43_USES_VSYS_PIN 1
+#endif
 
 // The GPIO Pin used to monitor VSYS. Typically you would use this with ADC.
 // There is an example in adc/read_vsys in pico-examples.
-//#ifndef PICO_VSYS_PIN
-//#define PICO_VSYS_PIN 29
-//#endif
+#ifndef PICO_VSYS_PIN
+#define PICO_VSYS_PIN 29
+#endif
 
 pico_board_cmake_set_default(PICO_RP2350_A2_SUPPORTED, 1)
 #ifndef PICO_RP2350_A2_SUPPORTED

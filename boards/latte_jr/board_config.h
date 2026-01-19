@@ -14,9 +14,9 @@
 
 #define HOJA_SEWN_TYPE  SEWN_LAYOUT_ABXY
 
-#define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // GC Ultimate
+#define HOJA_SINPUT_GAMEPAD_SUBTYPE    0  // Default
 #define HOJA_SINPUT_GAMEPAD_TYPE       0  // Default
-#define HOJA_SINPUT_GAMEPAD_FACESTYLE  0  // Default
+#define HOJA_SINPUT_GAMEPAD_FACESTYLE  3 // Nintendo
 
 // URL that will display to open a config tool
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
@@ -56,19 +56,19 @@
 
 // Bluetooth Driver Setup
 // Bluetooth Driver Setup
-//#define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_HAL
+#define HOJA_BLUETOOTH_DRIVER           BLUETOOTH_DRIVER_HAL
 //#define BLUETOOTH_DRIVER_PIO_INSTANCE   1 
 // ---------------------------------
 // ---------------------------------
 
-//#define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
-//#define HOJA_BATTERY_I2C_INSTANCE   0
-//#define HOJA_BATTERY_PART_CODE      "JD 603040"
-//#define HOJA_BATTERY_CAPACITY_MAH   800
-//#define HOJA_BATTERY_PMIC_PART_NUMBER "BQ25180"
-//#define HOJA_FUELGAUGE_DRIVER       FUELGAUGE_DRIVER_BQ27621G1
-//#define HOJA_FUELGAUGE_I2C_INSTANCE 0
-//#define HOJA_BATTERY_FUELGAUGE_PART_NUMBER "BQ27621G1"
+#define HOJA_BATTERY_DRIVER         BATTERY_DRIVER_BQ25180
+#define HOJA_BATTERY_I2C_INSTANCE   0
+#define HOJA_BATTERY_PART_CODE      "JD 603040"
+#define HOJA_BATTERY_CAPACITY_MAH   800
+#define HOJA_BATTERY_PMIC_PART_NUMBER "BQ25180"
+#define HOJA_FUELGAUGE_DRIVER       FUELGAUGE_DRIVER_BQ27621G1
+#define HOJA_FUELGAUGE_I2C_INSTANCE 0
+#define HOJA_BATTERY_FUELGAUGE_PART_NUMBER "BQ27621G1"
 // ---------------------------------
 // ---------------------------------
 
@@ -451,8 +451,11 @@
     {"Player"},\
 }
 
-//#define HOJA_RGB_NOTIF_GROUP_IDX   5
-//#define HOJA_RGB_NOTIF_GROUP_SIZE  1
+#define HOJA_RGB_PLAYER_GROUP_IDX   10
+#define HOJA_RGB_PLAYER_GROUP_SIZE  4
+
+#define HOJA_RGB_NOTIF_GROUP_IDX   7
+#define HOJA_RGB_NOTIF_GROUP_SIZE  1
 
 #define HOJA_RGB_GROUPINGS { \
     RGB_GROUP(0), /*Up*/ \

@@ -13,7 +13,7 @@
 
 #define HOJA_SINPUT_GAMEPAD_SUBTYPE    0 // Default
 #define HOJA_SINPUT_GAMEPAD_TYPE       0 // Default
-#define HOJA_SINPUT_GAMEPAD_FACESTYLE  0 // Default
+#define HOJA_SINPUT_GAMEPAD_FACESTYLE  3 // Nintendo
 
 // URL that will display to open a config tool
 #define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 

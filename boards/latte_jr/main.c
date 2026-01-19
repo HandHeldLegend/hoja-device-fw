@@ -68,7 +68,110 @@ void cb_hoja_init()
     adc_hal_init(&input_driver_4);
 }
 
-#define BUTTON_SLEEP_US 64
+#define BUTTON_SLEEP_US 16
+
+bool cb_hoja_boot(boot_input_s *boot)
+{
+    uint16_t vals[4];
+    int8_t mode_idx = -1;
+    const uint16_t diff = 300;
+    uint16_t baseline = 0;
+    uint32_t avg = 0;
+    uint8_t mode_mask = 0;
+
+    // USB gamepad modes
+        gpio_put(PGPIO_EN_SEWN, false);
+        sleep_us(BUTTON_SLEEP_US);
+        adc_hal_read(&input_driver_1);
+        adc_hal_read(&input_driver_2);
+        adc_hal_read(&input_driver_3);
+        adc_hal_read(&input_driver_4);
+
+        vals[2] = input_driver_1.output; // East/2
+        vals[3] = input_driver_2.output; // South/1
+        vals[1] = input_driver_3.output; // West/4
+        vals[0] = input_driver_4.output; // North/5
+        gpio_put(PGPIO_EN_SEWN, true);
+
+    avg = (vals[0] + vals[1] + vals[2] + vals[3])>>2;
+
+    for(int i = 0; i < 4; i++)
+    {
+        if(vals[i] > (avg+diff))
+        {
+            mode_mask |= (1<<i);
+        }
+    }
+
+    // Retro gamepad modes
+    // DPAD
+    gpio_put(PGPIO_EN_DPAD, false);
+    sleep_us(BUTTON_SLEEP_US);
+    adc_hal_read(&input_driver_1);
+    adc_hal_read(&input_driver_2);
+    adc_hal_read(&input_driver_3);
+    adc_hal_read(&input_driver_4);
+
+    vals[3] = input_driver_1.output; // Down
+    vals[1] = input_driver_2.output; // Right
+    vals[2] = input_driver_3.output; // Left
+    vals[0] = input_driver_4.output; // Up
+    gpio_put(PGPIO_EN_DPAD, true);
+
+    avg = (vals[0] + vals[1] + vals[2] + vals[3])>>2;
+
+    for(int i = 0; i < 4; i++)
+    {
+        if(vals[i] > (avg+diff))
+        {
+            mode_mask |= (1<<(i+4));
+        }
+    }
+
+    switch(mode_mask)
+    {
+        case 0b1:
+        mode_idx = GAMEPAD_MODE_XINPUT;
+        break;
+
+        case 0b10:
+        mode_idx = GAMEPAD_MODE_GCUSB;
+        break;
+
+        case 0b100:
+        mode_idx = GAMEPAD_MODE_SWPRO;
+        break;
+
+        case 0b1000:
+        mode_idx = GAMEPAD_MODE_SINPUT;
+        break;
+
+        case 0b100000:
+        mode_idx = GAMEPAD_MODE_GAMECUBE;
+        break;
+
+        case 0b1000000:
+        mode_idx = GAMEPAD_MODE_SNES;
+        break;
+
+        case 0b10000000:
+        mode_idx = GAMEPAD_MODE_N64;
+        break;
+
+        case 0b10000:
+        default:
+        break;
+    }
+
+    bool start = !gpio_get(PGPIO_BTN_PLUS);
+    bool minus = !gpio_get(PGPIO_BTN_MINUS);
+    bool gl = !gpio_get(PGPIO_BTN_GL);
+    bool gr = !gpio_get(PGPIO_BTN_GR);
+
+    boot->bootloader = (start && minus && gl && gr);
+    boot->pairing_mode = start;
+    boot->gamepad_mode = mode_idx;
+}
 
 void cb_hoja_read_input(mapper_input_s *input)
 {
@@ -84,11 +187,10 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_HOME] = !gpio_get(PGPIO_BTN_HOME);
    
     out[INPUT_CODE_START] = !gpio_get(PGPIO_BTN_PLUS);
-    if(!gpio_get(PGPIO_BTN_POWER)) sys_hal_bootloader();
+    //if(!gpio_get(PGPIO_BTN_POWER)) sys_hal_bootloader();
 
     out[INPUT_CODE_RP1] = !gpio_get(PGPIO_BTN_GR);
 
-    
     switch(read_idx)
     {
         case 1:

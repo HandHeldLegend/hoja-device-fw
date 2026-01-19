@@ -42,7 +42,7 @@ set(MY_LIST
     gcu_r4k:pico
     gcu_r5:gcur5_w
     gcu_s1:pico
-    latte_jr:pico2
+    latte_jr:lattejr_w
     latte_pro:lattepro_w
     padbox_gs:pico
     padbox_gs_c:pico

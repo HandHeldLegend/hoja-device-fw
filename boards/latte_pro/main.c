@@ -95,21 +95,129 @@ void cb_hoja_init()
 
 #define BUTTON_SLEEP_US 16
 
+bool cb_hoja_boot(boot_input_s *boot)
+{
+    uint16_t vals[4];
+    int8_t mode_idx = -1;
+    const uint16_t diff = 300;
+    uint16_t baseline = 0;
+    uint32_t avg = 0;
+    uint8_t mode_mask = 0;
+
+    // USB gamepad modes
+    gpio_put(PGPIO_EN_SEWN, false);
+    sleep_us(BUTTON_SLEEP_US);
+    adc_hal_read(&input_driver_1);
+    adc_hal_read(&input_driver_2);
+    adc_hal_read(&input_driver_3);
+    adc_hal_read(&input_driver_4);
+
+    vals[0] = input_driver_1.output; // NORTH
+    vals[1] = input_driver_2.output; // WEST
+    vals[2] = input_driver_3.output; // EAST
+    vals[3] = input_driver_4.output; // SOUTH
+    gpio_put(PGPIO_EN_SEWN, true);
+
+    avg = (vals[0] + vals[1] + vals[2] + vals[3])>>2;
+
+    for(int i = 0; i < 4; i++)
+    {
+        if(vals[i] > (avg+diff))
+        {
+            mode_mask |= (1<<i);
+        }
+    }
+
+    // Retro gamepad modes
+    gpio_put(PGPIO_EN_DPAD, false);
+    sleep_us(BUTTON_SLEEP_US);
+    adc_hal_read(&input_driver_1);
+    adc_hal_read(&input_driver_2);
+    adc_hal_read(&input_driver_3);
+    adc_hal_read(&input_driver_4);
+
+    vals[0] = input_driver_1.output;  // Up
+    vals[1] = input_driver_2.output;  // Right
+    vals[2] = input_driver_3.output;  // Left
+    vals[3] = input_driver_4.output;  // down
+    gpio_put(PGPIO_EN_DPAD, true);
+
+    avg = (vals[0] + vals[1] + vals[2] + vals[3])>>2;
+
+    for(int i = 0; i < 4; i++)
+    {
+        if(vals[i] > (avg+diff))
+        {
+            mode_mask |= (1<<(i+4));
+        }
+    }
+
+    switch(mode_mask)
+    {
+        case 0b1:
+        mode_idx = GAMEPAD_MODE_XINPUT;
+        break;
+
+        case 0b10:
+        mode_idx = GAMEPAD_MODE_GCUSB;
+        break;
+
+        case 0b100:
+        mode_idx = GAMEPAD_MODE_SWPRO;
+        break;
+
+        case 0b1000:
+        mode_idx = GAMEPAD_MODE_SINPUT;
+        break;
+
+        case 0b100000:
+        mode_idx = GAMEPAD_MODE_GAMECUBE;
+        break;
+
+        case 0b1000000:
+        mode_idx = GAMEPAD_MODE_SNES;
+        break;
+
+        case 0b10000000:
+        mode_idx = GAMEPAD_MODE_N64;
+        break;
+
+        case 0b10000:
+        default:
+        break;
+    }
+
+    // Bootloader setting
+    gpio_put(PGPIO_EN_TRIGGER_L, false);
+    gpio_put(PGPIO_EN_TRIGGER_R, false);
+    sleep_us(BUTTON_SLEEP_US);
+    adc_hal_read(&input_driver_1);
+    adc_hal_read(&input_driver_3);
+
+    vals[0] = 0xFFF - input_driver_1.output; // RB
+    vals[1] = 0xFFF - input_driver_3.output; // LB
+    gpio_put(PGPIO_EN_TRIGGER_L, true);
+    gpio_put(PGPIO_EN_TRIGGER_R, true);
+
+    bool l_only = false;
+
+    if(vals[1] > vals[0])
+    {
+        l_only = (vals[1]-vals[0]) > 2000;
+    }
+
+    bool start = !gpio_get(PGPIO_BTN_PLUS);
+
+    boot->bootloader = (start && l_only);
+    boot->pairing_mode = start;
+    boot->gamepad_mode = mode_idx;
+}
+
 void cb_hoja_read_input(mapper_input_s *input)
 {
 
     static uint8_t read_idx = 0;
     static uint16_t a_vals[36] = {0};
-
-    if(counter<UINT64_MAX)
-        counter++;
-
-    //DEBUG
-    if(counter>1000)
-    {   
-        if(!gpio_get(PGPIO_BTN_POWER)) sys_hal_bootloader();
-    }  
-    
 
     bool *out = input->presses;
     uint16_t *aout = input->inputs;
@@ -125,6 +233,21 @@ void cb_hoja_read_input(mapper_input_s *input)
 
     switch(read_idx)
     {
+        default:
+        // SEWNs
+        gpio_put(PGPIO_EN_SEWN, false);
+        sleep_us(BUTTON_SLEEP_US);
+        adc_hal_read(&input_driver_1);
+        adc_hal_read(&input_driver_2);
+        adc_hal_read(&input_driver_3);
+        adc_hal_read(&input_driver_4);
+
+        a_vals[INPUT_CODE_NORTH] = input_driver_1.output; // NORTH
+        a_vals[INPUT_CODE_WEST] = input_driver_2.output; // WEST
+        a_vals[INPUT_CODE_EAST] = input_driver_3.output; //EAST
+        a_vals[INPUT_CODE_SOUTH] = input_driver_4.output; // SOUTH
+        gpio_put(PGPIO_EN_SEWN, true);
+        break;
 
         case 1:
         // TRIGGERS
@@ -144,21 +267,7 @@ void cb_hoja_read_input(mapper_input_s *input)
         gpio_put(PGPIO_EN_TRIGGER_R, true);
         break;
 
-        default:
-        // SEWNs
-        gpio_put(PGPIO_EN_SEWN, false);
-        sleep_us(BUTTON_SLEEP_US);
-        adc_hal_read(&input_driver_1);
-        adc_hal_read(&input_driver_2);
-        adc_hal_read(&input_driver_3);
-        adc_hal_read(&input_driver_4);
-
-        a_vals[INPUT_CODE_NORTH] = input_driver_1.output; // NORTH
-        a_vals[INPUT_CODE_WEST] = input_driver_2.output; // WEST
-        a_vals[INPUT_CODE_EAST] = input_driver_3.output; //EAST
-        a_vals[INPUT_CODE_SOUTH] = input_driver_4.output; // SOUTH
-        gpio_put(PGPIO_EN_SEWN, true);
-
+        case 2:
         // DPAD
         gpio_put(PGPIO_EN_DPAD, false);
         sleep_us(BUTTON_SLEEP_US);
@@ -181,11 +290,11 @@ void cb_hoja_read_input(mapper_input_s *input)
     }
 
     read_idx++;
-    if(read_idx > 1) read_idx = 0;
+    if(read_idx > 2) read_idx = 0;
 
     input->button_shipping = !gpio_get(PGPIO_BTN_POWER);
     out[INPUT_CODE_MISC3] = input->button_shipping;
-    input->button_sync = (out[INPUT_CODE_START] > 0);
+    input->button_sync = !gpio_get(PGPIO_BTN_PLUS);
 }
 
 void cb_hoja_read_joystick(uint16_t *input)
