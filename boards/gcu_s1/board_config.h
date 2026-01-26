@@ -68,6 +68,8 @@
 #define HOJA_HAPTICS_MIN_LO     0.135f
 #define HOJA_HAPTICS_MIN_HI     0.10f
 
+#define HOJA_HAPTICS_CHAN_SWAP 1
+
 #define HOJA_HAPTICS_DEBUG 0
 // ---------------------------------
 // ---------------------------------

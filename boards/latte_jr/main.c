@@ -11,6 +11,7 @@
 #include "pico/bootrom.h" 
 
 #include "drivers/adc/mcp3002.h"
+#include "hardware/adc.h"
 #include "hal/adc_hal.h"
 
 adc_hal_driver_s input_driver_1 = {
@@ -29,6 +30,8 @@ adc_hal_driver_s input_driver_4 = {
     .gpio = 29
 };
 
+volatile bool stopme = false;
+
 void _local_setup_btn(uint32_t gpio)
 {
     gpio_init(gpio);
@@ -42,6 +45,15 @@ void _local_setup_push(uint32_t gpio)
     gpio_pull_up(gpio);
     gpio_set_dir(gpio, GPIO_OUT);
     gpio_put(gpio, true);
+}
+
+void cb_hoja_shutdown()
+{
+    _local_setup_btn(26);
+    _local_setup_btn(27);
+    _local_setup_btn(28);
+    _local_setup_btn(29);
+    stopme = true;
 }
 
 void cb_hoja_init()
@@ -80,18 +92,18 @@ bool cb_hoja_boot(boot_input_s *boot)
     uint8_t mode_mask = 0;
 
     // USB gamepad modes
-        gpio_put(PGPIO_EN_SEWN, false);
-        sleep_us(BUTTON_SLEEP_US);
-        adc_hal_read(&input_driver_1);
-        adc_hal_read(&input_driver_2);
-        adc_hal_read(&input_driver_3);
-        adc_hal_read(&input_driver_4);
+    gpio_put(PGPIO_EN_SEWN, false);
+    sleep_us(BUTTON_SLEEP_US);
+    adc_hal_read(&input_driver_1);
+    adc_hal_read(&input_driver_2);
+    adc_hal_read(&input_driver_3);
+    adc_hal_read(&input_driver_4);
 
-        vals[2] = input_driver_1.output; // East/2
-        vals[3] = input_driver_2.output; // South/1
-        vals[1] = input_driver_3.output; // West/4
-        vals[0] = input_driver_4.output; // North/5
-        gpio_put(PGPIO_EN_SEWN, true);
+    vals[2] = input_driver_1.output; // East/2 
+    vals[3] = input_driver_2.output; // South/1
+    vals[1] = input_driver_3.output; // West/4 
+    vals[0] = input_driver_4.output; // North/5
+    gpio_put(PGPIO_EN_SEWN, true);
 
     avg = (vals[0] + vals[1] + vals[2] + vals[3])>>2;
 
@@ -171,6 +183,8 @@ bool cb_hoja_boot(boot_input_s *boot)
     boot->bootloader = (start && minus && gl && gr);
     boot->pairing_mode = start;
     boot->gamepad_mode = mode_idx;
+
+    return true;
 }
 
 void cb_hoja_read_input(mapper_input_s *input)
@@ -187,9 +201,15 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_HOME] = !gpio_get(PGPIO_BTN_HOME);
    
     out[INPUT_CODE_START] = !gpio_get(PGPIO_BTN_PLUS);
+
+    input->button_shipping = !gpio_get(PGPIO_BTN_POWER);
+    out[INPUT_CODE_MISC3] = input->button_shipping;
+    input->button_sync = (out[INPUT_CODE_START] > 0);
     //if(!gpio_get(PGPIO_BTN_POWER)) sys_hal_bootloader();
 
     out[INPUT_CODE_RP1] = !gpio_get(PGPIO_BTN_GR);
+
+    if(stopme) return;
 
     switch(read_idx)
     {
@@ -208,7 +228,6 @@ void cb_hoja_read_input(mapper_input_s *input)
         a_vals[INPUT_CODE_UP] = input_driver_4.output; // Up
         gpio_put(PGPIO_EN_DPAD, true);
         break;
-
 
         case 2:
         // TRIGGERS R
@@ -248,10 +267,6 @@ void cb_hoja_read_input(mapper_input_s *input)
         gpio_put(PGPIO_EN_SEWN, true);
         break;
     }
-
-    input->button_shipping = !gpio_get(PGPIO_BTN_POWER);
-    out[INPUT_CODE_MISC3] = input->button_shipping;
-    input->button_sync = (out[INPUT_CODE_START] > 0);
 
     for(int i = 0; i < 36; i++)
     {

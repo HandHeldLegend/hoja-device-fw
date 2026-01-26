@@ -31,6 +31,7 @@ void _local_setup_btn(uint32_t gpio)
     gpio_init(gpio);
     gpio_pull_up(gpio);
     gpio_set_dir(gpio, GPIO_IN);
+    
 }
 
 // old SCAN
@@ -128,18 +129,18 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_MISC3] = input->button_shipping;
     input->button_sync = (out[INPUT_CODE_START] > 0);
 
-    input->inputs[INPUT_CODE_LT_ANALOG] = trigger_driver_l.output;
-    input->inputs[INPUT_CODE_RT_ANALOG] = trigger_driver_r.output;
+    input->inputs[INPUT_CODE_LT_ANALOG] = 0xFFF - trigger_driver_l.output;
+    input->inputs[INPUT_CODE_RT_ANALOG] = 0xFFF - trigger_driver_r.output;
 
-    const uint16_t threshold = 200;
+    const uint16_t threshold = 500;
 
-    if(trigger_driver_l.output < (hover_config->config[INPUT_CODE_LT_ANALOG].max + threshold))
+    if(input->inputs[INPUT_CODE_LT_ANALOG] > (hover_config->config[INPUT_CODE_LT_ANALOG].max + threshold))
     {
         out[INPUT_CODE_LT] |= 1;
     }
     else out[INPUT_CODE_LT] |= 0;
 
-    if(trigger_driver_r.output > (hover_config->config[INPUT_CODE_RT_ANALOG].max + threshold))
+    if(input->inputs[INPUT_CODE_RT_ANALOG] > (hover_config->config[INPUT_CODE_RT_ANALOG].max + threshold))
     {
         out[INPUT_CODE_RT] |= 1;
     }

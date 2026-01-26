@@ -9,6 +9,7 @@
 
 #include "hal/adc_hal.h"
 #include "drivers/mux/tmux1204.h"
+#include "utilities/settings.h"
 
 mux_tmux1204_driver_s mux_driver = {
     .a0_gpio = 23, .a1_gpio = 24};
@@ -62,6 +63,8 @@ void cb_hoja_init()
     _local_setup_push(PGPIO_PUSH_G);
     _local_setup_push(PGPIO_PUSH_H);
     _local_setup_push(PGPIO_PUSH_I);
+
+    
 
     tmux1204_init(&mux_driver);
     adc_hal_init(&trigger_driver_l);
@@ -124,8 +127,22 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_MISC3] = input->button_shipping;
     input->button_sync = (out[INPUT_CODE_START] > 0);
 
-    input->inputs[INPUT_CODE_LT_ANALOG] = trigger_driver_l.output;
-    input->inputs[INPUT_CODE_RT_ANALOG] = trigger_driver_r.output;
+    input->inputs[INPUT_CODE_LT_ANALOG] = 0xFFF - trigger_driver_l.output;
+    input->inputs[INPUT_CODE_RT_ANALOG] = 0xFFF - trigger_driver_r.output;
+
+    const uint16_t threshold = 500;
+
+    if(input->inputs[INPUT_CODE_LT_ANALOG] > (hover_config->config[INPUT_CODE_LT_ANALOG].max + threshold))
+    {
+        out[INPUT_CODE_LT] |= 1;
+    }
+    else out[INPUT_CODE_LT] |= 0;
+
+    if(input->inputs[INPUT_CODE_RT_ANALOG] > (hover_config->config[INPUT_CODE_RT_ANALOG].max + threshold))
+    {
+        out[INPUT_CODE_RT] |= 1;
+    }
+    else out[INPUT_CODE_RT] |= 0;
 }
 
 void cb_hoja_read_joystick(uint16_t *input)

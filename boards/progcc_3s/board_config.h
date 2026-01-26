@@ -47,7 +47,7 @@
 
 // Haptic Driver Setup
 // No helper driver used
-//#define HOJA_HAPTICS_DRIVER        HAPTICS_DRIVER_LRA_HAL
+#define HOJA_HAPTICS_DRIVER        HAPTICS_DRIVER_LRA_HAL
 #define HOJA_HAPTICS_CHAN_A_PIN    14
 #define HOJA_HAPTICS_CHAN_B_PIN    25
 

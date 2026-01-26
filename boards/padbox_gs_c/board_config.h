@@ -60,7 +60,7 @@
 
 #define HOJA_JOYBUS_GC_DRIVER           JOYBUS_GC_DRIVER_HAL
 #define JOYBUS_GC_DRIVER_PIO_INSTANCE  1
-#define JOYBUS_GC_DRIVER_DATA_PIN      24
+#define JOYBUS_GC_DRIVER_DATA_PIN      23
 
 // ---------------------------------
 // ---------------------------------

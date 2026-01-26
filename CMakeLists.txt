@@ -37,8 +37,11 @@ set(USE_EXTERNAL_BOARD_DEF TRUE)
 
 set(MY_LIST 
     progcc_3:pico
+    progcc_3p:pico
+    progcc_3.1:pico
     progcc_3.2:pico
-    progcc_3s:lattepro_w
+    progcc_3s:pico2
+    gcu_proto:pico
     gcu_r4k:pico
     gcu_r5:gcur5_w
     gcu_s1:pico
@@ -46,6 +49,7 @@ set(MY_LIST
     latte_pro:lattepro_w
     padbox_gs:pico
     padbox_gs_c:pico
+    super_gamepad:pico
 )
 
 set(PICO_SDK_INIT_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -121,7 +125,7 @@ foreach(ITEM ${MY_LIST})
                 "-DPICO_SDK_INIT_PATH=${ROOT_DIR}"
                 "-DTARGET_BOARD=${BOARD_TYPE}"
                 "-DTARGET_NAME=${BOARD_NAME}"
-                "-DPICO_DEOPTIMIZED_DEBUG=0"
+                "-DPICO_DEOPTIMIZED_DEBUG=1"
             BUILD_ALWAYS 1 # force dependency checking
             INSTALL_COMMAND ""
             )
