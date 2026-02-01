@@ -1,0 +1,79 @@
+{
+	"folders": [
+		{
+			"name": "rp2040",
+			"path": "rp2040"
+		},
+		{
+			"name": "rp2040_w",
+			"path": "rp2040_w"
+		},
+		{
+			"name": "rp2350a_w",
+			"path": "rp2350a_w"
+		},
+		{
+			"name": "rp2350b_w",
+			"path": "rp2350b_w"
+		},
+		{
+			"name": "HOJA-LIB-RP2040",
+			"path": "library/HOJA-LIB-RP2040"
+		},
+		{
+			"name": "builds",
+			"path": "builds"
+		},
+		{
+			"path": "boards"
+		},
+		{
+			"path": "scripts"
+		},
+		{
+			"path": "library/artifacts"
+		}
+	],
+	"settings": {
+		"cmake.options.statusBarVisibility": "hidden",
+		"cmake.options.advanced": {
+			"build": {
+				"statusBarVisibility": "hidden"
+			},
+			"launch": {
+				"statusBarVisibility": "hidden"
+			},
+			"debug": {
+				"statusBarVisibility": "hidden"
+			}
+		},
+		"terminal.integrated.env.windows": {
+			"PICO_SDK_PATH": "${env:USERPROFILE}/.pico-sdk/sdk/2.2.0",
+			"PICO_TOOLCHAIN_PATH": "${env:USERPROFILE}/.pico-sdk/toolchain/14_2_Rel1",
+			"Path": "${env:USERPROFILE}/.pico-sdk/toolchain/14_2_Rel1/bin;${env:USERPROFILE}/.pico-sdk/picotool/2.2.0/picotool;${env:USERPROFILE}/.pico-sdk/cmake/v3.31.5/bin;${env:USERPROFILE}/.pico-sdk/ninja/v1.12.1;${env:PATH}"
+		},
+		"terminal.integrated.env.osx": {
+			"PICO_SDK_PATH": "${env:HOME}/.pico-sdk/sdk/2.2.0",
+			"PICO_TOOLCHAIN_PATH": "${env:HOME}/.pico-sdk/toolchain/14_2_Rel1",
+			"PATH": "${env:HOME}/.pico-sdk/toolchain/14_2_Rel1/bin:${env:HOME}/.pico-sdk/picotool/2.2.0/picotool:${env:HOME}/.pico-sdk/cmake/v3.31.5/bin:${env:HOME}/.pico-sdk/ninja/v1.12.1:${env:PATH}"
+		},
+		"terminal.integrated.env.linux": {
+			"PICO_SDK_PATH": "${env:HOME}/.pico-sdk/sdk/2.2.0",
+			"PICO_TOOLCHAIN_PATH": "${env:HOME}/.pico-sdk/toolchain/14_2_Rel1",
+			"PATH": "${env:HOME}/.pico-sdk/toolchain/14_2_Rel1/bin:${env:HOME}/.pico-sdk/picotool/2.2.0/picotool:${env:HOME}/.pico-sdk/cmake/v3.31.5/bin:${env:HOME}/.pico-sdk/ninja/v1.12.1:${env:PATH}"
+		},
+		"raspberry-pi-pico.cmakeAutoConfigure": false,
+		"raspberry-pi-pico.useCmakeTools": true,
+		"raspberry-pi-pico.cmakePath": "${HOME}/.pico-sdk/cmake/v3.31.5/bin/cmake",
+		"raspberry-pi-pico.ninjaPath": "${HOME}/.pico-sdk/ninja/v1.12.1/ninja",
+		"files.associations": {
+			"usb.h": "c",
+			"btstack_flash_bank.h": "c",
+			"btstack_tlv_flash_bank.h": "c",
+			"stdlib.h": "c",
+			"xip_ctrl.h": "c",
+			"udp.h": "c",
+			"wlan_hal.h": "c"
+		}
+	}
+}
