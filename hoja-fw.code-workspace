@@ -17,10 +17,6 @@
 			"path": "rp2350b_w"
 		},
 		{
-			"name": "HOJA-LIB-RP2040",
-			"path": "library/HOJA-LIB-RP2040"
-		},
-		{
 			"name": "builds",
 			"path": "builds"
 		},
@@ -31,7 +27,7 @@
 			"path": "scripts"
 		},
 		{
-			"path": "library/artifacts"
+			"path": "library"
 		}
 	],
 	"settings": {
