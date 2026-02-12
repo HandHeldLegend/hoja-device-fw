@@ -150,6 +150,108 @@ void cb_hoja_read_input(mapper_input_s *input)
     //if(out[INPUT_CODE_SHARE]) sys_hal_bootloader();
 }
 
+bool cb_hoja_boot(boot_input_s *boot)
+{
+    mapper_input_s input;
+    cb_hoja_read_input(&input);
+    bool *out = input.presses;
+
+    // Set default transport mode
+    boot->gamepad_transport = GAMEPAD_TRANSPORT_AUTO;
+
+    uint8_t a = out[INPUT_CODE_SOUTH] << 7;
+    uint8_t b = out[INPUT_CODE_WEST] << 6;
+    uint8_t x = out[INPUT_CODE_EAST] << 5;
+    uint8_t y = out[INPUT_CODE_NORTH] << 4;
+    uint8_t u = out[INPUT_CODE_UP] << 3;
+    uint8_t d = out[INPUT_CODE_DOWN] << 2;
+    uint8_t l = out[INPUT_CODE_LEFT] << 1;
+    uint8_t r = out[INPUT_CODE_RIGHT];
+
+    uint8_t mask = (a|b|x|y|u|d|l|r);
+
+    switch(mask)
+    {
+        // SwPro
+        default:
+        boot->gamepad_mode = GAMEPAD_MODE_LOAD;
+        break;
+
+        // A
+        case 0b10000000:
+        boot->gamepad_mode = GAMEPAD_MODE_SWPRO;
+        break;
+
+        // B
+        case 0b1000000:
+        boot->gamepad_mode = GAMEPAD_MODE_SINPUT;
+        break;
+
+        // X
+        case 0b100000:
+        boot->gamepad_mode = GAMEPAD_MODE_XINPUT;
+        break;
+
+        // Y
+        case 0b10000:
+        boot->gamepad_mode = GAMEPAD_MODE_GCUSB;
+        break;
+
+        // U
+        case 0b1000:
+        boot->gamepad_mode = GAMEPAD_MODE_LOAD;
+        break;
+
+        // D
+        case 0b100:
+        boot->gamepad_mode = GAMEPAD_MODE_N64;
+        break;
+
+        // L
+        case 0b10:
+        boot->gamepad_mode = GAMEPAD_MODE_SNES;
+        break;
+
+        // R
+        case 0b1:
+        boot->gamepad_mode = GAMEPAD_MODE_GAMECUBE;
+        break;
+    }
+
+    bool lt = out[INPUT_CODE_LB];
+    bool rt = out[INPUT_CODE_RB];
+    bool plus = out[INPUT_CODE_START];
+
+    if(plus&&lt)
+    {
+        boot->bootloader = true;
+        return true;
+    }
+
+    if(plus)
+    {
+        boot->pairing_mode = true;
+    }
+
+    if(rt)
+    {
+        switch(boot->gamepad_mode)
+        {
+            case GAMEPAD_MODE_GCUSB:
+            case GAMEPAD_MODE_GAMECUBE:
+            case GAMEPAD_MODE_SINPUT:
+            case GAMEPAD_MODE_N64:
+            boot->gamepad_transport = GAMEPAD_TRANSPORT_WLAN;
+            break;
+
+            default:
+            boot->gamepad_transport = GAMEPAD_TRANSPORT_AUTO;
+        }
+    }
+
+    return true;
+}
+
 void cb_hoja_read_joystick(uint16_t *input)
 {
     tmux1204_switch_channel(&mux_driver, 2);
