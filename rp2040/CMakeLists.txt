@@ -57,7 +57,6 @@ set(BULK_PROJECTS_DIRS
     gcu_r4k 
     gcu_proto 
     phob_2 
-    padbox_gs 
     padbox_gs_c 
 )
 

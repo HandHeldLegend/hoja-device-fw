@@ -73,6 +73,75 @@ void cb_hoja_read_joystick(uint16_t *input)
     input[3] = 2048;
 }
 
+bool cb_hoja_boot(boot_input_s *boot)
+{
+    bool start   = !gpio_get(PGPIO_BTN_MENU);
+    bool select  = !gpio_get(PGPIO_BTN_BACK);
+
+    uint8_t south   = !gpio_get(PGPIO_BTN_A) << 7;
+    uint8_t east    = !gpio_get(PGPIO_BTN_B) << 6;
+    uint8_t west    = !gpio_get(PGPIO_BTN_X) << 5;
+    uint8_t north   = !gpio_get(PGPIO_BTN_Y) << 4;
+
+    if(start&&select)
+    {
+        boot->bootloader = true;
+        return true;
+    }
+
+    uint8_t up   = !gpio_get(PGPIO_BTN_DUP) << 3;
+    uint8_t down   = !gpio_get(PGPIO_BTN_DDOWN) << 2;
+    uint8_t left   = !gpio_get(PGPIO_BTN_DLEFT) << 1;
+    uint8_t right   = !gpio_get(PGPIO_BTN_DRIGHT);
+
+    uint8_t mode_mask = (south | east | west| north | up | down | left | right);
+
+    switch(mode_mask)
+    {
+        // A
+        default:
+        case 0b10000000:
+        boot->gamepad_mode = GAMEPAD_MODE_SWPRO;
+        break;
+
+        // B
+        case 0b1000000:
+        boot->gamepad_mode = GAMEPAD_MODE_SINPUT;
+        break;
+
+        // X
+        case 0b100000:
+        boot->gamepad_mode = GAMEPAD_MODE_XINPUT;
+        break;
+
+        // Y
+        case 0b10000:
+        boot->gamepad_mode = GAMEPAD_MODE_GCUSB;
+        break;
+
+        // Up
+        case 0b1000:
+        break;
+
+        // Down
+        case 0b100:
+        boot->gamepad_mode = GAMEPAD_MODE_N64;
+        break;
+
+        // Left
+        case 0b10:
+        boot->gamepad_mode = GAMEPAD_MODE_SNES;
+        break;
+
+        // Right
+        case 0b1:
+        boot->gamepad_mode = GAMEPAD_MODE_GAMECUBE;
+        break;
+    }
+
+    return true;
+}
+
 void cb_hoja_read_input(mapper_input_s *input)
 {
     bool *out = input->presses;

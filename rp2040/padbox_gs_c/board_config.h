@@ -107,10 +107,10 @@
 }
 
 #define HOJA_INPUT_DEFAULTS_SWITCH { \
-    /*South*/       SWITCH_CODE_A, \
-    /*East*/        SWITCH_CODE_B, \
-    /*West*/        SWITCH_CODE_X, \
-    /*North*/       SWITCH_CODE_Y, \
+    /*South - B*/       SWITCH_CODE_B, \
+    /*East  - X*/        SWITCH_CODE_X, \
+    /*West  - R*/        SWITCH_CODE_R, \
+    /*North - Y*/       SWITCH_CODE_Y, \
     /*Up*/          SWITCH_CODE_UP, \
     /*Down*/        SWITCH_CODE_DOWN, \
     /*Left*/        SWITCH_CODE_LEFT, \
@@ -268,33 +268,33 @@
 }
 
 #define HOJA_INPUT_DEFAULTS_XINPUT { \
-    /*South*/       XINPUT_CODE_A, \
-    /*East*/        XINPUT_CODE_B, \
-    /*West*/        XINPUT_CODE_X, \
+    /*South - B*/        XINPUT_CODE_B, \
+    /*East  - X*/        XINPUT_CODE_X, \
+    /*West  - RB*/       XINPUT_CODE_RB, \
     /*North*/       XINPUT_CODE_Y, \
     /*Up*/          XINPUT_CODE_UP, \
     /*Down*/        XINPUT_CODE_DOWN, \
     /*Left*/        XINPUT_CODE_LEFT, \
     /*Right*/       XINPUT_CODE_RIGHT, \
     /*LB*/          XINPUT_CODE_LB, \
-    /*RB*/          XINPUT_CODE_RB, \
-    /*LT*/          XINPUT_CODE_LT_ANALOG, \
+    /*RB    - RT*/          XINPUT_CODE_RT_ANALOG, \
+    /*LT*/          XINPUT_CODE_UNUSED, \
     /*LTANALOG*/    XINPUT_CODE_UNUSED, \
-    /*RT*/          XINPUT_CODE_RT_ANALOG, \
+    /*RT*/          XINPUT_CODE_UNUSED, \
     /*RTANALOG*/    XINPUT_CODE_UNUSED, \
-    /*LP1*/         XINPUT_CODE_LS, \
-    /*RP1*/         XINPUT_CODE_LS, \
-    /*LP2*/         XINPUT_CODE_RS, \
-    /*RP2*/         XINPUT_CODE_UNUSED, \
+    /*LP1   - LT*/         XINPUT_CODE_LT_ANALOG, \
+    /*RP1   - A*/          XINPUT_CODE_A, \
+    /*LP2*/         XINPUT_CODE_RY_UP, \
+    /*RP2*/         XINPUT_CODE_RX_LEFT, \
     /*Start*/       XINPUT_CODE_START, \
     /*Select*/      XINPUT_CODE_BACK, \
     /*Home*/        XINPUT_CODE_GUIDE, \
     /*Share*/       XINPUT_CODE_UNUSED, \
-    /*MISC3*/       XINPUT_CODE_UNUSED, \
+    /*MISC3*/       XINPUT_CODE_RX_RIGHT, \
     /*MISC4*/       XINPUT_CODE_UNUSED, \
     /*TP1*/         XINPUT_CODE_UNUSED, \
     /*TP2*/         XINPUT_CODE_UNUSED, \
-    /*LS*/          XINPUT_CODE_UNUSED, \
+    /*LS*/          XINPUT_CODE_RY_DOWN, \
     /*LX_RIGHT*/    XINPUT_CODE_LX_RIGHT, \
     /*LX_LEFT*/     XINPUT_CODE_LX_LEFT, \
     /*LY_UP*/       XINPUT_CODE_LY_UP, \
