@@ -13,10 +13,6 @@
 			"path": "rp2350a_w"
 		},
 		{
-			"name": "rp2350b_w",
-			"path": "rp2350b_w"
-		},
-		{
 			"name": "builds",
 			"path": "builds"
 		},
@@ -28,6 +24,9 @@
 		},
 		{
 			"path": "library"
+		},
+		{
+			"path": "rp2350b"
 		}
 	],
 	"settings": {
@@ -113,7 +112,39 @@
 			"compare": "c",
 			"cstdint": "c",
 			"format": "c",
-			"rand.h": "c"
+			"rand.h": "c",
+			"devices_shared_types.h": "c",
+			"sysmon.h": "c",
+			"esp32_hojabaseband.h": "c",
+			"bluetooth.h": "c",
+			"bluetooth_hal.h": "c",
+			"cstdlib": "c",
+			"static_config.h": "c",
+			"string.h": "c",
+			"ns_lib_spi.h": "c",
+			"ns_lib_analog.h": "c",
+			"ns_lib_types.h": "c",
+			"ns_lib_config.h": "c",
+			"ns_lib_motion.h": "c",
+			"xlocale": "c",
+			"btstack_event.h": "c",
+			"pcm.h": "c",
+			"haptics.h": "c",
+			"stdint.h": "c",
+			"sinput_lib.h": "c",
+			"numeric": "c",
+			"sinput_lib_protocol.h": "c",
+			"ns_lib.h": "c",
+			"sinput_lib_types.h": "c",
+			"dongle.h": "c",
+			"bq25180.h": "c",
+			"hoja_bsp.h": "c",
+			"sys_hal.h": "c",
+			"rgb.h": "c",
+			"transport_joybus64.h": "c",
+			"transport_nesbus.h": "c",
+			"nserial.pio.h": "c",
+			"queue": "c"
 		}
 	}
 }

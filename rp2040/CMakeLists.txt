@@ -53,11 +53,10 @@ set(BULK_PROJECTS_DIRS
     progcc_3.1 
     progcc_3.2 
     super_gamepad 
-    gcu_s1 
+    gcu_2s 
     gcu_r4k 
     gcu_proto 
     phob_2 
-    padbox_gs 
     padbox_gs_c 
 )
 

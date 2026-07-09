@@ -37,6 +37,15 @@ if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "C:/Users/Mitch/.pico-sdk/toolchain/14_2_Rel1/bin/arm-none-eabi-objdump.exe")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for each subdirectory.
+  include("C:/Users/Mitch/GitRepos/hoja-device-fw/library/artifacts/rp2040/external/NS-LIB-HID/cmake_install.cmake")
+  include("C:/Users/Mitch/GitRepos/hoja-device-fw/library/artifacts/rp2040/external/SINPUT-LIB-HID/cmake_install.cmake")
+  include("C:/Users/Mitch/GitRepos/hoja-device-fw/library/artifacts/rp2040/external/HOJA-LIB-DONGLE/cmake_install.cmake")
+  include("C:/Users/Mitch/GitRepos/hoja-device-fw/library/artifacts/rp2040/external/HHL-TINYUSB-DRIVERS/cmake_install.cmake")
+
+endif()
+
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)

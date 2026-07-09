@@ -49,7 +49,8 @@ set(HOJA_USE_BT_HAL TRUE)
 
 # Define your list of directories
 set(BULK_PROJECTS_DIRS 
-    gcu_r5
+    gcu_2
+    pico_w
 )
 
 # Iterate through the list
@@ -61,7 +62,7 @@ foreach(DIR ${BULK_PROJECTS_DIRS})
      DESTINATION "${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}")
 
     # Set the build folder for this project
-    set(HOJA_BUILD_DIR ${ROOT_DIR}/${PROJECT_NAME}/build)
+    set(HOJA_BUILD_DIR ${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}/build)
     # Create builds directory for this project
     set(HOJA_BUILDS_PROJECT_DIR ${BUILDS_DIR}/${PROJECT_NAME})
     # Make the dir if it doesn't exist
