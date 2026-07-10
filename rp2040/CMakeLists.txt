@@ -36,6 +36,7 @@ pico_sdk_init()
 set(PICO_SDK_INIT_DONE TRUE)
 
 # Include HOJA Libarary
+set(HOJA_CONFIG_SDK_BUILD_TESTS ON CACHE BOOL "Build HOJA-CONFIG-SDK host layout tests")
 set(HOJA_LIB_DIR        ${CMAKE_CURRENT_LIST_DIR}/../library/HOJA-LIB-RP2040)
 set(HOJA_LIBOUTPUT_DIR  ${CMAKE_CURRENT_LIST_DIR}/../library/artifacts/rp2040)
 add_subdirectory(${HOJA_LIB_DIR} ${HOJA_LIBOUTPUT_DIR})
