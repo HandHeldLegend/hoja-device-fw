@@ -34,7 +34,7 @@
 // RGB Setup (gate + compile-time sizing only).
 // Group layout lives in hoja_config_s.rgb / .rgb_driver (see main.c).
 #define HOJA_RGB_DRIVER         RGB_DRIVER_HAL
-#define RGB_DRIVER_LED_COUNT    17
+//#define RGB_DRIVER_LED_COUNT    32
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
 
 // ---------------------------------
