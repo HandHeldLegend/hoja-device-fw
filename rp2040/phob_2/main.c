@@ -61,6 +61,7 @@ static const hoja_config_s _hoja_config = {
     },
 
     .sewn_layout = SEWN_LAYOUT_AXBY,
+    .analog_invert_allowed = 1,
     .tourney_macro_code = INPUT_CODE_UNUSED,
 
     .shipping_macro_code = { INPUT_CODE_UNUSED, INPUT_CODE_UNUSED },

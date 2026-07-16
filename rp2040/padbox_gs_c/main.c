@@ -7,6 +7,24 @@
 
 #include "hal/adc_hal.h"
 #include "input/input_config.h"
+#include "utilities/settings.h"
+
+// Factory joystick orientation preset for Padbox GS hardware variants.
+// Change ONLY this define when building firmware for a specific stick module
+// orientation. On first boot the preset is written into analog config; if the
+// reserved factory marker already matches this preset, invert bits are left
+// alone so user customizations survive.
+//   0 = no axis invert
+//   1 = invert LY (current GS-C module orientation)
+//   2 = invert LX
+//   3 = invert LX and LY
+#define PADBOX_GS_FACTORY_INVERT_PRESET 1
+
+// analog_config->reserved[0..3] hold the library EXP1 migration marker.
+// reserved[4..5] are Padbox-GS-only factory invert bookkeeping.
+#define PADBOX_GS_FACTORY_INVERT_MAGIC  0xA5
+#define PADBOX_GS_FACTORY_INVERT_IDX0   4
+#define PADBOX_GS_FACTORY_INVERT_IDX1   5
 
 // Platform Edition PadBox GS: single physical left analog stick; the "right
 // stick" and paddle inputs are buttons (RX/RY/NB1/NB2/L3/R3). The right stick
@@ -18,6 +36,34 @@ adc_hal_driver_s joystick_driver_lx = {
 adc_hal_driver_s joystick_driver_ly = {
     .gpio = 28
 };
+
+static void padbox_gs_factory_invert_apply(void)
+{
+    if(!analog_config)
+        return;
+
+    if(analog_config->reserved[PADBOX_GS_FACTORY_INVERT_IDX0] == PADBOX_GS_FACTORY_INVERT_MAGIC &&
+       analog_config->reserved[PADBOX_GS_FACTORY_INVERT_IDX1] == (uint8_t)PADBOX_GS_FACTORY_INVERT_PRESET)
+        return;
+
+    uint8_t lx = 0;
+    uint8_t ly = 0;
+    switch(PADBOX_GS_FACTORY_INVERT_PRESET)
+    {
+        case 1: ly = 1; break;
+        case 2: lx = 1; break;
+        case 3: lx = 1; ly = 1; break;
+        default: break;
+    }
+
+    analog_config->lx_invert = lx;
+    analog_config->ly_invert = ly;
+    analog_config->rx_invert = 0;
+    analog_config->ry_invert = 0;
+    analog_config->reserved[PADBOX_GS_FACTORY_INVERT_IDX0] = PADBOX_GS_FACTORY_INVERT_MAGIC;
+    analog_config->reserved[PADBOX_GS_FACTORY_INVERT_IDX1] = (uint8_t)PADBOX_GS_FACTORY_INVERT_PRESET;
+    settings_commit_blocks();
+}
 
 static const hoja_config_s _hoja_config = {
     .battery_capacity_mah     = 0,
@@ -41,6 +87,7 @@ static const hoja_config_s _hoja_config = {
     },
 
     .sewn_layout = SEWN_LAYOUT_ABXY,
+    .analog_invert_allowed = 1,
     .tourney_macro_code = INPUT_CODE_UNUSED,
 
     .shipping_macro_code = { INPUT_CODE_UNUSED, INPUT_CODE_UNUSED },
@@ -48,7 +95,7 @@ static const hoja_config_s _hoja_config = {
     .sync_on_boot_code = INPUT_CODE_UNUSED,
     .sync_macro_code   = { INPUT_CODE_UNUSED, INPUT_CODE_UNUSED },
 
-    .usb_bootloader_code = { INPUT_CODE_LB, INPUT_CODE_START },
+    .usb_bootloader_code = { INPUT_CODE_START, INPUT_CODE_SELECT },
     .wlan_force_code     = INPUT_CODE_UNUSED,
 
     // Shared N64/GameCube joybus line (data on the SNES/NESBUS data pin).
@@ -96,9 +143,9 @@ static const hoja_config_s _hoja_config = {
 
     .defaults_switch = {
         .maps = {
-            INPUT_DEFAULT(INPUT_CODE_SOUTH,     SWITCH_CODE_A),
-            INPUT_DEFAULT(INPUT_CODE_EAST,      SWITCH_CODE_B),
-            INPUT_DEFAULT(INPUT_CODE_WEST,      SWITCH_CODE_X),
+            INPUT_DEFAULT(INPUT_CODE_SOUTH,     SWITCH_CODE_B),
+            INPUT_DEFAULT(INPUT_CODE_EAST,      SWITCH_CODE_X),
+            INPUT_DEFAULT(INPUT_CODE_WEST,      SWITCH_CODE_R),
             INPUT_DEFAULT(INPUT_CODE_NORTH,     SWITCH_CODE_Y),
             INPUT_DEFAULT(INPUT_CODE_UP,        SWITCH_CODE_UP),
             INPUT_DEFAULT(INPUT_CODE_DOWN,      SWITCH_CODE_DOWN),
@@ -108,8 +155,8 @@ static const hoja_config_s _hoja_config = {
             INPUT_DEFAULT(INPUT_CODE_RB,        SWITCH_CODE_ZR),
             INPUT_DEFAULT(INPUT_CODE_LP1,       SWITCH_CODE_ZL),
             INPUT_DEFAULT(INPUT_CODE_RP1,       SWITCH_CODE_A),
-            INPUT_DEFAULT(INPUT_CODE_LP2,       SWITCH_CODE_RY_UP),
-            INPUT_DEFAULT(INPUT_CODE_RP2,       SWITCH_CODE_RX_LEFT),
+            INPUT_DEFAULT(INPUT_CODE_LP2,       SWITCH_CODE_RX_LEFT),
+            INPUT_DEFAULT(INPUT_CODE_RP2,       SWITCH_CODE_RY_UP),
             INPUT_DEFAULT(INPUT_CODE_START,     SWITCH_CODE_PLUS),
             INPUT_DEFAULT(INPUT_CODE_SELECT,    SWITCH_CODE_MINUS),
             INPUT_DEFAULT(INPUT_CODE_HOME,      SWITCH_CODE_HOME),
@@ -178,12 +225,14 @@ static const hoja_config_s _hoja_config = {
             INPUT_DEFAULT(INPUT_CODE_LEFT,      GAMECUBE_CODE_LEFT),
             INPUT_DEFAULT(INPUT_CODE_RIGHT,     GAMECUBE_CODE_RIGHT),
             INPUT_DEFAULT(INPUT_CODE_RB,        GAMECUBE_CODE_Z),
-            INPUT_DEFAULT(INPUT_CODE_LT,        GAMECUBE_CODE_L_ANALOG),
-            INPUT_DEFAULT(INPUT_CODE_RT,        GAMECUBE_CODE_R_ANALOG),
+            // L↘ half-press analog (~128 after >>4); R↘ light analog (256).
+            // Note: GC mode clamps digital-to-analog below 784 up to 784.
+            INPUT_DEFAULT_VAL(INPUT_CODE_LT,    GAMECUBE_CODE_L_ANALOG, 2048),
+            INPUT_DEFAULT_VAL(INPUT_CODE_RT,    GAMECUBE_CODE_L_ANALOG, 410),
             INPUT_DEFAULT(INPUT_CODE_LP1,       GAMECUBE_CODE_L),
             INPUT_DEFAULT(INPUT_CODE_RP1,       GAMECUBE_CODE_A),
-            INPUT_DEFAULT(INPUT_CODE_LP2,       GAMECUBE_CODE_RY_UP),
-            INPUT_DEFAULT(INPUT_CODE_RP2,       GAMECUBE_CODE_RX_LEFT),
+            INPUT_DEFAULT(INPUT_CODE_LP2,       GAMECUBE_CODE_RX_LEFT),
+            INPUT_DEFAULT(INPUT_CODE_RP2,       GAMECUBE_CODE_RY_UP),
             INPUT_DEFAULT(INPUT_CODE_START,     GAMECUBE_CODE_START),
             INPUT_DEFAULT(INPUT_CODE_MISC3,     GAMECUBE_CODE_RX_RIGHT),
             INPUT_DEFAULT(INPUT_CODE_LS,        GAMECUBE_CODE_RY_DOWN),
@@ -209,8 +258,8 @@ static const hoja_config_s _hoja_config = {
             INPUT_DEFAULT(INPUT_CODE_RB,        XINPUT_CODE_RB),
             INPUT_DEFAULT(INPUT_CODE_LT,        XINPUT_CODE_LT_ANALOG),
             INPUT_DEFAULT(INPUT_CODE_RT,        XINPUT_CODE_RT_ANALOG),
-            INPUT_DEFAULT(INPUT_CODE_LP1,       XINPUT_CODE_LS),
-            INPUT_DEFAULT(INPUT_CODE_LP2,       XINPUT_CODE_RS),
+            INPUT_DEFAULT(INPUT_CODE_RP1,       XINPUT_CODE_LS),
+            INPUT_DEFAULT(INPUT_CODE_RP2,       XINPUT_CODE_RS),
             INPUT_DEFAULT(INPUT_CODE_START,     XINPUT_CODE_START),
             INPUT_DEFAULT(INPUT_CODE_SELECT,    XINPUT_CODE_BACK),
             INPUT_DEFAULT(INPUT_CODE_HOME,      XINPUT_CODE_GUIDE),
@@ -344,11 +393,21 @@ void cb_hoja_init()
 
 void cb_hoja_read_joystick(uint16_t *input)
 {
+    // Run once after analog/settings init so stick_scaling defaults cannot
+    // overwrite a just-applied factory invert preset.
+    static bool factory_invert_checked = false;
+    if(!factory_invert_checked)
+    {
+        factory_invert_checked = true;
+        padbox_gs_factory_invert_apply();
+    }
+
     adc_hal_read(&joystick_driver_lx);
     input[0] = joystick_driver_lx.output;
 
     adc_hal_read(&joystick_driver_ly);
-    input[1] = 0xFFF - joystick_driver_ly.output;
+    // Axis invert is handled by analog_config (lx/ly_invert); do not hard-flip here.
+    input[1] = joystick_driver_ly.output;
 
     // No physical right stick; report centered.
     input[2] = 2048;
