@@ -100,14 +100,14 @@ static const hoja_config_s _hoja_config = {
 
     // Shared N64/GameCube joybus line (data on the SNES/NESBUS data pin).
     .joybus = {
-        .data_pin = 24,
+        .data_pin = 23,
     },
 
     // SNES serial line.
     .nesbus = {
-        .data_pin  = 24,
+        .data_pin  = 23, // 23
         .clock_pin = 25,
-        .latch_pin = 23,
+        .latch_pin = 24, // 24
     },
 
     .inputs = {
