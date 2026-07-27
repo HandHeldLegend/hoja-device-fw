@@ -319,8 +319,8 @@ static const hoja_config_s _hoja_config = {
             { .name = "L\u2198", .leds = RGB_GROUP(7) },
             { .name = "L3",     .leds = RGB_GROUP(9) },
             { .name = "R3",     .leds = RGB_GROUP(12) },
-            { .name = "RX",     .leds = RGB_GROUP(11) },
-            { .name = "RY",     .leds = RGB_GROUP(10) },
+            { .name = "RX",     .leds = RGB_GROUP(10) },
+            { .name = "RY",     .leds = RGB_GROUP(11) },
             { .name = "NB2",    .leds = RGB_GROUP(8) },
         },
 
