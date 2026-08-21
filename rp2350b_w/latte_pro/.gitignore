@@ -1,0 +1,18 @@
+# Build directories
+build/
+lib/
+out/
+*/build/
+*/lib/
+*/out/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating System specific files
+.DS_Store
+Thumbs.db
+
