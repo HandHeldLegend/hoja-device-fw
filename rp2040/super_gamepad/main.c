@@ -336,7 +336,17 @@ void cb_hoja_read_input(mapper_input_s *input)
 
     out[INPUT_CODE_SELECT] = !gpio_get(PGPIO_BUTTON_SELECT);
 
-    if(core_current_reportformat() != CORE_REPORTFORMAT_SNES)
+    // L+R+Select+Start is the soft reset combo used by many SNES games
+    // and randomizers, so pass it through untouched instead of macroing
+    bool reset_combo = out[INPUT_CODE_LB] && out[INPUT_CODE_RB] &&
+                       out[INPUT_CODE_SELECT] && out[INPUT_CODE_START];
+
+    if(reset_combo)
+    {
+        out[INPUT_CODE_HOME]  = false;
+        out[INPUT_CODE_SHARE] = false;
+    }
+    else if(core_current_reportformat() != CORE_REPORTFORMAT_SNES)
     {
         if(out[INPUT_CODE_SELECT] && out[INPUT_CODE_RB])
         {
