@@ -12,7 +12,7 @@
 #define HOJA_USB_PID        0x10DF // ProGCC PID
 
 // URL that will display to open a config tool
-#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2" 
+#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja3" 
 #define HOJA_MANUFACTURER   "HHL" 
 
 #define HOJA_INPUT_ENABLE_SEWN 1

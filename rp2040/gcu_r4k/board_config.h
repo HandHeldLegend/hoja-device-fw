@@ -8,7 +8,7 @@
 
 #define HOJA_TASK_BENCHMARKING 1
 
-#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
+#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja3"
 
 // ---------------------------------
 // ---------------------------------

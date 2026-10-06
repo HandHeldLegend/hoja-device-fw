@@ -6,7 +6,7 @@
 #define HOJA_PRODUCT        "Hoverboard"
 
 // URL that will display to open a config tool
-#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
+#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja3"
 #define HOJA_MANUFACTURER   "HHL"
 
 #define HOJA_USB_VID        0x2E8A // Raspberry Pi

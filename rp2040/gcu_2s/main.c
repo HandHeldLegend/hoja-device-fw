@@ -310,8 +310,9 @@ static const hoja_config_s _hoja_config = {
         .channel_b_enable = true,
         .channel_swap     = true,
         .intensity_max    = 0.35f,
-        .intensity_min_lo = 0.15f,
-        .intensity_min_hi = 0.10f,
+        // Floors tuned on GCU2 hardware so light ticks (e.g. whiffed jabs) are felt
+        .intensity_min_lo = 0.18f,
+        .intensity_min_hi = 0.08f,
     },
 
     .rgb_driver = {

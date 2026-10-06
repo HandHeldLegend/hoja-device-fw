@@ -5,7 +5,7 @@
 #include "rgb_define_helper.h"
 
 #define HOJA_BT_LOGGING_DEBUG 0
-#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
+#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja3"
 
 #define HOJA_TRANSPORT_USB_DRIVER       USB_DRIVER_HAL
 #define HOJA_TRANSPORT_JOYBUS64_DRIVER  JOYBUS_N64_DRIVER_HAL
