@@ -5,7 +5,7 @@
 #include "rgb_define_helper.h"
 
 #define HOJA_BT_LOGGING_DEBUG 0
-#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
+#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja3"
 
 // HOJA Transport driver gates. Pico-W test build: onboard CYW43 Bluetooth + USB.
 #define HOJA_TRANSPORT_BT_DRIVER        BT_DRIVER_HAL

@@ -5,7 +5,7 @@
 #include "rgb_define_helper.h"
 
 #define HOJA_BT_LOGGING_DEBUG 0
-#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja2"
+#define HOJA_WEBUSB_URL     "handheldlegend.github.io/hoja3"
 
 // HOJA Transport driver gates. Platform Edition PadBox GS: wired USB plus
 // SNES (NESBUS) and N64/GameCube (Joybus) retro-console output.
