@@ -82,7 +82,7 @@ static const hoja_config_s _hoja_config = {
     .battery_part_code        = "BDT 903035",
     .battery_shutdown_percent = 0,
 
-    .device_name   = "GCU-Proto",
+    .device_name   = "GCU Proto",
     .device_maker  = "HHL",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_proto/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_proto/gcu_proto.uf2",

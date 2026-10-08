@@ -82,3 +82,9 @@ add_custom_command(TARGET ${PROJECT_NAME}
     COMMENT "Moving build files and generating manifest.json"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
+
+# Optional per-board additions (libraries, publish steps). Last so its post-build steps run after
+# the outputs exist.
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/board.cmake")
+    include(${CMAKE_CURRENT_LIST_DIR}/board.cmake)
+endif()

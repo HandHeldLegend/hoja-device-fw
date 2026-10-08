@@ -13,7 +13,7 @@
 #define PICOW_BTN_B 1
 
 static const hoja_config_s _hoja_config = {
-    .device_name   = "Pico-W",
+    .device_name   = "Pico W",
     .device_maker  = "RPI",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/pico_w/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/pico_w/pico_w.uf2",

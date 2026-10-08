@@ -82,10 +82,10 @@ static const hoja_config_s _hoja_config = {
     .battery_part_code        = "BDT 903035",
     .battery_shutdown_percent = 0,
 
-    .device_name   = "GCU-R4K",
+    .device_name   = "GCU 1",
     .device_maker  = "HHL",
-    .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r4k/manifest.json",
-    .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_r4k/gcu_r4k.uf2",
+    .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_1/manifest.json",
+    .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_1/gcu_1.uf2",
     .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z",
     .fcc_id        = "2BM3E-GCU-R4K",
 
