@@ -31,6 +31,12 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-08 - Switch mode over Bluetooth
+Boards: esp32
+
+### Wireless
+- Fix: Switch mode over Bluetooth no longer stutters on a PC. It reports at a steady 125 Hz.
+
 ## 2026-10-07 - GCU 1
 Boards: all
 
