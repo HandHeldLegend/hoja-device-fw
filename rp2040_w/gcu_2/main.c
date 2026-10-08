@@ -456,50 +456,61 @@ void cb_hoja_init()
 
 #define BUTTON_SLEEP_US 15
 
+// Waits out the rest of a row's settle time started at t0
+static inline void _settle_from(uint32_t t0)
+{
+    uint32_t spent = time_us_32() - t0;
+    if (spent < BUTTON_SLEEP_US)
+        busy_wait_us_32(BUTTON_SLEEP_US - spent);
+}
+
 void cb_hoja_read_input(mapper_input_s *input)
 {
-    adc_hal_read(&trigger_driver_l);
-    adc_hal_read(&trigger_driver_r);
-
     bool *out = input->presses;
 
+    // The trigger reads take longer than a row needs to settle, so they stand in for the first
+    // two waits
     gpio_put(PGPIO_SCAN_A, false);
-    sleep_us(BUTTON_SLEEP_US);
+    uint32_t t0 = time_us_32();
+    adc_hal_read(&trigger_driver_l);
+    _settle_from(t0);
     out[INPUT_CODE_UP] = !gpio_get(PGPIO_PUSH_H);
     out[INPUT_CODE_RS] = !gpio_get(PGPIO_PUSH_G);
     out[INPUT_CODE_START] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_A, true);
 
     gpio_put(PGPIO_SCAN_B, false);
-    sleep_us(BUTTON_SLEEP_US);
+    t0 = time_us_32();
+    adc_hal_read(&trigger_driver_r);
+    _settle_from(t0);
     out[INPUT_CODE_DOWN] = !gpio_get(PGPIO_PUSH_H);
     out[GCU_INPUT_CODE_A] = !gpio_get(PGPIO_PUSH_G);
     out[INPUT_CODE_SELECT] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_B, true);
 
     gpio_put(PGPIO_SCAN_C, false);
-    sleep_us(BUTTON_SLEEP_US);
+    busy_wait_us_32(BUTTON_SLEEP_US);
     out[INPUT_CODE_LEFT]     = !gpio_get(PGPIO_PUSH_H);
     out[GCU_INPUT_CODE_X]      = !gpio_get(PGPIO_PUSH_G);
     out[INPUT_CODE_HOME]   = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_C, true);
 
     gpio_put(PGPIO_SCAN_D, false);
-    sleep_us(BUTTON_SLEEP_US);
+    busy_wait_us_32(BUTTON_SLEEP_US);
     out[INPUT_CODE_LB] = !gpio_get(PGPIO_PUSH_H);
     out[GCU_INPUT_CODE_Y] = !gpio_get(PGPIO_PUSH_G);
     out[INPUT_CODE_SHARE] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_D, true);
 
     gpio_put(PGPIO_SCAN_E, false);
-    sleep_us(BUTTON_SLEEP_US);
+    busy_wait_us_32(BUTTON_SLEEP_US);
     out[INPUT_CODE_LS] = !gpio_get(PGPIO_PUSH_H);
     out[INPUT_CODE_RB] = !gpio_get(PGPIO_PUSH_G);
     out[INPUT_CODE_RIGHT] = !gpio_get(PGPIO_PUSH_I);
     gpio_put(PGPIO_SCAN_E, true);
 
     gpio_put(PGPIO_SCAN_F, false);
-    sleep_us(BUTTON_SLEEP_US);
+    busy_wait_us_32(BUTTON_SLEEP_US);
     out[INPUT_CODE_LT]    = !gpio_get(PGPIO_PUSH_H);
     out[INPUT_CODE_RT]    = !gpio_get(PGPIO_PUSH_G);
     out[GCU_INPUT_CODE_B]     = !gpio_get(PGPIO_PUSH_I);
