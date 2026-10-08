@@ -54,7 +54,7 @@ static const hoja_config_s _hoja_config = {
     .battery_shutdown_percent = 0,
 
     // Device identity + app-facing URLs.
-    .device_name   = "GCU-2S",
+    .device_name   = "GCU 2S",
     .device_maker  = "HHL",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_2s/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_2s/gcu_2s.uf2",

@@ -14,19 +14,22 @@
 // ---------------------------------
 
 // HOJA Transport driver gates.
-#define HOJA_TRANSPORT_BT_DRIVER        BT_DRIVER_ESP32HOJA
+#define HOJA_TRANSPORT_BT_DRIVER        BT_DRIVER_ESP32HCI
 #define HOJA_TRANSPORT_USB_DRIVER       USB_DRIVER_HAL
 #define HOJA_TRANSPORT_JOYBUS64_DRIVER  JOYBUS_N64_DRIVER_HAL
 #define HOJA_TRANSPORT_JOYBUSGC_DRIVER  JOYBUS_GC_DRIVER_HAL
 #define HOJA_TRANSPORT_NESBUS_DRIVER    NESBUS_DRIVER_HAL
 
-// ESP32 baseband (I2C instance must match hoja_config_s.i2c wiring).
+// ESP32 (I2C instance must match hoja_config_s.i2c wiring).
 #define BLUETOOTH_DRIVER_I2C_INSTANCE      1
 #define BLUETOOTH_DRIVER_ENABLE_PIN        26
 #define BLUETOOTH_DRIVER_BATMON_ENABLE     1
 #define BLUETOOTH_DRIVER_BATMON_ADC_GPIO   36
 
-// USB mux (required for ESP32 baseband).
+// Battery level measured by the ESP32
+#define HOJA_FUELGAUGE_DRIVER              FUELGAUGE_DRIVER_ESP32
+
+// USB mux (required for the ESP32).
 #define HOJA_USB_MUX_DRIVER         USB_MUX_DRIVER_PI3USB4000A
 #define USB_MUX_DRIVER_ENABLE_PIN   24
 #define USB_MUX_DRIVER_SELECT_PIN   25

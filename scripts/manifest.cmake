@@ -81,9 +81,15 @@ file(MAKE_DIRECTORY ${UF2_TARGET})
 file(MAKE_DIRECTORY ${BIN_TARGET})
 file(MAKE_DIRECTORY ${MANIFEST_TARGET})
 
-# Get file names without paths
-get_filename_component(UF2_FILENAME ${UF2_SOURCE} NAME)
-get_filename_component(BIN_FILENAME ${BIN_SOURCE} NAME)
+# Get file names without paths. TARGET_NAME (optional) publishes under another name, for devices
+# still pointing at a board's old name.
+if(DEFINED TARGET_NAME)
+    set(UF2_FILENAME "${TARGET_NAME}.uf2")
+    set(BIN_FILENAME "${TARGET_NAME}.bin")
+else()
+    get_filename_component(UF2_FILENAME ${UF2_SOURCE} NAME)
+    get_filename_component(BIN_FILENAME ${BIN_SOURCE} NAME)
+endif()
 
 # Set full target paths
 set(UF2_TARGET_FILE "${UF2_TARGET}/${UF2_FILENAME}")
@@ -91,8 +97,8 @@ set(BIN_TARGET_FILE "${BIN_TARGET}/${BIN_FILENAME}")
 set(MANIFEST_JSON "${MANIFEST_TARGET}/manifest.json")
 
 # Copy files to target locations
-file(COPY ${UF2_SOURCE} DESTINATION ${UF2_TARGET})
-file(COPY ${BIN_SOURCE} DESTINATION ${BIN_TARGET})
+configure_file(${UF2_SOURCE} ${UF2_TARGET_FILE} COPYONLY)
+configure_file(${BIN_SOURCE} ${BIN_TARGET_FILE} COPYONLY)
 
 # Calculate SHA256 checksum of the BIN file
 file(SHA256 ${BIN_TARGET_FILE} BIN_CHECKSUM)
