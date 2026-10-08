@@ -40,7 +40,8 @@ Boards: all
   to get it. Until then Bluetooth keeps working as before.
 - Fix: [esp32, gcu_2, pico_w, latte_pro, progcc_3s] SInput over Bluetooth on a PC reports at a
   steady 125 Hz.
-- Action: [esp32] Pair again after updating the ESP32 firmware.
+- Action: [esp32] Pair again after updating the ESP32 firmware: turn the controller on while holding
+  Plus (or Start), then pair it from the Switch (Change Grip/Order) or the device's Bluetooth settings.
 
 ### Battery
 - New: [gcu_1, gcu_r4k] Battery level over Bluetooth.
@@ -68,8 +69,8 @@ Boards: all
 ### Wireless
 - Fix: [esp32] Switch over Bluetooth no longer clashes with a Switch the controller was plugged into
   over USB.
-- Action: [esp32] Pair again in Switch mode after updating: on the Switch, open Change Grip/Order
-  and press the controller's sync button. You only need to do this once.
+- Action: [esp32] Pair again in Switch mode after updating: on the Switch, open Change Grip/Order,
+  then turn the controller on while holding Plus (or Start). You only need to do this once.
 
 ### System
 - Fix: The firmware ignores button bindings it doesn't recognise, so settings saved by a newer app
