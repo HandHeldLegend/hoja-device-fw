@@ -31,6 +31,13 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-08 - ESP32 version
+Boards: esp32
+
+### Wireless
+- Fix: The controller reads the ESP32 firmware version correctly. Some read it as 0xFFFF, which
+  stopped Bluetooth on the old ESP32 firmware and hid the ESP32 update in the app.
+
 ## 2026-10-08 - Switch mode over Bluetooth
 Boards: all
 
