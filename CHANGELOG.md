@@ -35,19 +35,18 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 Boards: all
 
 ### Wireless
-- New: [gcu_1, gcu_r4k] The GCU R4K is now the GCU 1, and gets the same Bluetooth as the GCU 2,
-  Wii mode included. Update the ESP32 firmware too to get it. Until then Bluetooth keeps working
-  as before.
-- Fix: [gcu_1, gcu_r4k, gcu_2, pico_w, latte_pro, progcc_3s] SInput over Bluetooth on a PC reports at a
+- New: [gcu_1, gcu_r4k] The GCU R4K is now the GCU 1.
+- New: [esp32] The same Bluetooth as the GCU 2, Wii mode included. Update the ESP32 firmware too
+  to get it. Until then Bluetooth keeps working as before.
+- Fix: [esp32, gcu_2, pico_w, latte_pro, progcc_3s] SInput over Bluetooth on a PC reports at a
   steady 125 Hz.
-- Action: [gcu_1, gcu_r4k] Pair again after updating the ESP32 firmware.
+- Action: [esp32] Pair again after updating the ESP32 firmware.
 
 ### Battery
 - New: [gcu_1, gcu_r4k] Battery level over Bluetooth.
 
 ### System
-- Action: [gcu_1, gcu_r4k] Settings are reset by this update. Calibrate the sticks again
-  afterwards.
+- Action: [esp32] Settings are reset by this update. Calibrate the sticks again afterwards.
 
 ## 2026-10-07 - Motion flicks
 Boards: all
