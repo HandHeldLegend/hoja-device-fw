@@ -31,6 +31,38 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-09 - Auto mode
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
+
+### Modes
+- New: Auto mode picks the mode at startup from what the controller is plugged into: a PC, a
+  Switch, a GameCube, an N64, an SNES or an NES. It switches without restarting.
+- New: [esp32, gcu_2, latte_pro, pico_w] On battery, Auto connects to whichever saved console or
+  PC answers first: Switch, then Wii, then PC. If none answers, it waits in Switch mode.
+- New: Separate default modes for wired and for battery. Choose them on the Gamepad page of the
+  app.
+- Change: After updating, a default mode of Switch Pro (the factory setting) becomes Auto, wired
+  and on battery. Any other default keeps working as before.
+- Change: [gcu_2, latte_pro] On battery, a default of GameCube, XInput or Slippi no longer starts
+  WLAN. The battery default is used instead. Use the WLAN button combo at power-on to start WLAN.
+
+### RGB
+- Change: In Authentic lighting, face buttons light by their printed letter: Nintendo colors in
+  Switch and SNES modes, Xbox colors in SInput and XInput modes.
+- Change: Brightness changes fade instead of jumping.
+- New: While Auto is choosing a mode, every button shows the Power LED color and the Power LED
+  blinks. The mode's lighting fades in once it is chosen.
+
+### Motion
+- Fix: [esp32, gcu_2, latte_pro, pico_w] The Wii pointer reaches the whole screen with the Wii's
+  sensor bar set to above the TV.
+
+## 2026-10-08 - SInput at 1000 Hz
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
+
+### Input
+- Fix: SInput over USB reports at 1000 Hz again. On the GCU 2 it had dropped to about 100 Hz.
+
 ## 2026-10-08 - ESP32 version
 Boards: esp32
 
