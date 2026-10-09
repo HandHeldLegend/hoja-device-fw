@@ -38,6 +38,8 @@ Boards: esp32
 - Fix: Bluetooth recovers by itself if the ESP32 stops responding, also while pairing or
   reconnecting. Before, Bluetooth stayed dead until the controller was turned off, and a console
   could keep showing it as connected.
+- Fix: With the latest ESP32 firmware (update it from the app), a console sees the controller
+  disconnect if the controller freezes, instead of keeping a controller that does nothing.
 
 ## 2026-10-09 - Bluetooth recovery and power button reset
 Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
