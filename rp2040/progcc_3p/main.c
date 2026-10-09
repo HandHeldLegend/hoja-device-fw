@@ -79,7 +79,7 @@ static const hoja_config_s _hoja_config = {
     .device_maker  = "HHL",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/progcc_3p/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/progcc_3p/progcc_3p.uf2",
-    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/user-guide-CGDu7Js71s",
+    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/progcc-3-31-32-wireless-8IT8pSbgGR",
     .fcc_id        = NULL,
 
     .usb_vid = 0x2E8A,

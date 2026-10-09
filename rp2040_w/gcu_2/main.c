@@ -83,7 +83,7 @@ static const hoja_config_s _hoja_config = {
     .device_maker  = "HHL",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_2/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_2/gcu_2.uf2",
-    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z",
+    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/gc-ultimate-2-A4ZYMkNIB9",
     .fcc_id        = "2BM3E-GCU-R5",
 
     // USB identity (also advertised over WLAN / SInput).

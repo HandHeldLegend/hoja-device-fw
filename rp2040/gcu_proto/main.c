@@ -86,7 +86,7 @@ static const hoja_config_s _hoja_config = {
     .device_maker  = "HHL",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_proto/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_proto/gcu_proto.uf2",
-    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z",
+    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/prototype-edition-qz0IsP08Yv",
     .fcc_id        = NULL,
 
     .usb_vid = 0x2E8A,

@@ -52,7 +52,7 @@ static const hoja_config_s _hoja_config = {
     .device_maker  = "HHL",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/super_gamepad/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/super_gamepad/super_gamepad.uf2",
-    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/user-guide-ZCJzKM9emw",
+    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/super-gamepad-MiOt0KLuX4",
     .fcc_id        = NULL,
 
     .usb_vid = 0,

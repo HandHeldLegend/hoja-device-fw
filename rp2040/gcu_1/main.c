@@ -86,7 +86,7 @@ static const hoja_config_s _hoja_config = {
     .device_maker  = "HHL",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_1/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/gcu_1/gcu_1.uf2",
-    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z",
+    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/gc-ultimate-1-kickstarter-edition-PsA7fEmGfD",
     .fcc_id        = "2BM3E-GCU-R4K",
 
     .usb_vid = 0x2E8A,

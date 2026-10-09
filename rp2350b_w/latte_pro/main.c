@@ -91,7 +91,7 @@ static const hoja_config_s _hoja_config = {
     .device_maker  = "HHL",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/latte_pro/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/latte_pro/latte_pro.uf2",
-    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z",
+    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/hoja-controllers-nqnqslegRP",
     .fcc_id        = NULL,
 
     // Old board_config had VID/PID commented out, so stay on library defaults.

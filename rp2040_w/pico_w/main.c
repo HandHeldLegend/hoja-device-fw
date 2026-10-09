@@ -17,7 +17,7 @@ static const hoja_config_s _hoja_config = {
     .device_maker  = "RPI",
     .manifest_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/pico_w/manifest.json",
     .firmware_url  = "https://raw.githubusercontent.com/HandHeldLegend/hoja-device-fw/main/builds/pico_w/pico_w.uf2",
-    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/user-guide-UoDtIku68z",
+    .manual_url    = "https://docs.handheldlegend.com/s/portal/doc/hoja-controllers-nqnqslegRP",
     .fcc_id        = NULL,
 
     .usb_vid = 0,
