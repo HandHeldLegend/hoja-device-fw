@@ -31,6 +31,22 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-09 - Stronger Flick Down, Auto connects to PCs faster
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
+
+### Motion
+- Fix: Flick Down is as strong and quick as Flick Up, just the other way. Before, it felt weaker.
+- Change: [esp32, gcu_2, latte_pro, pico_w] The default Wii layouts use Flick Up instead of Flick
+  Down: Remote Flick Up on R (and ZR in Sideways), Nunchuk Flick Up on the left stick click. Saved
+  layouts are not changed. Reset the Wii layout to defaults to get the new ones.
+
+### Wireless
+- Change: [esp32, gcu_2, latte_pro, pico_w] On battery, Auto only checks for a saved Switch or Wii.
+  If neither is on, it goes straight to SInput to connect to your PC, so PCs connect sooner.
+- Fix: [esp32, gcu_2, latte_pro, pico_w] Several controllers turned on at the same time all connect
+  to a PC. Before, one could miss its turn and stay unconnected. A controller that can't connect
+  now tries again a few times.
+
 ## 2026-10-09 - ESP32 recovery
 Boards: esp32
 

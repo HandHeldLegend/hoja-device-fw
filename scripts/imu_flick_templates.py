@@ -42,6 +42,17 @@ MIRRORED = {"flick_left": "flick_right"}
 MIRROR_ACCEL = np.array([-1, 1, 1])
 MIRROR_GYRO = np.array([1, -1, -1])
 
+# Directions built by turning another one upside down: the same stroke, pitching the other way.
+# Recorded down flicks pushed forward far more than the up flicks and ran longer, so Flick Down
+# felt weaker than Flick Up.
+INVERTED = {"flick_down": "flick_up"}
+
+# Inverting top-to-bottom (Z -> -Z) flips the hand's motion along Z and, being a turn, the gyro's
+# X and Y. Gravity can't be flipped the same way (it moves the same whichever way the controller
+# pitches), so it is taken out first and worked out again for the inverted turn.
+INVERT_MOTION = np.array([1, 1, -1])
+INVERT_GYRO = np.array([-1, -1, 1])
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT_H = os.path.join(HERE, "..", "library", "HOJA-LIB-RP2040", "src", "input", "motion_gesture_flicks.h")
 
@@ -104,6 +115,35 @@ def template(folder, take, axis, sign, length_ms, rest):
     return len(starts), np.round(a).astype(int), np.round(g).astype(int)
 
 
+def gravity(gyro_dps, up_mg):
+    """How the resting reading changes as the controller turns by gyro_dps from rest (mg)."""
+    u = np.array(up_mg, dtype=float)
+    out = [np.zeros(3)]
+    for i in range(len(gyro_dps) - 1):
+        # HOJA's axes are left-handed, so up, seen from the controller, turns by the gyro as read
+        # (the opposite of the right-handed rule). Checked against the recordings: only this way
+        # round does the pull toward the wrist track the spin squared.
+        w = np.radians((gyro_dps[i] + gyro_dps[i + 1]) / 2.0) * STEP_MS / 1000.0
+        angle = np.linalg.norm(w)
+        if angle > 0:
+            k = w / angle
+            u = u * np.cos(angle) + np.cross(k, u) * np.sin(angle) + k * np.dot(k, u) * (1 - np.cos(angle))
+        out.append(u - up_mg)
+    return np.array(out)
+
+
+def invert(a, g, up_mg):
+    # Summing the turn doesn't quite land back at rest, so fade gravity out with the table's tail
+    fade = np.ones(len(g))
+    n_tail = TAPER_MS // STEP_MS
+    fade[-n_tail:] = np.linspace(1, 0, n_tail)
+
+    g_inv = g * INVERT_GYRO
+    motion = a - gravity(g, up_mg) * fade[:, None]
+    a_inv = motion * INVERT_MOTION + gravity(g_inv, up_mg) * fade[:, None]
+    return np.round(a_inv).astype(int), g_inv
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("folder", help="folder with rest.csv and flick_*.csv")
@@ -135,7 +175,14 @@ def main():
         "",
     ]
     for name, take, axis, sign, length in FLICKS:
-        if take in MIRRORED:
+        if take in INVERTED:
+            src = INVERTED[take]
+            src_axis, src_sign, src_length = next((f[2], f[3], f[4]) for f in FLICKS if f[1] == src)
+            count, a, g = template(args.folder, src, src_axis, src_sign, src_length, rest)
+            a, g = invert(a.astype(float), g, rest[0:3] * ACCEL_MG_PER_LSB)
+            print(f"{take}: inverted from {src} ({count} flicks averaged), {len(a)} samples")
+            lines.append(f"// {take}: {src} turned upside down ({count} flicks averaged)")
+        elif take in MIRRORED:
             src = MIRRORED[take]
             src_axis, src_sign, src_length = next((f[2], f[3], f[4]) for f in FLICKS if f[1] == src)
             count, a, g = template(args.folder, src, src_axis, src_sign, src_length, rest)
