@@ -117,7 +117,7 @@ static const hoja_config_s _hoja_config = {
     .sync_on_boot_code   = INPUT_CODE_START,
     .sync_macro_code     = { INPUT_CODE_UNUSED, INPUT_CODE_UNUSED },
     .usb_bootloader_code = { INPUT_CODE_LB, INPUT_CODE_START },
-    .wlan_force_code     = INPUT_CODE_UNUSED,
+    .wlan_force_code     = INPUT_CODE_RB, // R
 
     .joybus = { .data_pin = 4 },
 
