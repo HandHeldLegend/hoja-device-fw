@@ -31,6 +31,17 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-09 - Wii pairing with several controllers
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
+
+### Wireless
+- Fix: [esp32, gcu_2, latte_pro, pico_w] Pairing another controller with a Wii no longer stalls
+  while one is already connected. Before, the Wii needed a restart and could freeze.
+
+### System
+- Fix: [esp32] Fixed a case where the controller stayed frozen after turning off and needed its
+  battery unplugged.
+
 ## 2026-10-09 - Auto mode
 Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
 
