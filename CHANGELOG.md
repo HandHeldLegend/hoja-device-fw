@@ -31,6 +31,14 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-09 - ESP32 recovery
+Boards: esp32
+
+### Wireless
+- Fix: Bluetooth recovers by itself if the ESP32 stops responding, also while pairing or
+  reconnecting. Before, Bluetooth stayed dead until the controller was turned off, and a console
+  could keep showing it as connected.
+
 ## 2026-10-09 - Bluetooth recovery and power button reset
 Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
 
