@@ -31,6 +31,21 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-09 - Bluetooth recovery and power button reset
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
+
+### Wireless
+- Fix: [esp32] Bluetooth recovers by itself if the ESP32 restarts or its link backs up. Before,
+  the controller could look connected but do nothing until it was restarted.
+- Fix: [esp32, gcu_2, latte_pro, pico_w] A connected controller no longer shows up when a Switch
+  or PC searches for new controllers, like Wii mode already does.
+- Change: [esp32, gcu_2, latte_pro, pico_w] In Wii mode the controller only sends what changed
+  unless the game asks for continuous updates, like a real Wii Remote.
+
+### System
+- New: [esp32, gcu_2, latte_pro] Hold the power button for 15 seconds to force a restart if the
+  controller ever freezes, with no need to unplug the battery.
+
 ## 2026-10-09 - Wii pairing with several controllers
 Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
 
