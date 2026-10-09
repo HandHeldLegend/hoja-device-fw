@@ -46,6 +46,8 @@ Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, 
 - Fix: [esp32, gcu_2, latte_pro, pico_w] Several controllers turned on at the same time all connect
   to a PC. Before, one could miss its turn and stay unconnected. A controller that can't connect
   now tries again a few times.
+- Fix: [esp32] Update the ESP32 firmware from the app to stop a disconnect of about 10 seconds
+  every 10 to 15 minutes. It came with the previous ESP32 firmware.
 
 ## 2026-10-09 - ESP32 recovery
 Boards: esp32
