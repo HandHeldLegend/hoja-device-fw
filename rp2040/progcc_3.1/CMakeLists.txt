@@ -35,6 +35,11 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/pico_override.cmake")
     )
 endif()
 
+# Board build options, such as the Bluetooth host stack (sets target properties)
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/board.cmake")
+    include(${CMAKE_CURRENT_LIST_DIR}/board.cmake)
+endif()
+
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
     PICO_FLASH_SAFE_EXECUTE_PICO_SUPPORT_MULTICORE_LOCKOUT=1
