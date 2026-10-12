@@ -205,12 +205,28 @@ def send(which, data, read=False):
         d.close()
 
 
+def wait_dongle_gamepad(timeout):
+    """True once a gamepad is connected through the dongle (the dongle drops tunnel traffic before)."""
+    end = time.time() + timeout
+    while time.time() < end:
+        try:
+            i = dongle_info()
+            if i and i["gamepad"]:
+                return True
+        except RuntimeError:
+            pass
+        time.sleep(0.5)
+    return False
+
+
 def pad_command(cmd):
     """A gamepad config command: on its own cable if it is there, else through the dongle."""
     data = [WEBUSB_ID_CONFIG_COMMAND, CFG_BLOCK_GAMEPAD, cmd]
     if find_webusb("pad"):
         send("pad", data)
         return "cable"
+    if not wait_dongle_gamepad(20):
+        raise RuntimeError("no gamepad on its cable or through the dongle")
     send("dongle", data)
     return "dongle"
 
@@ -300,17 +316,9 @@ def flash_pad(image, then_dongle, in_bootloader=False):
         pad_command(GAMEPAD_CMD_REBOOT_DONGLE)
         print("gamepad -> dongle link")
         wait_for(lambda s: not s["pad"], 10, "the gamepad to leave USB")
-        end = time.time() + 20
-        while time.time() < end:
-            try:
-                i = dongle_info()
-                if i and i["gamepad"]:
-                    print("gamepad connected through the dongle: %s" % i.get("gamepad_name"))
-                    return
-            except RuntimeError:
-                pass
-            time.sleep(0.5)
-        raise RuntimeError("the gamepad did not connect to the dongle")
+        if not wait_dongle_gamepad(20):
+            raise RuntimeError("the gamepad did not connect to the dongle")
+        print("gamepad connected through the dongle")
 
 
 def main():
