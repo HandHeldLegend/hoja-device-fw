@@ -31,6 +31,14 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-12 - ESP32 updates work on more PCs
+Boards: esp32
+
+### Wireless
+- Fix: Updating the ESP32 firmware from the app works on PCs where it used to fail, mostly
+  Windows PCs with AMD processors. Before, the update could not start because the ESP32 never
+  entered update mode. Install this firmware first, then update the ESP32.
+
 ## 2026-10-09 - Stronger Flick Down, Auto connects to PCs faster
 Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
 
