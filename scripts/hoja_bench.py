@@ -9,6 +9,7 @@ transport, flashes UF2 images through the bootloader drive, and reports what is 
     python -I scripts/hoja_bench.py pad-boot                    # gamepad -> bootloader (cable in)
     python -I scripts/hoja_bench.py pad-dongle [mode]           # gamepad: reboot onto the dongle link
     python -I scripts/hoja_bench.py pad-bt [mode]               # gamepad: reboot into Bluetooth
+                                       [--pair]   # either: and start pairing (dongle mode: Link first)
         mode: switch xinput slippi gamecube n64 snes sinput wii (kept, as a boot combo's would be);
         none keeps the current mode
     python -I scripts/hoja_bench.py flash-dongle <image.uf2>    # several dongles: --use hoja|pico|pico2
@@ -273,8 +274,9 @@ MODES = {"switch": 0, "xinput": 1, "slippi": 2, "gamecube": 3, "n64": 4, "snes":
 
 
 def pad_command(cmd, arg=None):
-    """A gamepad config command: on its own cable if it is there, else through the dongle."""
-    data = [WEBUSB_ID_CONFIG_COMMAND, CFG_BLOCK_GAMEPAD, cmd] + ([0x80 | arg] if arg is not None else [])
+    """A gamepad config command: on its own cable if it is there, else through the dongle. arg is the
+    command's argument byte as sent (for the reboots: 0x80 | mode, 0x40 to pair)."""
+    data = [WEBUSB_ID_CONFIG_COMMAND, CFG_BLOCK_GAMEPAD, cmd] + ([arg] if arg is not None else [])
     if find_webusb("pad"):
         send("pad", data)
         return "cable"
@@ -400,8 +402,12 @@ def main():
         elif cmd == "pad-boot":
             print("via", pad_command(GAMEPAD_CMD_RESET_TO_BOOTLOADER))
         elif cmd in ("pad-dongle", "pad-bt"):
-            mode = MODES[a[1]] if len(a) > 1 else None
-            print("via", pad_command(GAMEPAD_CMD_REBOOT_DONGLE if cmd == "pad-dongle" else GAMEPAD_CMD_REBOOT_BLUETOOTH, mode))
+            pair = "--pair" in a
+            names = [x for x in a[1:] if x != "--pair"]
+            arg = (0x80 | MODES[names[0]]) if names else 0
+            arg |= 0x40 if pair else 0
+            print("via", pad_command(GAMEPAD_CMD_REBOOT_DONGLE if cmd == "pad-dongle" else GAMEPAD_CMD_REBOOT_BLUETOOTH,
+                                     arg if arg else None))
         elif cmd == "flash-dongle":
             flash_dongle(a[1])
         elif cmd == "flash-pad":
