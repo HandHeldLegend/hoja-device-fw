@@ -165,9 +165,9 @@ def config_read_static(link, block=0):
 
 
 class Session:
-    """The app's side: keep the Link device open (reopen when Windows drops it), and repeat the host
-    info every second until the gamepad says who it is (Windows keeps a paired HID device present
-    while it is disconnected, so an open device doesn't mean a connected gamepad)."""
+    """The app's side: keep the Link device open (reopen when Windows drops it), and send the host
+    info every second (Windows keeps a paired HID device present while it is disconnected, so an
+    open device doesn't mean a connected gamepad, and the gamepad can't see the app quit)."""
 
     def __init__(self):
         self.link = None
@@ -195,8 +195,9 @@ class Session:
                 self.link.label = self.label
                 log("Link device open (in %d, out %d)" % (in_len, out_len))
             self.link.label = self.label
-            if not self.wakes or (self.inputs and time.perf_counter() * 1e6 - self.inputs[-1][0] > 1e6):
-                self.link.host(self.mode, self.interval)
+            # Every second: it brings a reconnected gamepad up, and tells a running one the app is
+            # still there (silent for 3 s, the gamepad goes back to looking for a dongle)
+            self.link.host(self.mode, self.interval)
             time.sleep(1.0)
 
     def host(self, mode, interval):
