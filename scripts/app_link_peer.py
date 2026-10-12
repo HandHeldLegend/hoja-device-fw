@@ -6,6 +6,7 @@ read through the link. Prints what arrived and the timing of the live reports (a
 gamepad's sample time, drift removed).
 
     python -I scripts/app_link_peer.py [--wait 120]
+    python -I scripts/app_link_peer.py --ab 240 [--save ab.json]   # A/B build (HOJA_BT_APP_ASSESS_AB)
 
 Windows only (Winsock Bluetooth). No admin needed.
 """
@@ -184,7 +185,49 @@ def config_read_static(peer, block=0):
     return data, (time.perf_counter() - t) * 1000, any(c[3] == 0xFF for c in chunks)
 
 
+def ab_report(inputs, interval_ms):
+    """Per state (bit 15 of seq): reports/s, gaps over 8 ms with their lengths and spacing."""
+    for state, name in ((0, "RFCOMM alone"), (1, "HID up too")):
+        rows = [r for r in inputs if (r[1] >> 15) == state]
+        # Contiguous stretches of one state, without the first 0.5 s after each flip
+        runs, cur = [], []
+        for a in rows:
+            if cur and a[0] - cur[-1][0] > 1e6:
+                runs.append(cur)
+                cur = []
+            cur.append(a)
+        if cur:
+            runs.append(cur)
+        dur, n, gaps, stall_times = 0.0, 0, [], []
+        for run in runs:
+            run = [r for r in run if r[0] - run[0][0] > 5e5]
+            if len(run) < 10:
+                continue
+            dur += (run[-1][0] - run[0][0]) / 1e6
+            n += len(run)
+            for a, b in zip(run, run[1:]):
+                g = (b[0] - a[0]) / 1000
+                gaps.append(g)
+                if g >= 8:
+                    stall_times.append((a[0], g))
+        if not dur:
+            continue
+        lens = sorted(g for _, g in stall_times)
+        spacing = sorted((b[0] - a[0]) / 1000 for a, b in zip(stall_times, stall_times[1:]))
+        print("  %-15s %5.0f s  %4.0f/s | gaps >= 8 ms: %4d (%.2f/s), length p50 %.1f max %.1f ms, spacing p50 %s ms | gap p99 %.2f ms" % (
+            name, dur, n / dur, len(stall_times), len(stall_times) / dur,
+            pct(lens, .5) if lens else 0, lens[-1] if lens else 0,
+            "%.0f" % pct(spacing, .5) if spacing else "-", pct(gaps, .99)))
+        hist = {}
+        for g in lens:
+            k = int(g // 5) * 5
+            hist[k] = hist.get(k, 0) + 1
+        print("                  gap lengths: " + ", ".join("%d-%d ms: %d" % (k, k + 5, v) for k, v in sorted(hist.items())))
+
+
 def main():
+    if "--ab" in sys.argv:
+        return main_ab(float(sys.argv[sys.argv.index("--ab") + 1]))
     wait = 120.0
     if "--wait" in sys.argv:
         wait = float(sys.argv[sys.argv.index("--wait") + 1])
@@ -235,6 +278,47 @@ def main():
     for label in ("SInput 4 ms", "SInput 2 ms", "XInput 2 ms", "SInput 2 ms again"):
         timing(peer.inputs, label)
     print("reliable reports (command replies): %d, bulk: %d, WAKEs: %d" % (len(peer.reports), peer.bulk, len(peer.wakes)))
+    return 0
+
+
+def main_ab(seconds):
+    srv = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+    srv.bind(("00:00:00:00:00:00", CHANNEL))
+    srv.listen(1)
+    ok, err = publish(CHANNEL)
+    log("A/B: listening; SDP record %s" % ("published" if ok else "NOT published (%d)" % err))
+    # The gamepad may drop and call again (an A/B that changes the connection): keep accepting
+    peer = None
+    end = time.perf_counter() + seconds
+    srv.settimeout(120)
+    while time.perf_counter() < end:
+        try:
+            conn, addr = srv.accept()
+        except socket.timeout:
+            log("no gamepad for 120 s")
+            break
+        log("gamepad connected from %s" % (addr,))
+        if peer is None:
+            peer = Peer(conn)
+        else:
+            peer.c, peer.buf = conn, b""
+        try:
+            peer.send(host(1, 4000))
+            peer.pump(end - time.perf_counter())
+        except ConnectionError as e:
+            log(str(e))
+        finally:
+            conn.close()
+    srv.close()
+    publish(CHANNEL, register=False)
+    if peer is None:
+        return 1
+    if "--save" in sys.argv:
+        import json
+        json.dump(peer.inputs, open(sys.argv[sys.argv.index("--save") + 1], "w"))
+    print()
+    print("SInput at 4 ms, HID next to the link every other 45 s:")
+    ab_report(peer.inputs, 4)
     return 0
 
 

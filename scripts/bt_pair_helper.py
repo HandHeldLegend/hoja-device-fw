@@ -3,6 +3,7 @@ Just Works pairing a gamepad starts (it calls this PC without a key).
 
     python -I scripts/bt_pair_helper.py remove 6AF4B0E017D7
     python -I scripts/bt_pair_helper.py accept 6AF4B0E017D7 [seconds]   # waits, accepts, reports
+    python -I scripts/bt_pair_helper.py enable-hid 6AF4B0E017D7          # install its HID service
 
 Uses bthprops (BluetoothRemoveDevice, BluetoothRegisterForAuthenticationEx,
 BluetoothSendAuthenticationResponseEx). No admin needed.
@@ -98,12 +99,34 @@ def accept(a, seconds):
     return paired
 
 
+class GUID(ctypes.Structure):
+    _fields_ = [("d1", ctypes.c_uint32), ("d2", ctypes.c_uint16), ("d3", ctypes.c_uint16), ("d4", ctypes.c_ubyte * 8)]
+
+
+# HumanInterfaceDeviceServiceClass_UUID: 00001124-0000-1000-8000-00805F9B34FB
+HID_SERVICE = GUID(0x00001124, 0x0000, 0x1000, (ctypes.c_ubyte * 8)(0x80, 0x00, 0x00, 0x80, 0x5F, 0x9B, 0x34, 0xFB))
+
+
+def enable_hid(a):
+    """Turn on the HID service for a paired device (what Settings does after pairing a HID device
+    from the PC's side). A device that paired by calling us gets no services by itself."""
+    d = info(a)
+    if not d:
+        print("%012X is not paired" % a)
+        return False
+    r = bt.BluetoothSetServiceState(None, ctypes.byref(d), ctypes.byref(HID_SERVICE), 1)  # BLUETOOTH_SERVICE_ENABLE
+    print("enable HID service on %012X: result %d" % (a, r))
+    return r == 0
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         sys.exit(__doc__)
     a = addr(sys.argv[2])
     if sys.argv[1] == "remove":
         sys.exit(0 if remove(a) else 1)
+    if sys.argv[1] == "enable-hid":
+        sys.exit(0 if enable_hid(a) else 1)
     if sys.argv[1] == "accept":
         sys.exit(0 if accept(a, float(sys.argv[3]) if len(sys.argv) > 3 else 60) else 1)
     sys.exit(__doc__)
