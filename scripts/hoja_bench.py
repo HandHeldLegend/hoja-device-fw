@@ -7,9 +7,11 @@ transport, flashes UF2 images through the bootloader drive, and reports what is 
     python -I scripts/hoja_bench.py dongle-info
     python -I scripts/hoja_bench.py dongle-boot                 # dongle -> bootloader
     python -I scripts/hoja_bench.py pad-boot                    # gamepad -> bootloader (cable in)
-    python -I scripts/hoja_bench.py pad-dongle                  # gamepad: reboot onto the dongle link
-    python -I scripts/hoja_bench.py pad-bt                      # gamepad: reboot into Bluetooth
-    python -I scripts/hoja_bench.py flash-dongle <image.uf2>
+    python -I scripts/hoja_bench.py pad-dongle [mode]           # gamepad: reboot onto the dongle link
+    python -I scripts/hoja_bench.py pad-bt [mode]               # gamepad: reboot into Bluetooth
+        mode: switch xinput slippi gamecube n64 snes sinput wii (kept, as a boot combo's would be);
+        none keeps the current mode
+    python -I scripts/hoja_bench.py flash-dongle <image.uf2>    # several dongles: --use hoja|pico|pico2
     python -I scripts/hoja_bench.py flash-pad <image.uf2> [--dongle]   # then back onto the dongle link
                                        [--in-bootloader]   # already there (put by hand)
 
@@ -31,7 +33,11 @@ if sys.platform != "win32":
 
 WEBUSB_GUID = "{8B3E9D2E-7EEC-4994-AAE7-0C40DE84D36D}"
 HOJA_VID = "VID_2E8A"
-BOOTSEL_PID = "PID_0003"
+# Bootloaders: RP2040 (the gamepads, Pico W dongles) and RP2350 (the HOJA dongle board, Pico 2 W)
+BOOTSEL_PIDS = ("PID_0003", "PID_000F")
+DONGLE_BOARDS = {"hoja": 1, "pico": 2, "pico2": 3}       # dongle_info board ids
+DONGLE_CHIP_PID = {1: "PID_000F", 2: "PID_0003", 3: "PID_000F"}
+DONGLE_SEL = None  # --use <board>: which dongle, when several are attached
 DONGLE_SERIAL = "000000"
 
 # WebUSB commands (HOJA-LIB-RP2040 settings_shared_types.h, the dongle's dongle_webusb.h)
@@ -178,11 +184,51 @@ class WebUsb:
         k32.CloseHandle(ctypes.c_void_p(self.f))
 
 
-def find_webusb(which):
-    """The WebUSB path of 'dongle' or 'pad' (the gamepad on its own cable), or None."""
+def _info_from(r):
+    if not r or len(r) < 22 or r[0] != DONGLE_WEBUSB_INFO:
+        return None
+    info = {
+        "protocol": r[1], "board": r[2], "fw": int.from_bytes(r[4:8], "little"),
+        "host_kind": r[10], "host_mode": r[11], "gamepad": bool(r[3]),
+    }
+    if r[3]:
+        info.update({"gamepad_mode": r[12], "gamepad_fw": int.from_bytes(r[14:18], "little"),
+                     "gamepad_vid": int.from_bytes(r[18:20], "little"), "gamepad_pid": int.from_bytes(r[20:22], "little"),
+                     "gamepad_name": r[22:54].split(b"\0")[0].decode(errors="replace")})
+    return info
+
+
+def dongles():
+    """[(path, info)] of every attached dongle answering WebUSB (they all report serial 000000)."""
+    out = []
     for path, parent in webusb_devices():
-        s = serial_of(parent)
-        if (which == "dongle") == (s == DONGLE_SERIAL):
+        if serial_of(parent) != DONGLE_SERIAL:
+            continue
+        try:
+            out.append((path, _info_from(send_path(path, [DONGLE_WEBUSB_INFO], read=True))))
+        except RuntimeError:
+            pass
+    return out
+
+
+def find_dongle(prefer_gamepad=False):
+    """The selected dongle (--use), else the one with a gamepad when asked, else the only one."""
+    ds = [(p, i) for p, i in dongles() if i]
+    if DONGLE_SEL:
+        ds = [(p, i) for p, i in ds if i["board"] == DONGLE_BOARDS[DONGLE_SEL]]
+    if prefer_gamepad and any(i["gamepad"] for _, i in ds):
+        ds = [(p, i) for p, i in ds if i["gamepad"]]
+    if len(ds) > 1 and not prefer_gamepad:
+        raise RuntimeError("several dongles attached: pick one with --use %s" % "|".join(DONGLE_BOARDS))
+    return ds[0] if ds else (None, None)
+
+
+def find_webusb(which):
+    """The WebUSB path of 'dongle' (see find_dongle) or 'pad' (the gamepad on its own cable), or None."""
+    if which == "dongle":
+        return find_dongle(prefer_gamepad=True)[0]
+    for path, parent in webusb_devices():
+        if serial_of(parent) != DONGLE_SERIAL:
             return path
     return None
 
@@ -191,6 +237,10 @@ def send(which, data, read=False):
     path = find_webusb(which)
     if not path:
         raise RuntimeError("no %s WebUSB interface present" % which)
+    return send_path(path, data, read)
+
+
+def send_path(path, data, read=False):
     d = WebUsb(path)
     try:
         if not d.write(data):
@@ -219,9 +269,12 @@ def wait_dongle_gamepad(timeout):
     return False
 
 
-def pad_command(cmd):
+MODES = {"switch": 0, "xinput": 1, "slippi": 2, "gamecube": 3, "n64": 4, "snes": 5, "sinput": 6, "wii": 7}
+
+
+def pad_command(cmd, arg=None):
     """A gamepad config command: on its own cable if it is there, else through the dongle."""
-    data = [WEBUSB_ID_CONFIG_COMMAND, CFG_BLOCK_GAMEPAD, cmd]
+    data = [WEBUSB_ID_CONFIG_COMMAND, CFG_BLOCK_GAMEPAD, cmd] + ([0x80 | arg] if arg is not None else [])
     if find_webusb("pad"):
         send("pad", data)
         return "cable"
@@ -239,7 +292,8 @@ def bootloader_drives():
         p = "%s:\\INFO_UF2.TXT" % letter
         if os.path.exists(p):
             try:
-                if "RPI-RP2" in open(p, errors="ignore").read():
+                txt = open(p, errors="ignore").read()
+                if "RPI-RP2" in txt or "RP2350" in txt:
                     out.append("%s:\\" % letter)
             except OSError:
                 pass
@@ -248,9 +302,10 @@ def bootloader_drives():
 
 def state():
     devs = usb_devices()
-    boot = [d for d in devs if BOOTSEL_PID in d]
-    dongle = [d for d in devs if BOOTSEL_PID not in d and serial_of(d) == DONGLE_SERIAL]
-    pad = [d for d in devs if BOOTSEL_PID not in d and serial_of(d) != DONGLE_SERIAL]
+    isboot = lambda d: any(p in d for p in BOOTSEL_PIDS)
+    boot = [d for d in devs if isboot(d)]
+    dongle = [d for d in devs if not isboot(d) and serial_of(d) == DONGLE_SERIAL]
+    pad = [d for d in devs if not isboot(d) and serial_of(d) != DONGLE_SERIAL]
     return {"bootloader": boot, "dongle": dongle, "pad": pad, "drives": bootloader_drives()}
 
 
@@ -265,29 +320,20 @@ def wait_for(cond, timeout, what):
 
 
 def dongle_info():
-    r = send("dongle", [DONGLE_WEBUSB_INFO], read=True)
-    if not r or len(r) < 22:
-        return None
-    info = {
-        "protocol": r[1], "board": r[2], "fw": int.from_bytes(r[4:8], "little"),
-        "host_kind": r[10], "host_mode": r[11], "gamepad": bool(r[3]),
-    }
-    if r[3]:
-        info.update({"gamepad_mode": r[12], "gamepad_fw": int.from_bytes(r[14:18], "little"),
-                     "gamepad_vid": int.from_bytes(r[18:20], "little"), "gamepad_pid": int.from_bytes(r[20:22], "little"),
-                     "gamepad_name": r[22:54].split(b"\0")[0].decode(errors="replace")})
-    return info
+    return find_dongle(prefer_gamepad=True)[1]
 
 
 # --- flashing ---
 
-def flash(image, target):
-    other = "pad" if target == "dongle" else "dongle"
+def flash(image, target, before, chip_pid=None):
+    """Copy image to the one bootloader drive, once the board sent there (target) has left and every
+    other board is still running: then the bootloader can only be it. chip_pid: its bootloader's PID."""
     st = wait_for(lambda s: len(s["drives"]) == 1 and len(s["bootloader"]) == 1, 15, "the bootloader drive")
-    if st[target]:
-        raise RuntimeError("the %s is still running: the board in the bootloader is not it" % target)
-    if other == "dongle" and not st["dongle"]:
-        raise RuntimeError("the dongle is not running: cannot tell which board is in the bootloader")
+    others = "pad" if target == "dongle" else "dongle"
+    if len(st[target]) != len(before[target]) - 1 or len(st[others]) != len(before[others]):
+        raise RuntimeError("cannot tell which board is in the bootloader: not flashing")
+    if chip_pid and chip_pid not in st["bootloader"][0]:
+        raise RuntimeError("the bootloader is the wrong chip (%s): not flashing" % st["bootloader"][0])
     drive = st["drives"][0]
     shutil.copyfile(image, os.path.join(drive, os.path.basename(image)))
     wait_for(lambda s: not s["drives"], 15, "the bootloader to finish")
@@ -295,20 +341,27 @@ def flash(image, target):
 
 
 def flash_dongle(image):
-    if state()["drives"]:
+    before = state()
+    if before["drives"]:
         raise RuntimeError("a board is already in the bootloader")
-    send("dongle", [DONGLE_WEBUSB_BOOTLOADER])
-    flash(image, "dongle")
-    wait_for(lambda s: s["dongle"], 20, "the dongle to come back")
+    path, info = find_dongle()
+    if not path:
+        raise RuntimeError("no dongle")
+    send_path(path, [DONGLE_WEBUSB_BOOTLOADER])
+    flash(image, "dongle", before, DONGLE_CHIP_PID.get(info["board"]))
+    wait_for(lambda s: len(s["dongle"]) == len(before["dongle"]), 20, "the dongle to come back")
 
 
 def flash_pad(image, then_dongle, in_bootloader=False):
+    before = state()
+    if not before["pad"]:
+        before["pad"] = ["(on a dongle, or in the bootloader)"]  # it still counts as one gamepad
     if not in_bootloader:
-        if state()["drives"]:
+        if before["drives"]:
             raise RuntimeError("a board is already in the bootloader")
         via = pad_command(GAMEPAD_CMD_RESET_TO_BOOTLOADER)
         print("gamepad -> bootloader (%s)" % via)
-    flash(image, "pad")
+    flash(image, "pad", before, "PID_0003")
     # With a cable in and nothing in boot memory, it comes back wired
     wait_for(lambda s: s["pad"], 20, "the gamepad to come back on its cable")
     if then_dongle:
@@ -322,7 +375,12 @@ def flash_pad(image, then_dongle, in_bootloader=False):
 
 
 def main():
+    global DONGLE_SEL
     a = sys.argv[1:]
+    if "--use" in a:
+        i = a.index("--use")
+        DONGLE_SEL = a[i + 1]
+        del a[i:i + 2]
     if not a:
         sys.exit(__doc__)
     cmd = a[0]
@@ -334,15 +392,16 @@ def main():
             for path, parent in webusb_devices():
                 print("webusb     %s" % parent)
         elif cmd == "dongle-info":
-            print(dongle_info())
+            for path, info in dongles():
+                print(info)
         elif cmd == "dongle-boot":
-            send("dongle", [DONGLE_WEBUSB_BOOTLOADER])
+            path, _ = find_dongle()
+            send_path(path, [DONGLE_WEBUSB_BOOTLOADER])
         elif cmd == "pad-boot":
             print("via", pad_command(GAMEPAD_CMD_RESET_TO_BOOTLOADER))
-        elif cmd == "pad-dongle":
-            print("via", pad_command(GAMEPAD_CMD_REBOOT_DONGLE))
-        elif cmd == "pad-bt":
-            print("via", pad_command(GAMEPAD_CMD_REBOOT_BLUETOOTH))
+        elif cmd in ("pad-dongle", "pad-bt"):
+            mode = MODES[a[1]] if len(a) > 1 else None
+            print("via", pad_command(GAMEPAD_CMD_REBOOT_DONGLE if cmd == "pad-dongle" else GAMEPAD_CMD_REBOOT_BLUETOOTH, mode))
         elif cmd == "flash-dongle":
             flash_dongle(a[1])
         elif cmd == "flash-pad":
