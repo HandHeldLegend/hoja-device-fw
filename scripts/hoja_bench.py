@@ -11,6 +11,7 @@ transport, flashes UF2 images through the bootloader drive, and reports what is 
     python -I scripts/hoja_bench.py pad-bt                      # gamepad: reboot into Bluetooth
     python -I scripts/hoja_bench.py flash-dongle <image.uf2>
     python -I scripts/hoja_bench.py flash-pad <image.uf2> [--dongle]   # then back onto the dongle link
+                                       [--in-bootloader]   # already there (put by hand)
 
 The gamepad is reached directly when it is on USB in a wired mode, else through the dongle's
 tunnel. Its bootloader only appears with a cable in. Boards are told apart by USB serial: the
@@ -285,11 +286,12 @@ def flash_dongle(image):
     wait_for(lambda s: s["dongle"], 20, "the dongle to come back")
 
 
-def flash_pad(image, then_dongle):
-    if state()["drives"]:
-        raise RuntimeError("a board is already in the bootloader")
-    via = pad_command(GAMEPAD_CMD_RESET_TO_BOOTLOADER)
-    print("gamepad -> bootloader (%s)" % via)
+def flash_pad(image, then_dongle, in_bootloader=False):
+    if not in_bootloader:
+        if state()["drives"]:
+            raise RuntimeError("a board is already in the bootloader")
+        via = pad_command(GAMEPAD_CMD_RESET_TO_BOOTLOADER)
+        print("gamepad -> bootloader (%s)" % via)
     flash(image, "pad")
     # With a cable in and nothing in boot memory, it comes back wired
     wait_for(lambda s: s["pad"], 20, "the gamepad to come back on its cable")
@@ -336,7 +338,7 @@ def main():
         elif cmd == "flash-dongle":
             flash_dongle(a[1])
         elif cmd == "flash-pad":
-            flash_pad(a[1], "--dongle" in a[2:])
+            flash_pad(a[1], "--dongle" in a[2:], "--in-bootloader" in a[2:])
         else:
             sys.exit(__doc__)
     except RuntimeError as e:
