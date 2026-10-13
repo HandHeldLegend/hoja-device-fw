@@ -6,6 +6,8 @@ transport, flashes UF2 images through the bootloader drive, and reports what is 
     python -I scripts/hoja_bench.py status
     python -I scripts/hoja_bench.py dongle-info
     python -I scripts/hoja_bench.py dongle-boot                 # dongle -> bootloader
+    python -I scripts/hoja_bench.py dongle-mode <mode>          # the dongle's mode on a computer:
+                                                                # switch sinput xinput slippi
     python -I scripts/hoja_bench.py pad-boot                    # gamepad -> bootloader (cable in)
     python -I scripts/hoja_bench.py pad-dongle [mode]           # gamepad: reboot onto the dongle link
     python -I scripts/hoja_bench.py pad-bt [mode]               # gamepad: reboot into Bluetooth
@@ -34,6 +36,9 @@ if sys.platform != "win32":
 
 WEBUSB_GUID = "{8B3E9D2E-7EEC-4994-AAE7-0C40DE84D36D}"
 HOJA_VID = "VID_2E8A"
+# XInput and Slippi keep the IDs games look for; on a computer the config interface sits beside them
+OTHER_IDS = ("VID_045E&PID_028E", "VID_057E&PID_0337")
+USB_DEVICE_GUID = "{A5DCBF10-6530-11D2-901F-00C04FB951ED}"  # GUID_DEVINTERFACE_USB_DEVICE
 # Bootloaders: RP2040 (the gamepads, Pico W dongles) and RP2350 (the HOJA dongle board, Pico 2 W)
 BOOTSEL_PIDS = ("PID_0003", "PID_000F")
 DONGLE_BOARDS = {"hoja": 1, "pico": 2, "pico2": 3}       # dongle_info board ids
@@ -50,6 +55,8 @@ GAMEPAD_CMD_REBOOT_BLUETOOTH = 4
 REBOOT_ARG_MODE_SET, REBOOT_ARG_PAIR = 0x80, 0x40  # The reboots' argument: [mode given][pair][mode]
 DONGLE_WEBUSB_INFO = 0xD0
 DONGLE_WEBUSB_BOOTLOADER = 0xD1
+DONGLE_WEBUSB_PC_MODE = 0xD2
+DONGLE_MODES = {"switch": 0, "sinput": 1, "xinput": 2, "slippi": 3}  # dongle_mode_t
 
 setupapi = ctypes.windll.setupapi
 cfgmgr = ctypes.windll.cfgmgr32
@@ -113,8 +120,32 @@ def _device_id(devinst):
 
 
 def webusb_devices():
-    """[(path, parent device id)] of every present HOJA WebUSB interface."""
-    g = _guid(WEBUSB_GUID)
+    """[(path, parent device id)] of every present HOJA WebUSB interface. An adapter that Windows gave
+    WinUSB as a whole (Zadig's driver for the GameCube adapter) has no interface of its own: its
+    device path is listed, with its own id, and WebUsb reaches interface 1 through it."""
+    out = _interfaces(WEBUSB_GUID, parent=True)
+    out += [(path, did) for path, did in _interfaces(USB_DEVICE_GUID, parent=False)
+            if any(i in did.upper() for i in OTHER_IDS) and _service(did) == "WINUSB"]
+    return out
+
+
+def _service(device_id):
+    """The device's function driver service (upper case), or "" """
+    devinst = wt.DWORD()
+    if cfgmgr.CM_Locate_DevNodeW(ctypes.byref(devinst), ctypes.c_wchar_p(device_id), 0) != 0:
+        return ""
+    buf = ctypes.create_unicode_buffer(256)
+    size = wt.ULONG(ctypes.sizeof(buf))
+    # CM_DRP_SERVICE
+    if cfgmgr.CM_Get_DevNode_Registry_PropertyW(devinst, 0x05, None, buf, ctypes.byref(size), 0) != 0:
+        return ""
+    return buf.value.upper()
+
+
+def _interfaces(guid, parent):
+    """[(path, device id)] of present device interfaces of guid: the id of the device's parent, or
+    its own"""
+    g = _guid(guid)
     info_set = ctypes.c_void_p(setupapi.SetupDiGetClassDevsW(ctypes.byref(g), None, None,
                                                               0x12))  # PRESENT | DEVICEINTERFACE
     out = []
@@ -136,10 +167,12 @@ def webusb_devices():
                                                          ctypes.byref(dinfo)):
             continue
         path = ctypes.wstring_at(ctypes.addressof(buf) + 4)
-        parent = wt.DWORD()
-        has_parent = cfgmgr.CM_Get_Parent(ctypes.byref(parent), dinfo.DevInst, 0) == 0
-        pid = _device_id(parent.value) if has_parent else ""
-        out.append((path, pid))
+        if parent:
+            up = wt.DWORD()
+            has_parent = cfgmgr.CM_Get_Parent(ctypes.byref(up), dinfo.DevInst, 0) == 0
+            out.append((path, _device_id(up.value) if has_parent else ""))
+        else:
+            out.append((path, _device_id(dinfo.DevInst)))
     setupapi.SetupDiDestroyDeviceInfoList(info_set)
     return out
 
@@ -156,7 +189,7 @@ def usb_devices():
             break
         i += 1
         did = _device_id(dinfo.DevInst)
-        if HOJA_VID in did.upper() and "&MI_" not in did.upper():
+        if (HOJA_VID in did.upper() or any(i in did.upper() for i in OTHER_IDS)) and "&MI_" not in did.upper():
             out.append(did.upper())
     setupapi.SetupDiDestroyDeviceInfoList(ctypes.c_void_p(h))
     return out
@@ -170,13 +203,23 @@ class WebUsb:
     def __init__(self, path):
         self.f = k32.CreateFileW(path, 0xC0000000, 3, None, 3, 0x40000080, None)
         if self.f in (None, ctypes.c_void_p(-1).value):
-            raise RuntimeError("cannot open the WebUSB interface (is the config app open in a browser?)")
-        self.h = ctypes.c_void_p()
-        if not winusb.WinUsb_Initialize(ctypes.c_void_p(self.f), ctypes.byref(self.h)):
+            raise RuntimeError("cannot open the WebUSB interface (is the config app open in a browser, "
+                               "or Dolphin holding the adapter?)")
+        self.h0 = ctypes.c_void_p()
+        if not winusb.WinUsb_Initialize(ctypes.c_void_p(self.f), ctypes.byref(self.h0)):
             k32.CloseHandle(ctypes.c_void_p(self.f))
             raise RuntimeError("WinUsb_Initialize failed (%d)" % k32.GetLastError())
+        self.h = self.h0
         d = IFACE_DESC()
         winusb.WinUsb_QueryInterfaceSettings(self.h, 0, ctypes.byref(d))
+        if d.bInterfaceClass != 0xFF or d.bInterfaceSubClass != 0:
+            # The whole adapter: the config interface is the next one
+            self.h = ctypes.c_void_p()
+            if not winusb.WinUsb_GetAssociatedInterface(self.h0, 0, ctypes.byref(self.h)):
+                self.h = None
+                self.close()
+                raise RuntimeError("no config interface beside the adapter")
+            winusb.WinUsb_QueryInterfaceSettings(self.h, 0, ctypes.byref(d))
         self.ep_in = self.ep_out = None
         for n in range(d.bNumEndpoints):
             pi = PIPE_INFO()
@@ -201,7 +244,9 @@ class WebUsb:
         return None
 
     def close(self):
-        winusb.WinUsb_Free(self.h)
+        if self.h and self.h is not self.h0:
+            winusb.WinUsb_Free(self.h)
+        winusb.WinUsb_Free(self.h0)
         k32.CloseHandle(ctypes.c_void_p(self.f))
 
 
@@ -262,15 +307,16 @@ def send(which, data, read=False):
     return send_path(path, data, read)
 
 
-def send_path(path, data, read=False):
+def send_path(path, data, read=False, reply=None):
+    """reply: the reply's first byte, when it isn't the command's own"""
     d = WebUsb(path)
     try:
         if not d.write(data):
-            raise RuntimeError("write to the %s failed" % which)
+            raise RuntimeError("write to %s failed" % path)
         if read:
             for _ in range(10):
                 r = d.read()
-                if r and r[0] == data[0]:
+                if r and r[0] == (data[0] if reply is None else reply):
                     return r
             return None
     finally:
@@ -420,6 +466,12 @@ def main():
         elif cmd == "dongle-boot":
             path, _ = find_dongle()
             send_path(path, [DONGLE_WEBUSB_BOOTLOADER])
+        elif cmd == "dongle-mode":
+            path, _ = find_dongle(prefer_gamepad=True)
+            if not path:
+                raise RuntimeError("no dongle")
+            print(_info_from(send_path(path, [DONGLE_WEBUSB_PC_MODE, DONGLE_MODES[a[1]]], read=True,
+                                       reply=DONGLE_WEBUSB_INFO)))
         elif cmd == "pad-boot":
             print("via", pad_command(GAMEPAD_CMD_RESET_TO_BOOTLOADER))
         elif cmd in ("pad-dongle", "pad-bt"):
