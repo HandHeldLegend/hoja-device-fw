@@ -138,6 +138,10 @@ class Link:
                     self.wakes.append(w)
                     log("WAKE %s" % w)
                     self.write_msg(LANE_STATUS, [1, 1, 0, 0, 0, 0])  # adopted, player 1
+                elif p[0] == 7:  # DONGLE_LINK_MSG_TOKEN: the gamepad's call token
+                    self.token = bytes(p[1:17])
+                    log("call token %s" % self.token.hex())
+                    open(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".link_token"), "w").write(self.token.hex())
                 elif p[0] == MSG_CONFIG:
                     self.configs.append(bytes(p[1:]))
                 elif p[0] == MSG_REPORT:
