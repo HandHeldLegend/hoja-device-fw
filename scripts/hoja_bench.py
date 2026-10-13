@@ -47,6 +47,7 @@ CFG_BLOCK_GAMEPAD = 0
 GAMEPAD_CMD_RESET_TO_BOOTLOADER = 1
 GAMEPAD_CMD_REBOOT_DONGLE = 3
 GAMEPAD_CMD_REBOOT_BLUETOOTH = 4
+REBOOT_ARG_MODE_SET, REBOOT_ARG_PAIR = 0x80, 0x40  # The reboots' argument: [mode given][pair][mode]
 DONGLE_WEBUSB_INFO = 0xD0
 DONGLE_WEBUSB_BOOTLOADER = 0xD1
 
@@ -59,27 +60,43 @@ k32.CreateFileW.restype = ctypes.c_void_p
 
 
 class GUID(ctypes.Structure):
-    _fields_ = [("Data1", wt.DWORD), ("Data2", wt.WORD), ("Data3", wt.WORD), ("Data4", ctypes.c_ubyte * 8)]
+    _fields_ = [("Data1", wt.DWORD),
+                ("Data2", wt.WORD),
+                ("Data3", wt.WORD),
+                ("Data4", ctypes.c_ubyte * 8)]
 
 
 class SP_DEVICE_INTERFACE_DATA(ctypes.Structure):
-    _fields_ = [("cbSize", wt.DWORD), ("InterfaceClassGuid", GUID), ("Flags", wt.DWORD), ("Reserved", ctypes.c_void_p)]
+    _fields_ = [("cbSize", wt.DWORD),
+                ("InterfaceClassGuid", GUID),
+                ("Flags", wt.DWORD),
+                ("Reserved", ctypes.c_void_p)]
 
 
 class SP_DEVINFO_DATA(ctypes.Structure):
-    _fields_ = [("cbSize", wt.DWORD), ("ClassGuid", GUID), ("DevInst", wt.DWORD), ("Reserved", ctypes.c_void_p)]
+    _fields_ = [("cbSize", wt.DWORD),
+                ("ClassGuid", GUID),
+                ("DevInst", wt.DWORD),
+                ("Reserved", ctypes.c_void_p)]
 
 
 class PIPE_INFO(ctypes.Structure):
-    _fields_ = [("PipeType", ctypes.c_int), ("PipeId", ctypes.c_ubyte), ("MaximumPacketSize", ctypes.c_ushort),
+    _fields_ = [("PipeType", ctypes.c_int),
+                ("PipeId", ctypes.c_ubyte),
+                ("MaximumPacketSize", ctypes.c_ushort),
                 ("Interval", ctypes.c_ubyte)]
 
 
 class IFACE_DESC(ctypes.Structure):
-    _fields_ = [("bLength", ctypes.c_ubyte), ("bDescriptorType", ctypes.c_ubyte), ("bInterfaceNumber", ctypes.c_ubyte),
-                ("bAlternateSetting", ctypes.c_ubyte), ("bNumEndpoints", ctypes.c_ubyte),
-                ("bInterfaceClass", ctypes.c_ubyte), ("bInterfaceSubClass", ctypes.c_ubyte),
-                ("bInterfaceProtocol", ctypes.c_ubyte), ("iInterface", ctypes.c_ubyte)]
+    _fields_ = [("bLength", ctypes.c_ubyte),
+                ("bDescriptorType", ctypes.c_ubyte),
+                ("bInterfaceNumber", ctypes.c_ubyte),
+                ("bAlternateSetting", ctypes.c_ubyte),
+                ("bNumEndpoints", ctypes.c_ubyte),
+                ("bInterfaceClass", ctypes.c_ubyte),
+                ("bInterfaceSubClass", ctypes.c_ubyte),
+                ("bInterfaceProtocol", ctypes.c_ubyte),
+                ("iInterface", ctypes.c_ubyte)]
 
 
 def _guid(s):
@@ -98,29 +115,32 @@ def _device_id(devinst):
 def webusb_devices():
     """[(path, parent device id)] of every present HOJA WebUSB interface."""
     g = _guid(WEBUSB_GUID)
-    h = setupapi.SetupDiGetClassDevsW(ctypes.byref(g), None, None, 0x12)  # PRESENT | DEVICEINTERFACE
+    info_set = ctypes.c_void_p(setupapi.SetupDiGetClassDevsW(ctypes.byref(g), None, None,
+                                                              0x12))  # PRESENT | DEVICEINTERFACE
     out = []
     i = 0
     while True:
         did = SP_DEVICE_INTERFACE_DATA()
         did.cbSize = ctypes.sizeof(did)
-        if not setupapi.SetupDiEnumDeviceInterfaces(ctypes.c_void_p(h), None, ctypes.byref(g), i, ctypes.byref(did)):
+        if not setupapi.SetupDiEnumDeviceInterfaces(info_set, None, ctypes.byref(g), i, ctypes.byref(did)):
             break
         i += 1
         need = wt.DWORD()
-        setupapi.SetupDiGetDeviceInterfaceDetailW(ctypes.c_void_p(h), ctypes.byref(did), None, 0, ctypes.byref(need), None)
+        setupapi.SetupDiGetDeviceInterfaceDetailW(info_set, ctypes.byref(did), None, 0, ctypes.byref(need),
+                                                  None)
         buf = ctypes.create_string_buffer(need.value)
         ctypes.cast(buf, ctypes.POINTER(wt.DWORD))[0] = 8 if ctypes.sizeof(ctypes.c_void_p) == 8 else 6
         dinfo = SP_DEVINFO_DATA()
         dinfo.cbSize = ctypes.sizeof(dinfo)
-        if not setupapi.SetupDiGetDeviceInterfaceDetailW(ctypes.c_void_p(h), ctypes.byref(did), buf, need, None,
+        if not setupapi.SetupDiGetDeviceInterfaceDetailW(info_set, ctypes.byref(did), buf, need, None,
                                                          ctypes.byref(dinfo)):
             continue
         path = ctypes.wstring_at(ctypes.addressof(buf) + 4)
         parent = wt.DWORD()
-        pid = _device_id(parent.value) if cfgmgr.CM_Get_Parent(ctypes.byref(parent), dinfo.DevInst, 0) == 0 else ""
+        has_parent = cfgmgr.CM_Get_Parent(ctypes.byref(parent), dinfo.DevInst, 0) == 0
+        pid = _device_id(parent.value) if has_parent else ""
         out.append((path, pid))
-    setupapi.SetupDiDestroyDeviceInfoList(ctypes.c_void_p(h))
+    setupapi.SetupDiDestroyDeviceInfoList(info_set)
     return out
 
 
@@ -194,7 +214,8 @@ def _info_from(r):
     }
     if r[3]:
         info.update({"gamepad_mode": r[12], "gamepad_fw": int.from_bytes(r[14:18], "little"),
-                     "gamepad_vid": int.from_bytes(r[18:20], "little"), "gamepad_pid": int.from_bytes(r[20:22], "little"),
+                     "gamepad_vid": int.from_bytes(r[18:20], "little"),
+                     "gamepad_pid": int.from_bytes(r[20:22], "little"),
                      "gamepad_name": r[22:54].split(b"\0")[0].decode(errors="replace")})
     return info
 
@@ -275,7 +296,7 @@ MODES = {"switch": 0, "xinput": 1, "slippi": 2, "gamecube": 3, "n64": 4, "snes":
 
 def pad_command(cmd, arg=None):
     """A gamepad config command: on its own cable if it is there, else through the dongle. arg is the
-    command's argument byte as sent (for the reboots: 0x80 | mode, 0x40 to pair)."""
+    command's argument byte as sent (for the reboots: REBOOT_ARG_*)."""
     data = [WEBUSB_ID_CONFIG_COMMAND, CFG_BLOCK_GAMEPAD, cmd] + ([arg] if arg is not None else [])
     if find_webusb("pad"):
         send("pad", data)
@@ -404,10 +425,10 @@ def main():
         elif cmd in ("pad-dongle", "pad-bt"):
             pair = "--pair" in a
             names = [x for x in a[1:] if x != "--pair"]
-            arg = (0x80 | MODES[names[0]]) if names else 0
-            arg |= 0x40 if pair else 0
-            print("via", pad_command(GAMEPAD_CMD_REBOOT_DONGLE if cmd == "pad-dongle" else GAMEPAD_CMD_REBOOT_BLUETOOTH,
-                                     arg if arg else None))
+            arg = (REBOOT_ARG_MODE_SET | MODES[names[0]]) if names else 0
+            arg |= REBOOT_ARG_PAIR if pair else 0
+            reboot = GAMEPAD_CMD_REBOOT_DONGLE if cmd == "pad-dongle" else GAMEPAD_CMD_REBOOT_BLUETOOTH
+            print("via", pad_command(reboot, arg if arg else None))
         elif cmd == "flash-dongle":
             flash_dongle(a[1])
         elif cmd == "flash-pad":

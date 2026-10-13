@@ -22,25 +22,38 @@ class SYSTEMTIME(ctypes.Structure):
 
 
 class BLUETOOTH_DEVICE_INFO(ctypes.Structure):
-    _fields_ = [("dwSize", wintypes.DWORD), ("Address", ctypes.c_ulonglong), ("ulClassofDevice", wintypes.ULONG),
-                ("fConnected", wintypes.BOOL), ("fRemembered", wintypes.BOOL), ("fAuthenticated", wintypes.BOOL),
-                ("stLastSeen", SYSTEMTIME), ("stLastUsed", SYSTEMTIME), ("szName", wintypes.WCHAR * 248)]
+    _fields_ = [("dwSize", wintypes.DWORD),
+                ("Address", ctypes.c_ulonglong),
+                ("ulClassofDevice", wintypes.ULONG),
+                ("fConnected", wintypes.BOOL),
+                ("fRemembered", wintypes.BOOL),
+                ("fAuthenticated", wintypes.BOOL),
+                ("stLastSeen", SYSTEMTIME),
+                ("stLastUsed", SYSTEMTIME),
+                ("szName", wintypes.WCHAR * 248)]
 
 
 class AUTH_PARAMS(ctypes.Structure):
-    _fields_ = [("deviceInfo", BLUETOOTH_DEVICE_INFO), ("authenticationMethod", ctypes.c_int),
-                ("ioCapability", ctypes.c_int), ("authenticationRequirements", ctypes.c_int),
+    _fields_ = [("deviceInfo", BLUETOOTH_DEVICE_INFO),
+                ("authenticationMethod", ctypes.c_int),
+                ("ioCapability", ctypes.c_int),
+                ("authenticationRequirements", ctypes.c_int),
                 ("Numeric_Value", wintypes.ULONG)]
 
 
 class AUTH_RESPONSE(ctypes.Structure):
     # bthAddressRemote, authMethod, union (largest: OOB data 32 bytes), negativeResponse
-    _fields_ = [("bthAddressRemote", ctypes.c_ulonglong), ("authMethod", ctypes.c_int),
-                ("value", ctypes.c_ubyte * 32), ("negativeResponse", ctypes.c_ubyte)]
+    _fields_ = [("bthAddressRemote", ctypes.c_ulonglong),
+                ("authMethod", ctypes.c_int),
+                ("value", ctypes.c_ubyte * 32),
+                ("negativeResponse", ctypes.c_ubyte)]
 
 
 CALLBACK = ctypes.WINFUNCTYPE(wintypes.BOOL, ctypes.c_void_p, ctypes.POINTER(AUTH_PARAMS))
-METHODS = {1: "legacy PIN", 2: "OOB", 3: "numeric comparison / Just Works", 4: "passkey notification", 5: "passkey"}
+METHODS = {1: "legacy PIN", 2: "OOB", 3: "numeric comparison / Just Works", 4: "passkey notification",
+           5: "passkey"}
+SERVICE_DISABLE, SERVICE_ENABLE = 0, 1
+MITM_NOT_REQUIRED_GENERAL_BONDING = 4
 
 
 def addr(text):
@@ -73,9 +86,9 @@ def accept(a, seconds):
         ctypes.memmove(resp.value, ctypes.byref(wintypes.ULONG(prm.Numeric_Value)), 4)
         resp.negativeResponse = 0
         r = bt.BluetoothSendAuthenticationResponseEx(None, ctypes.byref(resp))
-        print("  auth request: %s, io %d, value %d -> accepted (result %d)" % (
-            METHODS.get(prm.authenticationMethod, prm.authenticationMethod), prm.ioCapability, prm.Numeric_Value, r),
-            flush=True)
+        method = METHODS.get(prm.authenticationMethod, prm.authenticationMethod)
+        print("  auth request: %s, io %d, value %d -> accepted (result %d)"
+              % (method, prm.ioCapability, prm.Numeric_Value, r), flush=True)
         return True
 
     cb = CALLBACK(on_auth)
@@ -101,11 +114,15 @@ def accept(a, seconds):
 
 
 class GUID(ctypes.Structure):
-    _fields_ = [("d1", ctypes.c_uint32), ("d2", ctypes.c_uint16), ("d3", ctypes.c_uint16), ("d4", ctypes.c_ubyte * 8)]
+    _fields_ = [("d1", ctypes.c_uint32),
+                ("d2", ctypes.c_uint16),
+                ("d3", ctypes.c_uint16),
+                ("d4", ctypes.c_ubyte * 8)]
 
 
 # HumanInterfaceDeviceServiceClass_UUID: 00001124-0000-1000-8000-00805F9B34FB
-HID_SERVICE = GUID(0x00001124, 0x0000, 0x1000, (ctypes.c_ubyte * 8)(0x80, 0x00, 0x00, 0x80, 0x5F, 0x9B, 0x34, 0xFB))
+HID_SERVICE = GUID(0x00001124, 0x0000, 0x1000,
+                   (ctypes.c_ubyte * 8)(0x80, 0x00, 0x00, 0x80, 0x5F, 0x9B, 0x34, 0xFB))
 
 
 def disable_hid(a):
@@ -114,7 +131,7 @@ def disable_hid(a):
     if not d:
         print("%012X is not paired" % a)
         return False
-    r = bt.BluetoothSetServiceState(None, ctypes.byref(d), ctypes.byref(HID_SERVICE), 0)  # BLUETOOTH_SERVICE_DISABLE
+    r = bt.BluetoothSetServiceState(None, ctypes.byref(d), ctypes.byref(HID_SERVICE), SERVICE_DISABLE)
     print("disable HID service on %012X: result %d" % (a, r))
     return r == 0
 
@@ -126,15 +143,20 @@ def enable_hid(a):
     if not d:
         print("%012X is not paired" % a)
         return False
-    r = bt.BluetoothSetServiceState(None, ctypes.byref(d), ctypes.byref(HID_SERVICE), 1)  # BLUETOOTH_SERVICE_ENABLE
+    r = bt.BluetoothSetServiceState(None, ctypes.byref(d), ctypes.byref(HID_SERVICE), SERVICE_ENABLE)
     print("enable HID service on %012X: result %d" % (a, r))
     return r == 0
 
 
 class SEARCH_PARAMS(ctypes.Structure):
-    _fields_ = [("dwSize", wintypes.DWORD), ("fReturnAuthenticated", wintypes.BOOL), ("fReturnRemembered", wintypes.BOOL),
-                ("fReturnUnknown", wintypes.BOOL), ("fReturnConnected", wintypes.BOOL), ("fIssueInquiry", wintypes.BOOL),
-                ("cTimeoutMultiplier", ctypes.c_ubyte), ("hRadio", wintypes.HANDLE)]
+    _fields_ = [("dwSize", wintypes.DWORD),
+                ("fReturnAuthenticated", wintypes.BOOL),
+                ("fReturnRemembered", wintypes.BOOL),
+                ("fReturnUnknown", wintypes.BOOL),
+                ("fReturnConnected", wintypes.BOOL),
+                ("fIssueInquiry", wintypes.BOOL),
+                ("cTimeoutMultiplier", ctypes.c_ubyte),
+                ("hRadio", wintypes.HANDLE)]
 
 
 def find(a, seconds):
@@ -178,12 +200,14 @@ def pair(a, seconds):
             resp.authMethod = prm.authenticationMethod
             ctypes.memmove(resp.value, ctypes.byref(wintypes.ULONG(prm.Numeric_Value)), 4)
             r = bt.BluetoothSendAuthenticationResponseEx(None, ctypes.byref(resp))
-            print("  auth request: %s -> accepted (result %d)" % (METHODS.get(prm.authenticationMethod), r), flush=True)
+            method = METHODS.get(prm.authenticationMethod)
+            print("  auth request: %s -> accepted (result %d)" % (method, r), flush=True)
             return True
         cb = CALLBACK(on_auth)
         handle = ctypes.c_void_p()
         bt.BluetoothRegisterForAuthenticationEx(ctypes.byref(d), ctypes.byref(handle), cb, None)
-        r = bt.BluetoothAuthenticateDeviceEx(None, None, ctypes.byref(d), None, 4)  # MITM not required, general bonding
+        bonding = MITM_NOT_REQUIRED_GENERAL_BONDING
+        r = bt.BluetoothAuthenticateDeviceEx(None, None, ctypes.byref(d), None, bonding)
         bt.BluetoothUnregisterAuthentication(handle)
         print("pairing: result %d" % r)
         if r != 0:
