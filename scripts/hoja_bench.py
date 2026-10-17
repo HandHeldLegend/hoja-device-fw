@@ -11,7 +11,7 @@ transport, flashes UF2 images through the bootloader drive, and reports what is 
     python -I scripts/hoja_bench.py pad-boot                    # gamepad -> bootloader (cable in)
     python -I scripts/hoja_bench.py pad-dongle [mode]           # gamepad: reboot onto the dongle link
     python -I scripts/hoja_bench.py pad-bt [mode]               # gamepad: reboot into Bluetooth
-                                       [--pair]   # either: and start pairing (dongle mode: Link first)
+                                       [--pair]   # either: and start pairing
         mode: switch xinput slippi gamecube n64 snes sinput wii (kept, as a boot combo's would be);
         none keeps the current mode
     python -I scripts/hoja_bench.py flash-dongle <image.uf2>    # several dongles: --use hoja|pico|pico2
