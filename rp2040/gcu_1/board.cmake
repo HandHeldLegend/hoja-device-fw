@@ -16,6 +16,11 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 )
 
 # Released as the GCU R4K. Those units look for updates under builds/gcu_r4k, so publish there too.
+# This file is included twice (early for build options, last for publish steps): publish from the
+# last, once the UF2 exists.
+get_property(_gcu1_seen TARGET ${PROJECT_NAME} PROPERTY HOJA_BOARD_CMAKE_SEEN)
+set_property(TARGET ${PROJECT_NAME} PROPERTY HOJA_BOARD_CMAKE_SEEN ON)
+if(_gcu1_seen)
 add_custom_command(TARGET ${PROJECT_NAME}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND}
@@ -30,3 +35,4 @@ add_custom_command(TARGET ${PROJECT_NAME}
     COMMENT "Publishing ${PROJECT_NAME} for GCU R4K units"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
+endif()
