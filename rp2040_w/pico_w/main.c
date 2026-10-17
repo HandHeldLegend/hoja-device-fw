@@ -38,7 +38,6 @@ static const hoja_config_s _hoja_config = {
     .sync_macro_code   = { INPUT_CODE_UNUSED, INPUT_CODE_UNUSED },
 
     .usb_bootloader_code = { INPUT_CODE_SOUTH, INPUT_CODE_EAST },
-    .dongle_force_code     = INPUT_CODE_UNUSED,
 
     .inputs = {
         .slots = {

@@ -108,7 +108,6 @@ static const hoja_config_s _hoja_config = {
 
     .usb_bootloader_code  = { INPUT_CODE_LB, INPUT_CODE_START },
     .baseband_update_code = { INPUT_CODE_RB, INPUT_CODE_START },
-    .dongle_force_code      = INPUT_CODE_UNUSED,
 
     .joybus = {
         .data_pin = 20,

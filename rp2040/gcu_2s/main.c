@@ -82,7 +82,6 @@ static const hoja_config_s _hoja_config = {
 
     // Boot combos.
     .usb_bootloader_code = { INPUT_CODE_LB, INPUT_CODE_START },
-    .dongle_force_code     = INPUT_CODE_UNUSED,
 
     // Shared N64/GameCube joybus line (data on GPIO20).
     .joybus = {

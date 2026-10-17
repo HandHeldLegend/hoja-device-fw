@@ -96,7 +96,6 @@ static const hoja_config_s _hoja_config = {
     .sync_macro_code   = { INPUT_CODE_UNUSED, INPUT_CODE_UNUSED },
 
     .usb_bootloader_code = { INPUT_CODE_START, INPUT_CODE_SELECT },
-    .dongle_force_code     = INPUT_CODE_UNUSED,
 
     // Shared N64/GameCube joybus line (data on the SNES/NESBUS data pin).
     .joybus = {

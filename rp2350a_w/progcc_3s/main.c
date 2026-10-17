@@ -72,7 +72,6 @@ static const hoja_config_s _hoja_config = {
     .sync_macro_code   = { INPUT_CODE_MISC3, INPUT_CODE_UNUSED },
 
     .usb_bootloader_code = { INPUT_CODE_LB, INPUT_CODE_START },
-    .dongle_force_code     = INPUT_CODE_UNUSED,
 
     .joybus = { .data_pin = 0 },
 
