@@ -563,6 +563,23 @@ def stage_header(parts):
         b"".join(parts).ljust(4 * 24, b"\0")
 
 
+# A firmware's vector table: after the RP2040's second stage, or first on an RP2350
+VECTOR_OFFSETS = (0x100, 0)
+SRAM_START, SRAM_END = 0x20000000, 0x20082000  # The RP2350's; the RP2040's ends lower
+
+
+def slot_firmware_at(image, at, lay):
+    """True when image holds, at offset at, a firmware linked for the application slot: its stack in
+    RAM and its reset handler inside the slot"""
+    slot = (FLASH_BASE + lay["app_offset"], FLASH_BASE + lay["stage_header_offset"])
+    for vectors in (at + v for v in VECTOR_OFFSETS):
+        if len(image) >= vectors + 8:
+            sp, reset = struct.unpack_from("<II", image, vectors)
+            if SRAM_START <= sp <= SRAM_END and slot[0] <= reset < slot[1]:
+                return True
+    return False
+
+
 def update_stage(image_path, deflate, radio, break_dest):
     image = open(image_path, "rb").read()
     pb = open_update()
@@ -574,8 +591,12 @@ def update_stage(image_path, deflate, radio, break_dest):
             dest, dest_offset, room = STAGE_TO_RADIO, lay["radio_offset"], lay["radio_size"]
         else:
             # A whole board image is cut to the firmware; a firmware image is taken as it is
-            whole = image[lay["app_offset"]:lay["app_offset"] + 256] == image[:256]
-            part = image[lay["app_offset"]:] if whole else image
+            if slot_firmware_at(image, lay["app_offset"], lay):
+                part = image[lay["app_offset"]:]
+            elif slot_firmware_at(image, 0, lay):
+                part = image
+            else:
+                raise RuntimeError("not a firmware for this layout (nor a board image holding one)")
             dest, dest_offset = STAGE_TO_APP, lay["app_offset"]
             room = lay["stage_header_offset"] - lay["app_offset"]
         if not part or len(part) > room:
