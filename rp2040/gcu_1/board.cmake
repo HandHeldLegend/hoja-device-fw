@@ -10,6 +10,9 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY HOJA_BOARD_CMAKE_SEEN ON)
 # FLOSS on the RP2040, with the ESP32 HCI bridge as its controller
 if(NOT _gcu1_seen)
 hoja_use_floss(${PROJECT_NAME})
+# The HOJA bootloader in front of the firmware (updates over the air, WinUSB update mode). No radio
+# region: the radio is the ESP32, with its own firmware.
+hoja_use_bootloader(${PROJECT_NAME} "GCU 1" 0x100000 0 RGB_PIN 27 RGB_LEDS 9)
 endif()
 
 # Released as the GCU R4K. Those units look for updates under builds/gcu_r4k, so publish there too,
