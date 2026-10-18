@@ -46,9 +46,11 @@ class Pad:
     def close(self):
         self.d.close()
 
-    def ask(self, packet, reply_id, tries=20):
+    def ask(self, packet, reply_id, wait_s=5.0):
+        """Send, then read until the reply: the pad streams its input over WebUSB meanwhile"""
         self.d.write(packet)
-        for _ in range(tries):
+        end = time.time() + wait_s
+        while time.time() < end:
             r = self.d.read()
             if r and r[0] == reply_id:
                 return r
