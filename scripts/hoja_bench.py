@@ -18,6 +18,20 @@ transport, flashes UF2 images through the bootloader drive, and reports what is 
     python -I scripts/hoja_bench.py flash-pad <image.uf2> [--dongle]   # then back onto the dongle link
                                        [--in-bootloader]   # already there (put by hand)
 
+Boards with the HOJA bootloader: pad-boot opens its USB update mode (WinUSB, no driver install).
+    python -I scripts/hoja_bench.py update-flash <image.bin>    # the whole image from the start of flash,
+                                                                # read back, then the firmware starts
+    python -I scripts/hoja_bench.py update-stage <image.bin>    # staged as an update over the air would be,
+                                       [--deflate]              # then the bootloader writes it into place.
+                                       [--radio]                # The whole board image (.bin) is cut to the
+                                       [--break]                # firmware, or with --radio to the radio
+                                                                # region; --break erases the destination's
+                                                                # first sector first, to prove the write
+    python -I scripts/hoja_bench.py update-layout               # the layout as the bootloader reports it
+    python -I scripts/hoja_bench.py update-read <addr> <len>    # hex dump
+    python -I scripts/hoja_bench.py update-reboot               # back to the firmware
+    python -I scripts/hoja_bench.py update-rom                  # into the boot ROM's bootloader
+
 The gamepad is reached directly when it is on USB in a wired mode, else through the dongle's
 tunnel. Its bootloader only appears with a cable in. Boards are told apart by USB serial: the
 dongle reports 000000, the gamepad its chip id. Only one board may be in the bootloader at a
@@ -25,10 +39,11 @@ time (both share the bootloader's serial); a flash checks that the other one is 
 """
 import ctypes
 import os
-import shutil
 import string
+import struct
 import sys
 import time
+import zlib
 from ctypes import wintypes as wt
 
 if sys.platform != "win32":
@@ -39,6 +54,8 @@ HOJA_VID = "VID_2E8A"
 # XInput and Slippi keep the IDs games look for; on a computer the config interface sits beside them
 OTHER_IDS = ("VID_045E&PID_028E", "VID_057E&PID_0337")
 USB_DEVICE_GUID = "{A5DCBF10-6530-11D2-901F-00C04FB951ED}"  # GUID_DEVINTERFACE_USB_DEVICE
+# The HOJA bootloader's update mode (HOJA-LIB-RP2040 bootloader/boot_usb.c)
+UPDATE_GUID = "{2C8F6F2C-8CEF-4D98-8035-CE6AC66AB70A}"
 # Bootloaders: RP2040 (the gamepads, Pico W dongles) and RP2350 (the HOJA dongle board, Pico 2 W)
 BOOTSEL_PIDS = ("PID_0003", "PID_000F")
 DONGLE_BOARDS = {"hoja": 1, "pico": 2, "pico2": 3}       # dongle_info board ids
@@ -353,6 +370,219 @@ def pad_command(cmd, arg=None):
     return "dongle"
 
 
+# --- HOJA bootloader update mode (PICOBOOT over WinUSB) ---
+
+PB_MAGIC = 0x431FD10B
+PB_REBOOT, PB_ERASE, PB_WRITE, PB_READ = 0x02, 0x03, 0x05, 0x84
+PB_ROM_BOOTLOADER = 0x21
+FLASH_BASE = 0x10000000
+SECTOR = 4096
+BOOT_SIZE = 0x8000  # boot_layout.h
+STAGE_MAGIC = 0x45474154
+STAGE_VERSION = 1
+STAGE_STORED, STAGE_DEFLATE = 0, 1
+STAGE_TO_APP, STAGE_TO_RADIO = 0, 1
+REQ_FAULT, REQ_LAYOUT = 0x48, 0x49
+
+
+class Picoboot:
+    def __init__(self, path):
+        self.f = k32.CreateFileW(path, 0xC0000000, 3, None, 3, 0x40000080, None)
+        if self.f in (None, ctypes.c_void_p(-1).value):
+            raise RuntimeError("cannot open the update mode (is the config app holding it?)")
+        self.h = ctypes.c_void_p()
+        if not winusb.WinUsb_Initialize(ctypes.c_void_p(self.f), ctypes.byref(self.h)):
+            k32.CloseHandle(ctypes.c_void_p(self.f))
+            raise RuntimeError("WinUsb_Initialize failed (%d)" % k32.GetLastError())
+        d = IFACE_DESC()
+        winusb.WinUsb_QueryInterfaceSettings(self.h, 0, ctypes.byref(d))
+        for n in range(d.bNumEndpoints):
+            pi = PIPE_INFO()
+            winusb.WinUsb_QueryPipe(self.h, 0, n, ctypes.byref(pi))
+            if pi.PipeId & 0x80:
+                self.ep_in = pi.PipeId
+            else:
+                self.ep_out = pi.PipeId
+        t = wt.ULONG(5000)
+        for ep in (self.ep_in, self.ep_out):
+            winusb.WinUsb_SetPipePolicy(self.h, ep, 0x03, 4, ctypes.byref(t))  # PIPE_TRANSFER_TIMEOUT
+        self.token = 1
+
+    def reset(self):
+        """Clear a refused command: the pipes' halt on both ends, then PICOBOOT's interface reset"""
+        for ep in (self.ep_in, self.ep_out):
+            winusb.WinUsb_ResetPipe(self.h, ep)
+        setup = struct.pack("<BBHHH", 0x41, 0x41, 0, 0, 0)
+        n = wt.ULONG()
+        winusb.WinUsb_ControlTransfer(self.h, ctypes.c_uint64(int.from_bytes(setup, "little")), None, 0,
+                                      ctypes.byref(n), None)
+
+    def _out(self, data):
+        data = bytes(data)
+        b = (ctypes.c_ubyte * max(1, len(data))).from_buffer_copy(data or b"\0")
+        n = wt.ULONG()
+        if not winusb.WinUsb_WritePipe(self.h, self.ep_out, b, len(data), ctypes.byref(n), None):
+            raise RuntimeError("update mode: write failed (%d)" % k32.GetLastError())
+
+    def _in(self, length):
+        b = (ctypes.c_ubyte * max(64, length))()
+        n = wt.ULONG()
+        if not winusb.WinUsb_ReadPipe(self.h, self.ep_in, b, max(64, length), ctypes.byref(n), None):
+            raise RuntimeError("update mode: read failed (%d)" % k32.GetLastError())
+        return bytes(b[:n.value])
+
+    def cmd(self, cmd_id, args=b"", data=None, read_len=0):
+        """One PICOBOOT command: its packet, its data either way, then the acknowledgement"""
+        transfer = len(data) if data is not None else read_len
+        self._out(struct.pack("<IIBBHI", PB_MAGIC, self.token, cmd_id, len(args), 0, transfer) + args.ljust(16, b"\0"))
+        self.token += 1
+        if cmd_id & 0x80:
+            got = self._in(read_len)
+            self._out(b"")
+            return got
+        if data is not None:
+            self._out(data)
+        if self._in(0):
+            raise RuntimeError("update mode: acknowledgement carried data")
+        return None
+
+    def erase(self, addr, length):
+        self.cmd(PB_ERASE, struct.pack("<II", addr, length))
+
+    def write(self, addr, data):
+        self.cmd(PB_WRITE, struct.pack("<II", addr, len(data)), data=data)
+
+    def read(self, addr, length):
+        """In sectors: PICOBOOT moves at most one per command"""
+        out = b""
+        for at in range(addr, addr + length, SECTOR):
+            n = min(SECTOR, addr + length - at)
+            out += self.cmd(PB_READ, struct.pack("<II", at, n), read_len=n)
+        return out
+
+    def control_in(self, request, length):
+        """A PICOBOOT-style interface request, device to host"""
+        setup = struct.pack("<BBHHH", 0xC1, request, 0, 0, length)
+        b = (ctypes.c_ubyte * length)()
+        n = wt.ULONG()
+        if not winusb.WinUsb_ControlTransfer(self.h, ctypes.c_uint64(int.from_bytes(setup, "little")), b, length,
+                                             ctypes.byref(n), None):
+            raise RuntimeError("update mode: request 0x%02x failed (%d)" % (request, k32.GetLastError()))
+        return bytes(b[:n.value])
+
+    def layout(self):
+        v = struct.unpack("<B3xIIIIII", self.control_in(REQ_LAYOUT, 28))
+        keys = ("version", "flash_size", "radio_offset", "radio_size", "app_offset", "stage_header_offset",
+                "top_offset")
+        return dict(zip(keys, v))
+
+    def fault(self):
+        return struct.unpack("<II", self.control_in(REQ_FAULT, 8))
+
+    def reboot(self, rom=False):
+        try:
+            if rom:
+                self.cmd(PB_ROM_BOOTLOADER)
+            else:
+                self.cmd(PB_REBOOT, struct.pack("<III", 0, 0x20042000, 100))
+        except RuntimeError:
+            pass  # It may be gone before the acknowledgement is read
+
+    def close(self):
+        winusb.WinUsb_Free(self.h)
+        k32.CloseHandle(ctypes.c_void_p(self.f))
+
+
+def update_devices():
+    """[(path, device id)] of boards in the HOJA update mode"""
+    return _interfaces(UPDATE_GUID, parent=False)
+
+
+def open_update(timeout=15):
+    end = time.time() + timeout
+    while time.time() < end:
+        devs = update_devices()
+        if len(devs) > 1:
+            raise RuntimeError("several boards in the update mode")
+        if devs:
+            path, did = devs[0]
+            print("update mode: %s (driver %s)" % (did, _service(did) or "?"))
+            return Picoboot(path)
+        time.sleep(0.25)
+    raise RuntimeError("no board in the update mode")
+
+
+def write_image(pb, addr, image, label):
+    image = image + b"\xff" * ((-len(image)) % SECTOR)
+    t0 = time.time()
+    for off in range(0, len(image), SECTOR):
+        pb.erase(addr + off, SECTOR)
+        pb.write(addr + off, image[off:off + SECTOR])
+    t1 = time.time()
+    back = pb.read(addr, len(image))
+    t2 = time.time()
+    # The bootloader never rewrites its own sectors: compare the rest
+    skip = max(0, FLASH_BASE + BOOT_SIZE - addr)
+    if back[skip:] != image[skip:]:
+        bad = next(i for i in range(skip, len(image)) if back[i] != image[i])
+        raise RuntimeError("%s: read back differs at 0x%08x" % (label, addr + bad))
+    print("%s: %d KB written in %.1f s, read back in %.1f s, matches" % (label, len(image) // 1024, t1 - t0, t2 - t1))
+
+
+def update_flash(image_path):
+    image = open(image_path, "rb").read()
+    pb = open_update()
+    try:
+        if pb.read(FLASH_BASE, BOOT_SIZE) != image[:BOOT_SIZE]:
+            print("note: this image's bootloader differs from the board's, which stays as it is")
+        write_image(pb, FLASH_BASE, image, "image")
+        pb.reboot()
+    finally:
+        pb.close()
+
+
+def update_stage(image_path, deflate, radio, break_dest):
+    image = open(image_path, "rb").read()
+    pb = open_update()
+    try:
+        lay = pb.layout()
+        if radio:
+            # The radio region of a whole board image, without its unused tail
+            part = image[lay["radio_offset"]:lay["app_offset"]].rstrip(b"\xff")
+            dest, dest_offset, room = STAGE_TO_RADIO, lay["radio_offset"], lay["radio_size"]
+        else:
+            # A whole board image is cut to the firmware; a firmware image is taken as it is
+            whole = image[lay["app_offset"]:lay["app_offset"] + 256] == image[:256]
+            part = image[lay["app_offset"]:] if whole else image
+            dest, dest_offset, room = STAGE_TO_APP, lay["app_offset"], lay["stage_header_offset"] - lay["app_offset"]
+        if not part or len(part) > room:
+            raise RuntimeError("nothing to stage, or too large for its destination")
+
+        if deflate:
+            c = zlib.compressobj(9, zlib.DEFLATED, -15)
+            staged = c.compress(part) + c.flush()
+        else:
+            staged = part
+        data_offset = lay["stage_header_offset"] - (len(staged) + SECTOR - 1) // SECTOR * SECTOR
+        if data_offset < dest_offset + len(part):
+            raise RuntimeError("no room to stage %d bytes above a %d byte image" % (len(staged), len(part)))
+
+        write_image(pb, FLASH_BASE + data_offset, staged, "staged data")
+        if break_dest:
+            pb.erase(FLASH_BASE + dest_offset, SECTOR)
+            print("the destination's first sector erased")
+        header = struct.pack("<IIBBBBIIII", STAGE_MAGIC, STAGE_MAGIC ^ 0xFFFFFFFF, STAGE_VERSION,
+                             STAGE_DEFLATE if deflate else STAGE_STORED, dest, 0,
+                             len(staged), zlib.crc32(staged) & 0xFFFFFFFF, len(part), zlib.crc32(part) & 0xFFFFFFFF)
+        pb.erase(FLASH_BASE + lay["stage_header_offset"], SECTOR)
+        pb.write(FLASH_BASE + lay["stage_header_offset"], header.ljust(256, b"\xff"))
+        print("staged %s: %d bytes as %d (%s) at 0x%06x" % ("radio" if radio else "firmware", len(part), len(staged),
+                                                           "deflate" if deflate else "stored", data_offset))
+        pb.reboot()
+    finally:
+        pb.close()
+
+
 # --- state ---
 
 def bootloader_drives():
@@ -404,7 +634,10 @@ def flash(image, target, before, chip_pid=None):
     if chip_pid and chip_pid not in st["bootloader"][0]:
         raise RuntimeError("the bootloader is the wrong chip (%s): not flashing" % st["bootloader"][0])
     drive = st["drives"][0]
-    shutil.copyfile(image, os.path.join(drive, os.path.basename(image)))
+    # In small writes: the bootloader drive has refused one large write after a reboot into it
+    with open(image, "rb") as src, open(os.path.join(drive, os.path.basename(image)), "wb") as dst:
+        for chunk in iter(lambda: src.read(64 * 1024), b""):
+            dst.write(chunk)
     wait_for(lambda s: not s["drives"], 15, "the bootloader to finish")
     print("flashed %s -> %s" % (os.path.basename(image), target))
 
@@ -460,6 +693,8 @@ def main():
                 print("%-10s %s" % (k, ", ".join(st[k]) or "-"))
             for path, parent in webusb_devices():
                 print("webusb     %s" % parent)
+            for path, did in update_devices():
+                print("update     %s (driver %s)" % (did, _service(did) or "?"))
         elif cmd == "dongle-info":
             for path, info in dongles():
                 print(info)
@@ -485,6 +720,33 @@ def main():
             flash_dongle(a[1])
         elif cmd == "flash-pad":
             flash_pad(a[1], "--dongle" in a[2:], "--in-bootloader" in a[2:])
+        elif cmd == "update-flash":
+            update_flash(a[1])
+        elif cmd == "update-stage":
+            update_stage(a[1], "--deflate" in a[2:], "--radio" in a[2:], "--break" in a[2:])
+        elif cmd == "update-layout":
+            pb = open_update()
+            try:
+                for k, v in pb.layout().items():
+                    print("%-20s 0x%06x" % (k, v))
+                print("%-20s %08x %08x" % ("last fault", *pb.fault()))
+            finally:
+                pb.close()
+        elif cmd == "update-read":
+            addr = int(a[1], 0)
+            pb = open_update()
+            try:
+                data = pb.read(addr, int(a[2], 0))
+            finally:
+                pb.close()
+            for i in range(0, len(data), 16):
+                print("%08x  %s" % (addr + i, data[i:i + 16].hex(" ")))
+        elif cmd in ("update-reboot", "update-rom"):
+            pb = open_update()
+            try:
+                pb.reboot(rom=(cmd == "update-rom"))
+            finally:
+                pb.close()
         else:
             sys.exit(__doc__)
     except RuntimeError as e:
