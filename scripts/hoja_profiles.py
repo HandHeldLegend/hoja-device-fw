@@ -6,9 +6,13 @@
     python -I scripts/hoja_profiles.py copy <from> <to>
     python -I scripts/hoja_profiles.py block <block>       # a config block's bytes (hex), e.g. 3 for RGB
     python -I scripts/hoja_profiles.py selftest            # rename, switch, edit, switch back, check apart
+    python -I scripts/hoja_profiles.py device              # its name and build (check before flashing)
+    python -I scripts/hoja_profiles.py snapshot <file.json>  # every config block, to compare after an update
+    python -I scripts/hoja_profiles.py compare <file.json>   # what differs from a snapshot, block by block
 
 The gamepad on its own cable (hoja_bench.find_webusb('pad')); the config app must not hold it.
 """
+import json
 import sys
 import time
 
@@ -17,10 +21,17 @@ import hoja_bench as hb  # noqa: E402
 
 WEBUSB_ID_READ_CONFIG_BLOCK = 0x01
 WEBUSB_ID_WRITE_CONFIG_BLOCK = 0x02
+WEBUSB_ID_READ_STATIC_BLOCK = 0x03
 WEBUSB_ID_CONFIG_COMMAND = 0x04
 WEBUSB_ID_PROFILE = 0x07
 GAMEPAD_CMD_SAVE_ALL = 0xFF
 CFG_BLOCK_RGB = 3
+STATIC_BLOCK_DEVICE = 0
+# deviceInfoStatic_s (static_config.h): name, maker, then the build stamp past the URLs
+DEVICE_NAME_LEN = 16
+DEVICE_FW_VERSION_AT = 16 + 16 + 256 + 256 + 128 + 32
+# cfg_block_t (settings_shared_types.h), in order
+CFG_BLOCKS = ["gamepad", "hover", "analog", "rgb", "trigger", "imu", "haptic", "user", "input"]
 OP_INFO, OP_SWITCH, OP_RENAME, OP_COPY = 0, 1, 2, 3
 CHUNK = 32
 
@@ -50,12 +61,12 @@ class Pad:
         return {"done": bool(r[2]), "count": r[3], "active": r[4], "profile": r[5],
                 "name": bytes(r[6:30]).split(b"\0")[0].decode(errors="replace")}
 
-    def read_block(self, block):
-        self.d.write([WEBUSB_ID_READ_CONFIG_BLOCK, block])
+    def read_block(self, block, kind=WEBUSB_ID_READ_CONFIG_BLOCK):
+        self.d.write([kind, block])
         data = b""
         for _ in range(200):
             r = self.d.read()
-            if not r or r[0] != WEBUSB_ID_READ_CONFIG_BLOCK or r[1] != block:
+            if not r or r[0] != kind or r[1] != block:
                 continue
             if r[3] == 0xFF:
                 return data
@@ -127,6 +138,49 @@ def selftest(pad):
     return bytes(rgb1)
 
 
+def device(pad):
+    info = pad.read_block(STATIC_BLOCK_DEVICE, WEBUSB_ID_READ_STATIC_BLOCK)
+    name = info[:DEVICE_NAME_LEN].split(b"\0")[0].decode(errors="replace")
+    build = int.from_bytes(info[DEVICE_FW_VERSION_AT:DEVICE_FW_VERSION_AT + 4], "little")
+    print("%s, build %d (%s UTC)" % (name, build, time.strftime("%Y-%m-%d %H:%M", time.gmtime(build))))
+
+
+def snapshot(pad, path):
+    blocks = {name: pad.read_block(i).hex() for i, name in enumerate(CFG_BLOCKS)}
+    with open(path, "w") as f:
+        json.dump(blocks, f, indent=1)
+    print("%d blocks saved to %s" % (len(blocks), path))
+
+
+def _ranges(old, new):
+    """The byte ranges where two blocks differ, as (start, end) pairs"""
+    out = []
+    for i in range(max(len(old), len(new))):
+        if (old[i:i + 1] != new[i:i + 1]):
+            if out and out[-1][1] == i:
+                out[-1][1] = i + 1
+            else:
+                out.append([i, i + 1])
+    return out
+
+
+def compare(pad, path):
+    with open(path) as f:
+        before = {name: bytes.fromhex(h) for name, h in json.load(f).items()}
+    same = True
+    for i, name in enumerate(CFG_BLOCKS):
+        now = pad.read_block(i)
+        old = before.get(name, b"")
+        if now == old:
+            print("%-8s same (%d bytes)" % (name, len(now)))
+            continue
+        same = False
+        for start, end in _ranges(old, now):
+            print("%-8s differs at %d..%d: %s -> %s"
+                  % (name, start, end - 1, old[start:end].hex(" ")[:47], now[start:end].hex(" ")[:47]))
+    print("all the same" if same else "differences above")
+
+
 def main():
     a = sys.argv[1:]
     if not a:
@@ -143,6 +197,12 @@ def main():
             print(pad.profile(OP_COPY, int(a[2]), bytes([int(a[1])])))
         elif a[0] == "block":
             print(pad.read_block(int(a[1])).hex(" "))
+        elif a[0] == "device":
+            device(pad)
+        elif a[0] == "snapshot":
+            snapshot(pad, a[1])
+        elif a[0] == "compare":
+            compare(pad, a[1])
         elif a[0] == "selftest":
             selftest(pad)
             show(pad)

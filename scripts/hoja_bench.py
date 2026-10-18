@@ -58,6 +58,12 @@ USB_DEVICE_GUID = "{A5DCBF10-6530-11D2-901F-00C04FB951ED}"  # GUID_DEVINTERFACE_
 UPDATE_GUID = "{2C8F6F2C-8CEF-4D98-8035-CE6AC66AB70A}"
 # Bootloaders: RP2040 (the gamepads, Pico W dongles) and RP2350 (the HOJA dongle board, Pico 2 W)
 BOOTSEL_PIDS = ("PID_0003", "PID_000F")
+# A UF2's family ID names its chip, and so the bootloader it may go to (RP2350: secure ARM, the
+# absolute block picotool puts first, and RISC-V)
+UF2_FAMILY_PID = {0xE48BFF56: "PID_0003", 0xE48BFF57: "PID_000F", 0xE48BFF59: "PID_000F",
+                  0xE48BFF5A: "PID_000F"}
+UF2_MAGIC_START0 = 0x0A324655
+UF2_FLAG_FAMILY = 0x00002000
 DONGLE_BOARDS = {"hoja": 1, "pico": 2, "pico2": 3}       # dongle_info board ids
 DONGLE_CHIP_PID = {1: "PID_000F", 2: "PID_0003", 3: "PID_000F"}
 DONGLE_SEL = None  # --use <board>: which dongle, when several are attached
@@ -206,8 +212,9 @@ def usb_devices():
             break
         i += 1
         did = _device_id(dinfo.DevInst)
-        if (HOJA_VID in did.upper() or any(i in did.upper() for i in OTHER_IDS)) and "&MI_" not in did.upper():
-            out.append(did.upper())
+        did = did.upper()
+        if (HOJA_VID in did or any(i in did for i in OTHER_IDS)) and "&MI_" not in did:
+            out.append(did)
     setupapi.SetupDiDestroyDeviceInfoList(ctypes.c_void_p(h))
     return out
 
@@ -686,7 +693,19 @@ def flash_dongle(image):
     wait_for(lambda s: len(s["dongle"]) == len(before["dongle"]), 20, "the dongle to come back")
 
 
+def uf2_chip_pid(image):
+    """The bootloader PID for the chip a UF2 is built for, from its first block's family ID"""
+    with open(image, "rb") as f:
+        block = f.read(512)
+    magic, _, flags = struct.unpack_from("<III", block, 0)
+    family = struct.unpack_from("<I", block, 28)[0]
+    if magic != UF2_MAGIC_START0 or not (flags & UF2_FLAG_FAMILY) or family not in UF2_FAMILY_PID:
+        raise RuntimeError("%s: not a UF2 for an RP2040 or RP2350" % image)
+    return UF2_FAMILY_PID[family]
+
+
 def flash_pad(image, then_dongle, in_bootloader=False):
+    chip_pid = uf2_chip_pid(image)
     before = state()
     if not before["pad"]:
         before["pad"] = ["(on a dongle, or in the bootloader)"]  # it still counts as one gamepad
@@ -695,7 +714,7 @@ def flash_pad(image, then_dongle, in_bootloader=False):
             raise RuntimeError("a board is already in the bootloader")
         via = pad_command(GAMEPAD_CMD_RESET_TO_BOOTLOADER)
         print("gamepad -> bootloader (%s)" % via)
-    flash(image, "pad", before, "PID_0003")
+    flash(image, "pad", before, chip_pid)
     # With a cable in and nothing in boot memory, it comes back wired
     wait_for(lambda s: s["pad"], 20, "the gamepad to come back on its cable")
     if then_dongle:
