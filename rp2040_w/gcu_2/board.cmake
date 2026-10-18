@@ -6,4 +6,4 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 # FLOSS as the Bluetooth host stack instead of BTstack
 hoja_use_floss(${PROJECT_NAME})
 # The HOJA bootloader in front of the firmware (updates over the air, WinUSB update mode)
-hoja_use_bootloader(${PROJECT_NAME} "GCU 2" 0x100000 0x40000)
+hoja_use_bootloader(${PROJECT_NAME} "GCU 2" 0x100000 0x40000 RGB_PIN 7 RGB_LEDS 17)
