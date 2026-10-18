@@ -434,7 +434,8 @@ class Picoboot:
     def cmd(self, cmd_id, args=b"", data=None, read_len=0):
         """One PICOBOOT command: its packet, its data either way, then the acknowledgement"""
         transfer = len(data) if data is not None else read_len
-        self._out(struct.pack("<IIBBHI", PB_MAGIC, self.token, cmd_id, len(args), 0, transfer) + args.ljust(16, b"\0"))
+        command = struct.pack("<IIBBHI", PB_MAGIC, self.token, cmd_id, len(args), 0, transfer)
+        self._out(command + args.ljust(16, b"\0"))
         self.token += 1
         if cmd_id & 0x80:
             got = self._in(read_len)
@@ -465,8 +466,8 @@ class Picoboot:
         setup = struct.pack("<BBHHH", 0xC1, request, 0, 0, length)
         b = (ctypes.c_ubyte * length)()
         n = wt.ULONG()
-        if not winusb.WinUsb_ControlTransfer(self.h, ctypes.c_uint64(int.from_bytes(setup, "little")), b, length,
-                                             ctypes.byref(n), None):
+        setup_packet = ctypes.c_uint64(int.from_bytes(setup, "little"))
+        if not winusb.WinUsb_ControlTransfer(self.h, setup_packet, b, length, ctypes.byref(n), None):
             raise RuntimeError("update mode: request 0x%02x failed (%d)" % (request, k32.GetLastError()))
         return bytes(b[:n.value])
 
@@ -526,7 +527,8 @@ def write_image(pb, addr, image, label):
     if back[skip:] != image[skip:]:
         bad = next(i for i in range(skip, len(image)) if back[i] != image[i])
         raise RuntimeError("%s: read back differs at 0x%08x" % (label, addr + bad))
-    print("%s: %d KB written in %.1f s, read back in %.1f s, matches" % (label, len(image) // 1024, t1 - t0, t2 - t1))
+    print("%s: %d KB written in %.1f s, read back in %.1f s, matches"
+          % (label, len(image) // 1024, t1 - t0, t2 - t1))
 
 
 def update_flash(image_path):
@@ -543,7 +545,8 @@ def update_flash(image_path):
 
 def stage_part(dest, encoding, staged_offset, staged, image):
     """One part of a stage header (boot_layout.h boot_stage_part_s)"""
-    return struct.pack("<BBxxIIIII", dest, encoding, staged_offset, len(staged), zlib.crc32(staged) & 0xFFFFFFFF,
+    return struct.pack("<BBxxIIIII", dest, encoding, staged_offset,
+                       len(staged), zlib.crc32(staged) & 0xFFFFFFFF,
                        len(image), zlib.crc32(image) & 0xFFFFFFFF)
 
 
@@ -566,7 +569,8 @@ def update_stage(image_path, deflate, radio, break_dest):
             # A whole board image is cut to the firmware; a firmware image is taken as it is
             whole = image[lay["app_offset"]:lay["app_offset"] + 256] == image[:256]
             part = image[lay["app_offset"]:] if whole else image
-            dest, dest_offset, room = STAGE_TO_APP, lay["app_offset"], lay["stage_header_offset"] - lay["app_offset"]
+            dest, dest_offset = STAGE_TO_APP, lay["app_offset"]
+            room = lay["stage_header_offset"] - lay["app_offset"]
         if not part or len(part) > room:
             raise RuntimeError("nothing to stage, or too large for its destination")
 
@@ -583,12 +587,13 @@ def update_stage(image_path, deflate, radio, break_dest):
         if break_dest:
             pb.erase(FLASH_BASE + dest_offset, SECTOR)
             print("the destination's first sector erased")
-        header = stage_header([stage_part(dest, STAGE_DEFLATE if deflate else STAGE_STORED, data_offset, staged,
-                                          part)])
+        encoding = STAGE_DEFLATE if deflate else STAGE_STORED
+        header = stage_header([stage_part(dest, encoding, data_offset, staged, part)])
         pb.erase(FLASH_BASE + lay["stage_header_offset"], SECTOR)
         pb.write(FLASH_BASE + lay["stage_header_offset"], header.ljust(256, b"\xff"))
-        print("staged %s: %d bytes as %d (%s) at 0x%06x" % ("radio" if radio else "firmware", len(part), len(staged),
-                                                           "deflate" if deflate else "stored", data_offset))
+        print("staged %s: %d bytes as %d (%s) at 0x%06x"
+              % ("radio" if radio else "firmware", len(part), len(staged),
+                 "deflate" if deflate else "stored", data_offset))
         pb.reboot()
     finally:
         pb.close()
@@ -647,7 +652,8 @@ def copy_to_drive(image, drive):
                     dst.write(chunk)
             return
         except OSError as e:
-            print("copy to %s failed (%s), %s" % (drive, e, "retrying" if attempt == 0 else "using PowerShell"))
+            fallback = "retrying" if attempt == 0 else "using PowerShell"
+            print("copy to %s failed (%s), %s" % (drive, e, fallback))
             time.sleep(1.0)
     subprocess.run(["powershell", "-NoProfile", "-Command", "Copy-Item -LiteralPath '%s' -Destination '%s' "
                     "-ErrorAction Stop" % (image, target)], check=True)

@@ -1,6 +1,7 @@
-"""hoja_ble_update.py <board image.bin> [--deflate] [--radio]: send a firmware update over the BLE config link,
-the way the config app does (HOJA-LIB-RP2040 ble_config.c, boot_update.h). Press + and - on the gamepad, and
-enter the code the first time. Needs bleak. A run that stops part way resumes when run again.
+"""hoja_ble_update.py <board image.bin> [--deflate] [--radio]: send a firmware update over the BLE
+config link, the way the config app does (HOJA-LIB-RP2040 ble_config.c, boot_update.h). Press + and -
+on the gamepad, and enter the code the first time. Needs bleak. A run that stops part way resumes when
+run again.
 
     python scripts/hoja_ble_update.py builds/gcu_2/gcu_2.bin
 """
@@ -16,9 +17,11 @@ from bleak import BleakClient, BleakScanner
 SVC = "b4c1f0a0-3e6d-4c5a-9f2e-6d1a7c8b9e10"
 RX = "b4c1f0a0-3e6d-4c5a-9f2e-6d1a7c8b9e11"
 TX = "b4c1f0a0-3e6d-4c5a-9f2e-6d1a7c8b9e12"
-TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ble_cfg_token.bin")  # This browser's token
+# This bench's token, as a browser keeps one
+TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ble_cfg_token.bin")
 ARROWS = {"U": "Up", "D": "Down", "L": "Left", "R": "Right"}
-STATUS = ["ok", "unsupported", "bad request", "no room", "battery low", "out of order", "failed", "restarting"]
+STATUS = ["ok", "unsupported", "bad request", "no room", "battery low", "out of order", "failed",
+          "restarting"]
 SECTOR = 4096
 RADIO_HEADER_LEN = 72  # boot_radio_header_s
 
@@ -95,8 +98,9 @@ async def main():
     app_off, radio_off, radio_size, header_off, running_end, radio_crc = struct.unpack_from("<6I", f, 5)
     window, data_max = struct.unpack_from("<HH", f, 29)
     print("info: supported %d battery ok %d (%d%%) app 0x%x radio 0x%x+0x%x header 0x%x running end 0x%x "
-          "window %d data %d" % (flags & 1, (flags >> 1) & 1, battery, app_off, radio_off, radio_size, header_off,
-                                 running_end, window, data_max), flush=True)
+          "window %d data %d"
+          % (flags & 1, (flags >> 1) & 1, battery, app_off, radio_off, radio_size, header_off,
+             running_end, window, data_max), flush=True)
 
     # The parts: the radio region when the image's differs from the gamepad's, then the firmware
     parts = []
@@ -148,14 +152,17 @@ async def main():
         try:
             await asyncio.wait_for(acked_event.wait(), 2)
         except asyncio.TimeoutError:
-            print("no acknowledgement for 2 s at %d (sent %d): resending" % (acked["written"], sent), flush=True)
+            print("no acknowledgement for 2 s at %d (sent %d): resending" % (acked["written"], sent),
+                  flush=True)
             sent = acked["written"]
         if time.time() - last_print > 2:
             last_print = time.time()
             rate = (acked["written"] - start) / max(0.001, time.time() - t0) / 1024
-            print("  %d / %d KB  (%.1f KB/s)" % (acked["written"] // 1024, len(stream) // 1024, rate), flush=True)
+            print("  %d / %d KB  (%.1f KB/s)" % (acked["written"] // 1024, len(stream) // 1024, rate),
+                  flush=True)
     dt = time.time() - t0
-    print("sent %d KB in %.1f s (%.1f KB/s)" % ((len(stream) - start) // 1024, dt, (len(stream) - start) / dt / 1024), flush=True)
+    sent_bytes = len(stream) - start
+    print("sent %d KB in %.1f s (%.1f KB/s)" % (sent_bytes // 1024, dt, sent_bytes / dt / 1024), flush=True)
 
     await client.write_gatt_char(RX, b"\x09", response=True)
     # Repeated acknowledgements (status ok) may come first: wait for the answer to FINISH
@@ -172,9 +179,12 @@ async def main():
 
     if f[1] == 7:
         print("waiting for the gamepad to come back (its beacon opens by itself)...", flush=True)
-        dev = await BleakScanner.find_device_by_filter(lambda d, ad: SVC in [s.lower() for s in ad.service_uuids],
-                                                       timeout=60)
-        print("beacon back after %.1f s: %s" % (time.time() - t_restart, dev.name if dev else None), flush=True)
+        def offers_config(_device, ad):
+            return SVC in [s.lower() for s in ad.service_uuids]
+
+        dev = await BleakScanner.find_device_by_filter(offers_config, timeout=60)
+        name = dev.name if dev else None
+        print("beacon back after %.1f s: %s" % (time.time() - t_restart, name), flush=True)
 
 
 asyncio.run(main())

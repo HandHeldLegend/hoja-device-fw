@@ -72,6 +72,16 @@ class Pad:
         self.ask(bytes([WEBUSB_ID_CONFIG_COMMAND, 0, GAMEPAD_CMD_SAVE_ALL]), WEBUSB_ID_CONFIG_COMMAND)
 
 
+def switch(pad, n, tries=20):
+    """Switch profiles, waiting while a record is still being written. The last answer."""
+    for _ in range(tries):
+        r = pad.profile(OP_SWITCH, n)
+        if r["done"]:
+            break
+        time.sleep(0.1)
+    return r
+
+
 def show(pad):
     for n in range(4):
         p = pad.profile(OP_INFO, n)
@@ -90,11 +100,7 @@ def selftest(pad):
 
     rgb0 = pad.read_block(CFG_BLOCK_RGB)
     assert pad.profile(OP_RENAME, 1, b"\0" + b"Bench B")["done"]
-    for _ in range(20):
-        r = pad.profile(OP_SWITCH, 1)
-        if r["done"]:
-            break
-        time.sleep(0.1)  # a record still being written
+    r = switch(pad, 1)
     assert r["done"] and r["active"] == 1, r
     print("switched to 1:", pad.profile(OP_INFO, 1)["name"])
 
@@ -109,21 +115,13 @@ def selftest(pad):
     time.sleep(0.5)
     assert pad.read_block(CFG_BLOCK_RGB) == bytes(rgb1)
 
-    for _ in range(20):
-        r = pad.profile(OP_SWITCH, 0)
-        if r["done"]:
-            break
-        time.sleep(0.1)
+    r = switch(pad, 0)
     assert r["done"], r
     back = pad.read_block(CFG_BLOCK_RGB)
     assert back == rgb0, "profile 0 kept its own RGB"
     print("profile 0 has its own RGB again")
 
-    for _ in range(20):
-        r = pad.profile(OP_SWITCH, 1)
-        if r["done"]:
-            break
-        time.sleep(0.1)
+    switch(pad, 1)
     assert pad.read_block(CFG_BLOCK_RGB) == bytes(rgb1), "profile 1 kept its edit"
     print("profile 1 kept its edit")
     return bytes(rgb1)
@@ -138,7 +136,7 @@ def main():
         if a[0] == "list":
             show(pad)
         elif a[0] == "switch":
-            print(pad.profile(OP_SWITCH, int(a[1])))
+            print(switch(pad, int(a[1])))
         elif a[0] == "rename":
             print(pad.profile(OP_RENAME, int(a[1]), b"\0" + a[2].encode()[:24]))
         elif a[0] == "copy":
