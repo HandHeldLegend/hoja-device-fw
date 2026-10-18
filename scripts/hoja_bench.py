@@ -541,6 +541,18 @@ def update_flash(image_path):
         pb.close()
 
 
+def stage_part(dest, encoding, staged_offset, staged, image):
+    """One part of a stage header (boot_layout.h boot_stage_part_s)"""
+    return struct.pack("<BBxxIIIII", dest, encoding, staged_offset, len(staged), zlib.crc32(staged) & 0xFFFFFFFF,
+                       len(image), zlib.crc32(image) & 0xFFFFFFFF)
+
+
+def stage_header(parts):
+    """The stage header (boot_stage_header_s): up to four parts, written together"""
+    return struct.pack("<IIBBxx", STAGE_MAGIC, STAGE_MAGIC ^ 0xFFFFFFFF, STAGE_VERSION, len(parts)) + \
+        b"".join(parts).ljust(4 * 24, b"\0")
+
+
 def update_stage(image_path, deflate, radio, break_dest):
     image = open(image_path, "rb").read()
     pb = open_update()
@@ -571,9 +583,8 @@ def update_stage(image_path, deflate, radio, break_dest):
         if break_dest:
             pb.erase(FLASH_BASE + dest_offset, SECTOR)
             print("the destination's first sector erased")
-        header = struct.pack("<IIBBBBIIII", STAGE_MAGIC, STAGE_MAGIC ^ 0xFFFFFFFF, STAGE_VERSION,
-                             STAGE_DEFLATE if deflate else STAGE_STORED, dest, 0,
-                             len(staged), zlib.crc32(staged) & 0xFFFFFFFF, len(part), zlib.crc32(part) & 0xFFFFFFFF)
+        header = stage_header([stage_part(dest, STAGE_DEFLATE if deflate else STAGE_STORED, data_offset, staged,
+                                          part)])
         pb.erase(FLASH_BASE + lay["stage_header_offset"], SECTOR)
         pb.write(FLASH_BASE + lay["stage_header_offset"], header.ljust(256, b"\xff"))
         print("staged %s: %d bytes as %d (%s) at 0x%06x" % ("radio" if radio else "firmware", len(part), len(staged),
@@ -624,6 +635,24 @@ def dongle_info():
 
 # --- flashing ---
 
+def copy_to_drive(image, drive):
+    """Copy a UF2 onto the bootloader drive. Python's writes to it fail now and then right after it
+    appears (EINVAL); PowerShell's copy has not: retry once, then hand it to that."""
+    import subprocess
+    target = os.path.join(drive, os.path.basename(image))
+    for attempt in range(2):
+        try:
+            with open(image, "rb") as src, open(target, "wb") as dst:
+                for chunk in iter(lambda: src.read(64 * 1024), b""):
+                    dst.write(chunk)
+            return
+        except OSError as e:
+            print("copy to %s failed (%s), %s" % (drive, e, "retrying" if attempt == 0 else "using PowerShell"))
+            time.sleep(1.0)
+    subprocess.run(["powershell", "-NoProfile", "-Command", "Copy-Item -LiteralPath '%s' -Destination '%s' "
+                    "-ErrorAction Stop" % (image, target)], check=True)
+
+
 def flash(image, target, before, chip_pid=None):
     """Copy image to the one bootloader drive, once the board sent there (target) has left and every
     other board is still running: then the bootloader can only be it. chip_pid: its bootloader's PID."""
@@ -634,10 +663,7 @@ def flash(image, target, before, chip_pid=None):
     if chip_pid and chip_pid not in st["bootloader"][0]:
         raise RuntimeError("the bootloader is the wrong chip (%s): not flashing" % st["bootloader"][0])
     drive = st["drives"][0]
-    # In small writes: the bootloader drive has refused one large write after a reboot into it
-    with open(image, "rb") as src, open(os.path.join(drive, os.path.basename(image)), "wb") as dst:
-        for chunk in iter(lambda: src.read(64 * 1024), b""):
-            dst.write(chunk)
+    copy_to_drive(image, drive)
     wait_for(lambda s: not s["drives"], 15, "the bootloader to finish")
     print("flashed %s -> %s" % (os.path.basename(image), target))
 

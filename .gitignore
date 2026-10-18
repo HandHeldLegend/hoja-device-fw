@@ -6,3 +6,6 @@ build/
 library/artifacts/
 
 __pycache__/
+
+# The bench BLE client's saved token
+scripts/ble_cfg_token.bin
