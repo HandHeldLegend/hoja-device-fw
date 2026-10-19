@@ -31,6 +31,37 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-19 - New Bluetooth, bootloader and profiles for every controller
+Boards: esp32, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
+
+### Wireless
+- New: [esp32] The new Bluetooth stack from the GCU 2. Reports reach Steam, the Switch and the Wii
+  more steadily.
+- New: [esp32] Connects to a HOJA dongle. Pairing mode (hold Start while turning on) connects to the
+  nearest free dongle and saves it. Otherwise the saved dongle is used first, and any free dongle
+  for that session.
+- Change: [esp32] Auto on battery takes a free dongle first, then calls your saved hosts straight
+  away in your boot order (Switch, Wii, then Steam unless you change it).
+- New: [esp32] Boot order on the Gamepad page: drag the dongle, Switch, Wii and Steam into the order
+  Auto should try them, or switch any of them off.
+- New: [esp32] Forget a paired Switch, PC, Wii or the saved dongle from the Wireless page.
+- New: [esp32] Change settings over Bluetooth, no cable: press Start and Select (+ and -) together,
+  then pick the controller in the config app. The first time, it asks for a short button code.
+- Action: [esp32] Update the ESP32 firmware from the app after updating. The new Bluetooth needs it.
+- Action: [esp32] Pair your Switch, PC and Wii again after updating.
+
+### Modes
+- New: On USB, Auto gives a Nintendo Switch Switch mode and anything else your fallback mode: Steam,
+  XInput, Slippi, or Switch every time.
+
+### System
+- New: The HOJA bootloader: updates install through it with the LEDs showing progress, and the app
+  can always reinstall the firmware.
+- New: Four settings profiles. Switch between them from the Home page.
+- New: The Home page shows how the controller is connected, its mode and its report rate live, and
+  has "Send inputs to game" and a tournament lock.
+- Fix: The config app stays responsive after connecting and after switching profiles.
+
 ## 2026-10-19 - New Bluetooth, bootloader, profiles and dongle
 Boards: gcu_2, dongle_hoja, dongle_pico_w, dongle_pico2_w
 
@@ -42,6 +73,8 @@ Boards: gcu_2, dongle_hoja, dongle_pico_w, dongle_pico2_w
 - New: [gcu_2] Boot order on the Gamepad page: drag the dongle, Switch, Wii and Steam into the order
   Auto should try them, or switch any of them off.
 - New: [gcu_2] Forget a paired Switch, PC, Wii or the saved dongle from the Wireless page.
+- New: [gcu_2] Change settings over Bluetooth, no cable: press + and - together, then pick the
+  controller in the config app. The first time, it asks for a short button code.
 - New: [dongle_hoja, dongle_pico_w, dongle_pico2_w] The dongle announces itself while it is free, so a
   controller finds it in a moment without pairing.
 - Change: [gcu_2] Pairing mode (hold Start while turning on) connects to the nearest free dongle and
