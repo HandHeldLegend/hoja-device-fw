@@ -31,6 +31,13 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-19 - ESP32 updates on every PC again
+Boards: esp32
+
+### Wireless
+- Fix: Updating the ESP32 firmware from the app works again on PCs where it failed before the
+  2026-10-12 fix, mostly Windows PCs with AMD processors. The previous update left that fix out.
+
 ## 2026-10-19 - New Bluetooth, bootloader and profiles for every controller
 Boards: esp32, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
 
