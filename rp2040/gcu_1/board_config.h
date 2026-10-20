@@ -65,6 +65,7 @@
     (rgb_s) {.r = 0xF2, .g = 0x60, .b = 0x50},  /* B */ \
     (rgb_s) {.r = 0x0E, .g = 0x86, .b = 0xE1},  /* X */ \
     (rgb_s) {.r = 0xE1, .g = 0xFF, .b = 0x00},  /* Y */ \
+    (rgb_s) {.r = 0xB4, .g = 0xB4, .b = 0xB4},  /* Power, the notification LED */ \
 }
 
 // ---------------------------------
