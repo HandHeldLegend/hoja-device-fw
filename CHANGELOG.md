@@ -31,6 +31,16 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-20 - Switch 2 GameCube controller
+Boards: gcu_1, gcu_r4k
+
+### Modes
+- New: Hold Y while plugging the cable in (GameCube mode): on a Switch 2 the controller is the
+  Switch 2's own GameCube controller, with analog triggers, Home, Capture and rumble in the
+  GameCube games. It takes no pairing slot on the console.
+- New: The same start finds out what it is plugged into: a Switch 1 gets the GameCube adapter at
+  Nintendo's rate (8 ms), and a PC gets Slippi.
+
 ## 2026-10-20 - Steam Input pairing on Linux
 Boards: esp32, gcu_2
 
