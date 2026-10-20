@@ -41,6 +41,10 @@ Boards: gcu_1, gcu_r4k
 - New: The same start finds out what it is plugged into: a Switch 1 gets the GameCube adapter at
   Nintendo's rate (8 ms), and a PC gets Slippi.
 
+### System
+- New: Update mode also shows a drive named after the controller. Drop the controller's `.uf2`
+  file onto it to update; files for other controllers are refused.
+
 ## 2026-10-20 - Steam Input pairing on Linux
 Boards: esp32, gcu_2
 
