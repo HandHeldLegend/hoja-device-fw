@@ -31,6 +31,25 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-20 - Switch 2 GameCube controller for every controller and dongle
+Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s, dongle_hoja, dongle_pico_w, dongle_pico2_w
+
+### Modes
+- New: [gcu_proto, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s] Hold Slippi mode's button while plugging the cable in: on a Switch 2 the
+  controller is the Switch 2's own GameCube controller, with analog triggers, Home, Capture and
+  rumble in the GameCube games. It takes no pairing slot on the console.
+- New: [gcu_proto, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s] The same start finds out what it is plugged into: a Switch 1 gets the GameCube
+  adapter at Nintendo's rate (8 ms), and a PC gets Slippi.
+- New: [dongle_hoja, dongle_pico_w, dongle_pico2_w] The Switch 2 GameCube controller through the dongle: start an updated
+  controller in Slippi mode with its button held, with the dongle in a Switch 2.
+- Fix: [dongle_hoja, dongle_pico_w, dongle_pico2_w] Slippi on a Switch runs at Nintendo's 8 ms. 1 kHz upset the Switch.
+- Fix: [dongle_hoja, dongle_pico_w, dongle_pico2_w] Slippi on a PC is the plain GameCube adapter again, so Dolphin takes it. While
+  a controller is linked in Slippi mode, the config app can't reach it through the dongle.
+
+### System
+- New: [gcu_proto, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s] Update mode also shows a drive named after the controller. Drop the
+  controller's `.uf2` file onto it to update; files for other controllers are refused.
+
 ## 2026-10-20 - Switch 2 GameCube controller
 Boards: gcu_1, gcu_r4k
 
