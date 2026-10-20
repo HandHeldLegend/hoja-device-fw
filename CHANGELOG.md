@@ -31,6 +31,18 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-20 - Map the Switch 2 GameCube controller's buttons
+Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
+
+### Input
+- New: The Switch 2 GameCube controller's own buttons (ZL, Minus, Home, Capture, C and both stick
+  clicks) are in the GameCube mapping, to put on any button. Only a Switch 2 sees them.
+- Change: After updating, each of those is added to your GameCube mapping on its usual button
+  (L shoulder, Select, Home, Capture, power, the stick clicks) if that button was free. Your other
+  mappings stay as they are.
+- Fix: [padbox_gs_c, super_gamepad] On a Switch 2 as its GameCube controller, buttons mapped to
+  something else no longer also press ZL, Minus, C or a stick click.
+
 ## 2026-10-20 - Switch 2 GameCube controller for every controller and dongle
 Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s, dongle_hoja, dongle_pico_w, dongle_pico2_w
 
