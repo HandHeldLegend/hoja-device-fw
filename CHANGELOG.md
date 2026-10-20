@@ -35,7 +35,7 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
 
 ### Wireless
-- Fix: [gcu_2, progcc_3s] Connected straight to a PC over Bluetooth, the controller times its
+- Fix: [gcu_2] Connected straight to a PC over Bluetooth, the controller times its
   reports to the Bluetooth link's own clock, so fewer are late and the polling rate holds steadier.
 
 ### RGB
