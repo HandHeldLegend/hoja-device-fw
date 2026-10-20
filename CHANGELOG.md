@@ -31,6 +31,15 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-20 - Waveshare RP2350B-Plus-W dongle, and a status light on Pico dongles
+Boards: dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w
+
+### Wireless
+- New: [dongle_rp2350b_plus_w] The Waveshare RP2350B-Plus-W works as a HOJA dongle, like a
+  Pico 2 W dongle.
+- New: The board's LED shows the link: it blinks while the dongle waits for a controller and
+  stays on once one is connected.
+
 ## 2026-10-20 - Map the Switch 2 GameCube controller's buttons
 Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
 
