@@ -31,6 +31,15 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-20 - Steam Input pairing on Linux
+Boards: esp32, gcu_2
+
+### Wireless
+- Fix: Pairing in Steam Input mode works again on a Steam Machine, Steam Deck or other Linux PC.
+  These often showed an error and never connected.
+- Action: If pairing failed before, remove the controller from the Steam Machine or PC's Bluetooth
+  list, then pair again in Steam Input mode.
+
 ## 2026-10-19 - ESP32 updates on every PC again
 Boards: esp32
 
