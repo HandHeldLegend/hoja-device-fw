@@ -31,6 +31,19 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-20 - Steadier Bluetooth on PC, steady dim LEDs
+Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
+
+### Wireless
+- Fix: [gcu_2, progcc_3s] Connected straight to a PC over Bluetooth, the controller times its
+  reports to the Bluetooth link's own clock, so fewer are late and the polling rate holds steadier.
+
+### RGB
+- Fix: LEDs set to a low brightness hold steady instead of flickering at some brightness levels.
+- Fix: While the controller connects, its LEDs always light up, in white when the player and power
+  LEDs are set to black or are too dim to see.
+- Change: [gcu_1, gcu_r4k] The power LED's default color is white instead of off.
+
 ## 2026-10-20 - Waveshare RP2350B-Plus-W dongle, and a status light on Pico dongles
 Boards: dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w
 
