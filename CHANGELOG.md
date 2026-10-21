@@ -31,6 +31,16 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-21 - Mechanical triggers on the GCU 1
+Boards: gcu_1, gcu_r4k
+
+### Input
+- New: The controller recognizes mechanical triggers by itself: click a mechanical trigger a few
+  times and it works as a digital trigger in every mode. Swapping back to analog triggers works the
+  same way. Nothing to set up.
+- Fix: Mechanical triggers work in XInput mode, as a full trigger press.
+- Change: In SInput mode, a mechanical trigger shows up as a digital trigger.
+
 ## 2026-10-20 - Steadier Bluetooth on PC, steady dim LEDs
 Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
 
