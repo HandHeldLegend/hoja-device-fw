@@ -31,6 +31,16 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-21 - Wii pairing with Dolphin, one bump per trigger press
+Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
+
+### Wireless
+- Fix: [esp32] In Wii mode, Dolphin's Sync on a computer finds the controller. Pairing with a Wii
+  works as before.
+
+### Haptics
+- Fix: With the config app open, holding a trigger gives one bump instead of bumping over and over.
+
 ## 2026-10-21 - Mechanical triggers on the GCU 1
 Boards: gcu_1, gcu_r4k
 
