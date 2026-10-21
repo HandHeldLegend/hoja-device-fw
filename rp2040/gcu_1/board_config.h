@@ -46,6 +46,9 @@
 #define ADC_SMOOTHING_STRENGTH      0
 #define HOJA_ANALOG_DEFAULT_DISTANCE 1400.0f
 
+// Either trigger can be fitted as mechanical (a click with no travel)
+#define HOJA_MECHANICAL_TRIGGERS     1
+
 // Haptic Driver
 #define HOJA_HAPTICS_DRIVER         HAPTICS_DRIVER_LRA_HAL
 
