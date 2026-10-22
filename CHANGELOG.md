@@ -31,6 +31,13 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-22 - One mechanical trigger in SInput
+Boards: gcu_1, gcu_r4k
+
+### Input
+- Fix: With one mechanical trigger and one analog, SInput (Steam) shows both as analog triggers,
+  and a click on the mechanical one is a full press. It used to show up as an extra button.
+
 ## 2026-10-21 - Wii pairing with Dolphin, one bump per trigger press
 Boards: esp32, gcu_2, gcu_2s, padbox_gs_c, phob_2, progcc_3, progcc_3s
 
