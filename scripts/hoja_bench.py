@@ -51,8 +51,8 @@ if sys.platform != "win32":
 
 WEBUSB_GUID = "{8B3E9D2E-7EEC-4994-AAE7-0C40DE84D36D}"
 HOJA_VID = "VID_2E8A"
-# XInput and Slippi keep the IDs games look for; on a computer the config interface sits beside them
-OTHER_IDS = ("VID_045E&PID_028E", "VID_057E&PID_0337")
+# XInput, Slippi and Switch keep the IDs games look for; on a computer the config interface sits beside them
+OTHER_IDS = ("VID_045E&PID_028E", "VID_057E&PID_0337", "VID_057E&PID_2009")
 USB_DEVICE_GUID = "{A5DCBF10-6530-11D2-901F-00C04FB951ED}"  # GUID_DEVINTERFACE_USB_DEVICE
 # The HOJA bootloader's update mode (HOJA-LIB-RP2040 bootloader/boot_usb.c)
 UPDATE_GUID = "{2C8F6F2C-8CEF-4D98-8035-CE6AC66AB70A}"
