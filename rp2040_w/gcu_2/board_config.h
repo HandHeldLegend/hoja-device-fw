@@ -51,6 +51,8 @@
 // optional (library defaults: 32 LEDs, GRB order).
 #define RGB_DRIVER_LED_COUNT    32
 #define RGB_DRIVER_ORDER        RGB_ORDER_GRB
+// 12 LED frames per 60 Hz animation frame (720 Hz) dither dim fades smoothly; 32 LEDs take ~1 ms
+#define RGB_DRIVER_OUTPUT_FRAMES 12
 // ---------------------------------
 // ---------------------------------
 
