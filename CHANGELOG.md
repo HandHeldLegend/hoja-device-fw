@@ -31,6 +31,13 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-25 - Faster dongle on a computer
+Boards: dongle_hoja, dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w
+
+### Wireless
+- Change: On a computer, the dongle passes on every report from the controller as it arrives:
+  about 760 to 790 a second in SInput, XInput and Slippi modes, up from 500, with nothing dropped.
+
 ## 2026-10-25 - Auto snapback that learns your stick, smoother dim LEDs
 Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
 
