@@ -31,6 +31,35 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-25 - Auto snapback that learns your stick, smoother dim LEDs
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
+
+### Snapback
+- New: Auto snapback can learn your stick. In the config app, open Snapback, pick Auto and choose
+  Tune: a short guided set of moves records how your stick springs back. A tuned stick holds back
+  only the rebound after you let go, so your own moves, flicks and dash-backs come through without
+  delay. A stick you haven't tuned keeps the Auto you know.
+
+### Input
+- Change: Every report carries your newest input, read just before it is sent. Over the dongle and
+  Bluetooth it could be a whole report old, and in GameCube, N64 and SNES modes up to 8 ms old.
+
+### Modes
+- Fix: Auto mode plugged into a GameCube no longer freezes and restarts, which happened about half
+  the time. It also finds the GameCube when the controller runs on battery.
+
+### RGB
+- Fix: [gcu_2, progcc_3s] Slow fades at low brightness are smooth, with no visible steps.
+- Change: [gcu_2, progcc_3s] Brightness below 10% dims smoothly all the way down. 1% is now about
+  as bright as 5% used to be, and turning the LEDs on from 0% fades them up.
+- Fix: While the controller connects, the LEDs no longer flare brighter than your brightness
+  setting. They stay lit enough to show it is connecting.
+
+### Haptics
+- Change: [gcu_1, gcu_r4k, gcu_2, gcu_2s, latte_pro, progcc_3.1, progcc_3.2, progcc_3s] Rumble is
+  played by the controller's hardware, so it starts a little sooner and stays steady while the
+  controller is busy.
+
 ## 2026-10-22 - One mechanical trigger in SInput
 Boards: gcu_1, gcu_r4k
 
