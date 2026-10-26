@@ -31,13 +31,17 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
-## 2026-10-26 - Tuned Auto snapback holds worn sticks
-Boards: gcu_1, progcc_3p
+## 2026-10-26 - Tuned Auto snapback holds worn sticks, LEDs wake with the config app open
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
 
 ### Snapback
 - Fix: A tuned stick that is worn or loose no longer snaps back now and then after you let go. Its
   slower, bigger rebound is held until it settles, including let-gos straight down and turnaround
   lasers. Tight sticks behave as before.
+
+### RGB
+- Fix: With the config app open and input passthrough off, the LEDs dimmed after 5 minutes and stayed
+  dim. Pressing a button or moving a stick now brings them back.
 
 ## 2026-10-25 - Faster dongle on a computer
 Boards: dongle_hoja, dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w
