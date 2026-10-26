@@ -32,7 +32,7 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
 ## 2026-10-26 - Tuned Auto snapback holds worn sticks
-Boards: gcu_1
+Boards: gcu_1, progcc_3p
 
 ### Snapback
 - Fix: A tuned stick that is worn or loose no longer snaps back now and then after you let go. Its
