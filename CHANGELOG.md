@@ -42,6 +42,10 @@ Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, 
   then, which could set off a tap jump.
 - Change: A stick you guide back from the edge is never held, so tuning can hold your widest let-gos
   without slowing your throws and dash-backs.
+- Fix: Moving the stick sideways soon after letting go, like a fast fall into a dash, now comes
+  through as soon as you move it instead of up to 17 ms later.
+- Fix: On sticks whose bounce pauses briefly at its peak, the rest of the bounce no longer gets
+  through now and then.
 - Action: If you use a tuned Auto snapback, run Tune again and save it.
 
 ### RGB
