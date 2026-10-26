@@ -40,6 +40,9 @@ Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, 
   lasers. Tight sticks behave as before.
 - Fix: [progcc_3p] Letting go of the stick slightly off to one side no longer lets its rebound
   through now and then, which could set off a tap jump.
+- Change: [progcc_3p] A stick you guide back from the edge is never held, so tuning can hold your
+  widest let-gos without slowing your throws and dash-backs.
+- Action: [progcc_3p] If a rebound still gets through now and then, run Tune again and save it.
 
 ### RGB
 - Fix: With the config app open and input passthrough off, the LEDs dimmed after 5 minutes and stayed
