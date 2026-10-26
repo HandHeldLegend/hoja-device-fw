@@ -38,6 +38,8 @@ Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, 
 - Fix: A tuned stick that is worn or loose no longer snaps back now and then after you let go. Its
   slower, bigger rebound is held until it settles, including let-gos straight down and turnaround
   lasers. Tight sticks behave as before.
+- Fix: [progcc_3p] Letting go of the stick slightly off to one side no longer lets its rebound
+  through now and then, which could set off a tap jump.
 
 ### RGB
 - Fix: With the config app open and input passthrough off, the LEDs dimmed after 5 minutes and stayed
