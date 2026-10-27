@@ -31,6 +31,14 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-27 - SInput over Bluetooth stays connected
+Boards: esp32
+
+### Wireless
+- Fix: In SInput (Steam) mode over Bluetooth, the controller no longer drops out about 20 seconds
+  after it connects. It happened once each time the controller was turned on, and on Linux the
+  controller only came back about 20 seconds later.
+
 ## 2026-10-26 - Tuned Auto snapback holds worn sticks, LEDs wake with the config app open
 Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
 
