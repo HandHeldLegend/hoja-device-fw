@@ -40,6 +40,11 @@ Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, 
   run went no longer decides it. Your thumb moves and dash-backs come through as fast as before, and
   your current tuning keeps working.
 
+### Wireless
+- Fix: [gcu_2, latte_pro, pico_w] SInput over Bluetooth keeps its steady report timing after the
+  controller's radio restarts during a session. Before, the timing could stay off until you turned the
+  controller off and on again.
+
 ## 2026-10-27 - SInput over Bluetooth stays connected
 Boards: esp32
 
