@@ -31,6 +31,15 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-10-28 - Tuned Auto snapback holds turnarounds on every stick
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
+
+### Snapback
+- Fix: Letting go of the stick partway (a turnaround) no longer lets the bounce through now and then on
+  some sticks. The filter now tells a bounce from your thumb the same way on every stick, so how a Tune
+  run went no longer decides it. Your thumb moves and dash-backs come through as fast as before, and
+  your current tuning keeps working.
+
 ## 2026-10-27 - SInput over Bluetooth stays connected
 Boards: esp32
 
