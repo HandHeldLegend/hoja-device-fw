@@ -31,6 +31,13 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-11-04 - ProGCC 4 (in development)
+Boards: progcc_4
+
+### System
+- New: First firmware for the ProGCC 4. It is still in development: the triggers and the stick
+  directions are not final, so expect more updates before it is ready to play.
+
 ## 2026-10-28 - Tuned Auto snapback holds turnarounds on every stick
 Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s
 

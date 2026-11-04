@@ -52,14 +52,14 @@
 
 // Hover (analog face/trigger/dpad) polarity, read by hover.c: 1 where a press lowers the reading
 #define HOJA_HOVER_INVERTS {\
-    /*South*/   0,\
-    /*East*/    0,\
-    /*West*/    0,\
-    /*North*/   0,\
-    /*Up*/      0,\
-    /*Down*/    0,\
-    /*Left*/    0,\
-    /*Right*/   0,\
+    /*South*/   1,\
+    /*East*/    1,\
+    /*West*/    1,\
+    /*North*/   1,\
+    /*Up*/      1,\
+    /*Down*/    1,\
+    /*Left*/    1,\
+    /*Right*/   1,\
     /*LB*/      0,\
     /*RB*/      0,\
     /*LT*/      0,\
