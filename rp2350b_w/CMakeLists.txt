@@ -55,6 +55,7 @@ set(HOJA_USE_BT_HAL TRUE)
 # Define your list of directories
 set(BULK_PROJECTS_DIRS
     latte_pro
+    progcc_4
 )
 
 # Iterate through the list

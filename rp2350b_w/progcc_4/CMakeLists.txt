@@ -1,41 +1,5 @@
 # THIS IS MEAN TO BE COPIED. DO NOT EDIT UNLES YOU ARE IN THE SCRIPTS FOLDER
-
 cmake_minimum_required(VERSION 3.13)
-
-if(NOT DEFINED PICO_SDK_INIT_DONE)
-    include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
-    set(CMAKE_C_STANDARD 11)
-    set(CMAKE_CXX_STANDARD 17)
-endif()
-
-if(NOT DEFINED PROJECT_NAME)
-    get_filename_component(PROJECT_NAME "${CMAKE_CURRENT_LIST_DIR}" NAME)
-endif()
-
-if(NOT DEFINED PICO_SDK_INIT_DONE)
-    project(${PROJECT_NAME} C CXX ASM)
-    pico_sdk_init()
-else()
-    project(${PROJECT_NAME})
-endif()
-
-if(NOT DEFINED HOJA_LIB_ADDED)
-    set(HOJA_LIB_DIR        ${CMAKE_CURRENT_LIST_DIR}/../../library/HOJA-LIB-RP2040)
-    set(HOJA_LIBOUTPUT_DIR  ${CMAKE_CURRENT_LIST_DIR}/../../library/artifacts)
-    add_subdirectory(${HOJA_LIB_DIR} ${HOJA_LIBOUTPUT_DIR})
-endif()
-
-if(NOT DEFINED SCRIPTS_DIR)
-    set(SCRIPTS_DIR ${CMAKE_CURRENT_LIST_DIR}/../../scripts)
-endif()
-
-if(NOT DEFINED HOJA_BUILD_DIR)
-    set(HOJA_BUILD_DIR   ${CMAKE_CURRENT_LIST_DIR}/build)
-endif()
-
-if(NOT DEFINED HOJA_BUILDS_PROJECT_DIR)
-    set(HOJA_BUILDS_PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/../../builds/${PROJECT_NAME})
-endif()
 
 add_custom_target(
     ${PROJECT_NAME}_TIMESTAMP_GEN ALL
@@ -71,11 +35,15 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/pico_override.cmake")
     )
 endif()
 
+# Board build options, such as the Bluetooth host stack (sets target properties)
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/board.cmake")
+    include(${CMAKE_CURRENT_LIST_DIR}/board.cmake)
+endif()
+
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
     PICO_FLASH_SAFE_EXECUTE_PICO_SUPPORT_MULTICORE_LOCKOUT=1
     PICO_XOSC_STARTUP_DELAY_MULTIPLIER=64
-    CYW43_LWIP=0
     )
 
 # Make your targets depend on the timestamp
@@ -119,3 +87,9 @@ add_custom_command(TARGET ${PROJECT_NAME}
     COMMENT "Moving build files and generating manifest.json"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
+
+# Optional per-board additions (libraries, publish steps). Last so its post-build steps run after
+# the outputs exist.
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/board.cmake")
+    include(${CMAKE_CURRENT_LIST_DIR}/board.cmake)
+endif()
