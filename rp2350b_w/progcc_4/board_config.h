@@ -60,12 +60,12 @@
     /*Down*/    1,\
     /*Left*/    1,\
     /*Right*/   1,\
-    /*LB*/      0,\
-    /*RB*/      0,\
+    /*LB*/      1,\
+    /*RB*/      1,\
     /*LT*/      0,\
-    /*LTANALOG*/0,\
+    /*LTANALOG*/1,\
     /*RT*/      0,\
-    /*RTANALOG*/0,\
+    /*RTANALOG*/1,\
     /*LP1*/     0,\
     /*RP1*/     0,\
     /*LP2*/     0,\
