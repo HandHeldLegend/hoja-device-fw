@@ -50,6 +50,13 @@ hoja_fetch_dep(cmsis https://github.com/ARM-software/CMSIS_6.git b0bbb0423b278ca
 set(NRFX_DIR  ${nrfx_DIR})
 set(CMSIS_DIR ${cmsis_DIR})
 
+# Bluetooth LE: NimBLE's open controller, built into the firmware (the library's HOJA_NRF52_BLE)
+option(HOJA_NRF52_BLE "Build the Bluetooth LE controller in" ON)
+if(HOJA_NRF52_BLE)
+    hoja_fetch_dep(nimble https://github.com/apache/mynewt-nimble.git 648fc0213fb7aff71f56423151e342fdd3b8f775)
+    set(NIMBLE_DIR ${nimble_DIR})
+endif()
+
 # TinyUSB: the copy in the Pico SDK the other boards build with, or TINYUSB_DIR
 if(NOT DEFINED TINYUSB_DIR)
     if(WIN32)
