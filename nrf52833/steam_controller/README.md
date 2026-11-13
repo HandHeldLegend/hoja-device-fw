@@ -76,11 +76,11 @@ position, the touch and the click are worked out in the firmware.
   use.
 
 Checked on a controller (2026-11-13), from the reports on a PC and by feel: both pads track from
-edge to edge the right way round, the click force and the two pulses. SDL (the copy Steam ships,
-3.5.0) opens the gamepad as the Steam type with two touchpads, their clicks as `touchpad` and
-`misc2`. The Steam client of 2026-11-11 showed no trackpads for it. Not checked: the pads while in
-the Switch 2 mode. The click threshold is one number for both pads, not each pad's factory range
-as on the stock firmware.
+edge to edge the right way round, the click force and the two pulses. SDL opens the gamepad as
+the Steam type with two touchpads, their clicks as `touchpad` and `misc2`, and both pads and both
+clicks work in its gamepad test (`testcontroller`, SDL main of 2026-11-12). The Steam client of
+2026-11-11 showed no trackpads for it. Not checked: the pads while in the Switch 2 mode. The click
+threshold is one number for both pads, not each pad's factory range as on the stock firmware.
 
 ## Switch 2 (Bluetooth)
 
