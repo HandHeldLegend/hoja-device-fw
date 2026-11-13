@@ -1,7 +1,7 @@
 # Steam Controller (2026)
 
 HOJA on Valve's second Steam Controller: an nRF52833 behind Valve's own USB bootloader, which stays
-in place. USB only for now.
+in place. USB on the cable; off it, a Pro Controller 2 for a Switch 2 over Bluetooth LE.
 
 **Running on a controller since 2026-11-12.** It shows up as an SInput gamepad with the config
 interface and sends about 850 reports a second. Checked by hand on that controller: every button,
@@ -11,21 +11,25 @@ battery level, the status LED's colours, rumble on the correct sides and the app
 ## What is in
 
 - USB modes: SInput, XInput, Switch, and the others the library offers over USB, with the config app
+- Off the cable: Switch mode as a Switch 2's Pro Controller 2, over Bluetooth LE (below)
 - Buttons (A B X Y, d-pad, L1 R1, L4 L5 R4 R5, View, Menu, Steam, Quick Access, stick clicks)
 - Sticks and analog triggers
 - Motion (LSM6DSV16X)
 - Rumble through the two grip motors (I2S amplifier)
 - Status LED
-- Battery level and charger status; Steam held, or the cable pulled, powers off
+- Battery level and charger status; Steam held, or the cable pulled, powers off (Steam pressed
+  starts it again)
 - Settings and profiles saved in flash
 
 ## What is not
 
 - Trackpads, grip sensing and stick touch (all behind the trackpad controller)
 - Trackpad haptics
-- A wireless mode to start in: Bluetooth LE runs, but only from the bench build below. The chip has
-  no Bluetooth Classic, so no first-Switch or Wii mode whatever is added later; Valve's 2.4 GHz
-  link is not used
+- Any wireless mode but the Switch 2's. The chip has no Bluetooth Classic, so no first-Switch or Wii
+  mode whatever is added later; Valve's 2.4 GHz link is not used
+- The config app off the cable
+- A power-off of its own when no console answers a start: it waits until Steam is held or the
+  battery is low
 - Stock calibration: the sticks and triggers start uncalibrated (calibrate in the config app)
 - Saved settings across an update: the bootloader erases them with the firmware
 
@@ -34,8 +38,7 @@ battery level, the status LED's colours, rumble on the correct sides and the app
 - Report rate: about 850 a second rather than 1000. One core does everything here, and the motion
   read alone is about 0.35 ms of I2C.
 
-Checked since: rumble at a full-strength request is fine, and off the cable it flashes white twice
-and powers off (it has no wireless mode to stay on for).
+Checked since: rumble at a full-strength request is fine.
 
 ## Build
 
@@ -53,31 +56,74 @@ cmake --build nrf52833/build
 
 The result is `nrf52833/steam_controller/build/steam_controller.fw`.
 
-## Bluetooth (bench)
+## Switch 2 (Bluetooth)
 
 The chip is its own Bluetooth LE radio. The library runs NimBLE's link layer on it with no operating
-system, and FLOSS over that as the host stack (`src/hal/nrf52/ble` in the library). The default
-build carries none of it.
+system, and FLOSS over that as the host stack (`src/hal/nrf52/ble` in the library). It has the 2M
+PHY a Switch 2 asks of its controllers, and no Bluetooth Classic for a first Switch, so on this build
+Switch mode over Bluetooth is a Switch 2's Pro Controller 2 (`HOJA_NS2_BLE`, on by default).
 
-One mode exists so far, started beside USB by a build flag: a Pro Controller 2 for a Switch 2.
+- Off the cable the gamepad starts in it, whatever mode is picked or saved: it is the one mode the
+  radio carries. On a charger (power, no computer) it goes there after three seconds.
+- Buttons and sticks are the Switch profile's, as in Switch mode over USB. The Pro Controller 2's GL
+  and GR have no place in that profile yet: they are L4 and R4 as wired.
+- Pairing: open Controllers > Change Grip/Order on the console. With no console saved the gamepad is
+  found by any; with one saved it calls that one. Menu held while it starts makes it findable again.
+- The console and its key are saved as the gamepad's Switch (the config app's saved Switch, and its
+  forget). An update erases them with the other settings.
+- Rumble and motion work. Buttons and motion are read 800 times a second, the rate of the motion
+  data's own clock.
+- The console shows the gamepad in its own colours (the config app's body, buttons and grips).
+- Waking: started off the cable with Steam, the gamepad wakes its console, as a retail
+  controller's Home does. Started on a cable (a charger) it waits to be taken and leaves a sleeping
+  console asleep, until Home is pressed.
+- Sleeping: a Switch 2 has no command that turns a controller off. Going to sleep it ends the link
+  itself, and the gamepad powers off when it does. The same is expected when the console clears its
+  controllers (Change Grip/Order). A link that is only lost is offered back, without waking the
+  console.
+
+Checked on a controller and a Switch 2 (2026-11-12): pairing, buttons, triggers, sticks and motion;
+a start off the cable that went back to the console by itself, with the pairing kept over the
+power-off; Menu held at start to pair again; the console put to sleep, which stayed asleep with the
+gamepad off at once, and woke when the gamepad was started. Not checked: rumble since the mode
+stopped being a bench build, the colours on the console, Home waking the console from a gamepad on
+a cable, and Change Grip/Order with the gamepad connected.
+
+Until the triggers are calibrated in the config app they learn their range at every start: pull
+each one fully once.
+
+`-DHOJA_NS2_BLE=OFF` builds without the mode: USB only, and off the cable the gamepad powers off.
+
+### Bench
+
+A build flag also starts the link beside the USB modes, where a log can be read: FLOSS's, and every
+tenth second the main loop's pace and the link layer's counters. Start in Switch mode over USB for the
+buttons to be right (the link reads that mode's profile).
 
 ```bash
 cmake -S nrf52833 -B nrf52833/build -DSTEAM_CONTROLLER_NS2_BLE_TEST=ON
 ```
 
-Keep the gamepad on its cable, open Controllers > Change Grip/Order on the console, and it pairs.
-Buttons go by their printed labels, whatever profile the USB mode has. Rumble and motion work. The
-pairing is kept in RAM: it is lost at power off and with every flash.
-
-The same flag keeps a log in the gamepad (FLOSS's, and every tenth second the main loop's pace and
-the link layer's counters), read over the config interface. Read it after a test, not during one:
-reading slows the gamepad's main loop.
+Read the log after a test, not during one: reading slows the gamepad's main loop.
 
 ```bash
 python -I scripts/hoja_bench.py pad-log
 ```
 
 `-DSTEAM_CONTROLLER_BLE_SNOOP=ON` adds every HCI packet to that log.
+
+On the cable, the bench script restarts a gamepad into its Bluetooth mode with no buttons (it comes
+back to USB when plugged in again):
+
+```bash
+python -I scripts/hoja_bench.py pad-bt
+```
+
+The Bluetooth mode itself has no USB to read a log over. The log is kept in RAM a restart leaves
+alone (4 KB), and `-DSTEAM_CONTROLLER_BLE_RETURN_S=120` restarts the gamepad out of the Bluetooth
+mode two seconds after its console lets go of it, or after that many seconds with no console: on
+the cable it comes back on USB, and `pad-log` reads what the mode logged. A start that finds a log
+waiting leaves the link beside USB off, so the log is not buried.
 
 ## Flash
 
@@ -104,6 +150,12 @@ Steam keeps Valve's firmware in the same container, in its `bin/hardwareupdater`
 ```bash
 python scripts/steam_controller_fw.py flash IBEX_FW_xxxxxxxx.fw
 ```
+
+## Restarts and Valve's bootloader
+
+Every restart passes through the bootloader, which uses the bottom of RAM: a note left there for
+the firmware that follows (which mode to come back in) did not survive. The firmware's RAM ends
+8 KB early (`steam_controller.ld`), and the note is kept at that end, where it does.
 
 ## If it goes wrong
 

@@ -32,6 +32,13 @@ if(STEAM_CONTROLLER_BLE_SNOOP)
     target_compile_definitions(${PROJECT_NAME} PRIVATE STEAM_CONTROLLER_BLE_SNOOP=1)
 endif()
 
+set(STEAM_CONTROLLER_BLE_RETURN_S 0 CACHE STRING
+    "Bench: with the test above, the Bluetooth mode restarts back to USB when its console lets go, or after this many seconds with none (0: stays)")
+if(STEAM_CONTROLLER_BLE_RETURN_S)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        STEAM_CONTROLLER_BLE_RETURN_S=${STEAM_CONTROLLER_BLE_RETURN_S})
+endif()
+
 hoja_nrf52_firmware(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/steam_controller.ld)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)

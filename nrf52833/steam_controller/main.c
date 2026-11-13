@@ -12,7 +12,8 @@
 
 // Valve Steam Controller (2026). What isn't read yet: the trackpads, the grip sensors and the
 // sticks' touch sensing (all behind the trackpad controller, which is left idle), and the
-// trackpads' own haptics. USB only: no radio.
+// trackpads' own haptics. Off the cable it is a Switch 2's Pro Controller 2 over Bluetooth LE, the
+// one mode its radio carries here (HOJA_NS2_BLE); on the cable, the library's USB modes.
 //
 // The pins and the parts on them come from the community's work on the stock firmware. Buttons,
 // sticks, triggers and motion have been checked on a controller; the entries marked "to confirm"
@@ -132,7 +133,9 @@ static const hoja_config_s _hoja_config = {
     // Steam held: off, as on the stock firmware
     .shipping_macro_code = { INPUT_CODE_HOME, INPUT_CODE_UNUSED },
 
-    .sync_on_boot_code   = INPUT_CODE_UNUSED,
+    // Menu held at power-on, as Start is on the other gamepads: found by any Switch 2, though one is
+    // saved. (With none saved it always is.) With L1 as well it is the bootloader instead.
+    .sync_on_boot_code   = INPUT_CODE_START,
     .sync_macro_code     = { INPUT_CODE_UNUSED, INPUT_CODE_UNUSED },
 
     // Into Valve's bootloader. (The bootloader's own way in, whatever firmware is installed: hold
@@ -370,30 +373,47 @@ static const hoja_config_s _hoja_config = {
 };
 
 #if defined(STEAM_CONTROLLER_NS2_BLE_TEST)
-// Bench: a Pro Controller 2 for a Switch 2 over Bluetooth LE, beside USB (transport/ns2_ble.h). It
-// is the only way into that mode until it is one the gamepad starts in. FLOSS's log and the link's
-// counters go to the log read over the config interface (utilities/bench_log.h).
+// Bench: the Switch 2 mode's link (transport/ns2_ble.h) also runs beside the USB modes, where its
+// log can be read: FLOSS's log and the link's counters go to the log read over the config interface
+// (utilities/bench_log.h). The buttons are right in Switch mode over USB only, whose profile the
+// link reads. Off the cable the mode runs as it does in any build.
 #include <stdio.h>
 
+#include "cores/cores.h"
+#include "floss/floss.h"
 #include "hal/nrf52/ble_controller.h"
-#include "hal/nrf52/ble_floss.h"
+#include "hal/nrf52/bluetooth.h"
 #include "ns2_lib_gatt.h"
 #include "transport/ns2_ble.h"
+#include "transport/transport.h"
+#include "transport/transport_bt.h"
 #include "utilities/bench_log.h"
+#include "utilities/boot.h"
 
 #define BLE_TEST_ATT_NOTIFY     0x1Bu
+#define BLE_TEST_ATT_WRITE_CMD  0x52u
+#define BLE_TEST_EVT_COMPLETED_PACKETS 0x13u
+// A console that lets go of the link and is back within this has not left (it does so while
+// pairing, 14 s into one run): the restart back to USB waits for one that stays away
+#define BLE_TEST_RETURN_AFTER_US 6000000u
 #define BLE_TEST_LINE_US        2000000u
 #define BLE_TEST_LINK_LINE_EVERY 5u
 
 static bool _ble_test_running = false;
 
 #if defined(STEAM_CONTROLLER_BLE_SNOOP)
-// Every HCI packet but the input reports, which would bury the rest
+// Every HCI packet but the input reports, the rumble writes and the controller's count of packets
+// sent, which would bury the rest (each goes 200 times a second)
 static void _ble_test_snoop(uint8_t type, bool is_rx, const uint8_t *pkt, uint16_t len, uint32_t t_us)
 {
     // ACL header (4), L2CAP header (4), then the ATT opcode and the handle it is about
     if ((type == FLOSS_PKT_ACL) && !is_rx && (len > 10u) && (pkt[8] == BLE_TEST_ATT_NOTIFY) &&
         (pkt[9] == NS2_HANDLE_PRO2_INPUT_VALUE) && (pkt[10] == 0))
+        return;
+    if ((type == FLOSS_PKT_ACL) && is_rx && (len > 10u) && (pkt[8] == BLE_TEST_ATT_WRITE_CMD) &&
+        (pkt[9] == NS2_HANDLE_VIBRATION_VALUE) && (pkt[10] == 0))
+        return;
+    if ((type == FLOSS_PKT_EVT) && is_rx && len && (pkt[0] == BLE_TEST_EVT_COMPLETED_PACKETS))
         return;
     floss_snoop_log_hook(type, is_rx, pkt, len, t_us);
 }
@@ -401,35 +421,67 @@ static void _ble_test_snoop(uint8_t type, bool is_rx, const uint8_t *pkt, uint16
 
 static void _ble_test_start(void)
 {
-    const floss_init_t init = {.transport = nrf52_ble_floss_transport()};
-    if (floss_init(&init) != FLOSS_OK)
-        return;
-
-    // The library takes the address most significant byte first
-    uint8_t address[6];
-    uint8_t mac[6];
-    nrf52_ble_controller_address(address);
-    for (uint8_t i = 0; i < sizeof(mac); i++)
-        mac[i] = address[sizeof(mac) - 1u - i];
-
 #if defined(STEAM_CONTROLLER_BLE_SNOOP)
     floss_snoop_set_hook(_ble_test_snoop);
 #endif
-    if (!ns2_ble_start(mac))
+    // A start that will be the Bluetooth mode (asked for by the restart before, or off the cable)
+    // is left to start the link itself, as it does in any build
+    boot_memory_s asked = {0};
+    boot_get_memory(&asked);
+    if ((asked.gamepad_method == GAMEPAD_METHOD_BLUETOOTH) || !nrf52_usb_power_present())
+        return;
+    // A log kept from the Bluetooth mode is waiting to be read: a link started now would bury it
+    if (bench_log_waiting())
+        return;
+
+    _ble_test_running = nrf52_bluetooth_start(false);
+    if (!_ble_test_running)
     {
         static const char failed[] = "BENCH Pro Controller 2 start failed\n";
         bench_log_write(failed, sizeof(failed) - 1u);
-        return;
     }
-    _ble_test_running = floss_start() == FLOSS_OK;
 }
 
 static void _ble_test_task(void)
 {
+    const bool wireless = core_current_params()->transport_type == GAMEPAD_TRANSPORT_BLUETOOTH;
+
+#if defined(STEAM_CONTROLLER_BLE_RETURN_S)
+    // The Bluetooth mode has no USB to read its log over. It says where it stands and restarts,
+    // which on the cable is back to USB with the log kept: a little after a console that had the
+    // link lets go of it, or when none has taken it in the time given.
+    static bool was_linked = false;
+    static uint64_t let_go_us = 0;
+    const uint64_t return_now = sys_hal_now_us();
+    if (ns2_ble_linked())
+    {
+        was_linked = true;
+        let_go_us = 0;
+    }
+    else if (was_linked && !let_go_us)
+        let_go_us = return_now;
+
+    const bool let_go = let_go_us && ((return_now - let_go_us) >= BLE_TEST_RETURN_AFTER_US);
+    const bool none_came = !was_linked && (return_now >= (STEAM_CONTROLLER_BLE_RETURN_S * 1000000ull));
+    if (wireless && (let_go || none_came))
+    {
+        char line[120];
+        const int n = snprintf(line, sizeof(line), "BENCH back to USB: mode up %u, radio up %u, running %u, "
+                                                   "linked %u, connection %u\n",
+                               core_current_params()->transport_task != NULL, transport_bt_radio_up(),
+                               ns2_ble_running(), ns2_ble_linked(), (unsigned)transport_current_connection());
+        bench_log_write(line, (size_t)n);
+        sys_hal_reboot();
+    }
+#endif
+
+    // The wireless mode runs the link from its own task
+    if (wireless)
+        _ble_test_running = transport_bt_radio_up();
     if (!_ble_test_running)
         return;
-    floss_poll();
-    ns2_ble_task();
+    if (!wireless)
+        nrf52_bluetooth_task();
 
     // How the main loop kept up (passes, and the longest wait between two) and the link layer's
     // counters, every tenth second

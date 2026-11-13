@@ -57,6 +57,13 @@ if(HOJA_NRF52_BLE)
     set(NIMBLE_DIR ${nimble_DIR})
 endif()
 
+# Switch mode off the cable: a Pro Controller 2 for a Switch 2, over that controller. Without it a
+# board has no wireless mode, and powers off when it leaves the cable.
+option(HOJA_NS2_BLE "Switch mode over Bluetooth is a Switch 2's Pro Controller 2" ON)
+if(NOT HOJA_NRF52_BLE)
+    set(HOJA_NS2_BLE OFF)
+endif()
+
 # TinyUSB: the copy in the Pico SDK the other boards build with, or TINYUSB_DIR
 if(NOT DEFINED TINYUSB_DIR)
     if(WIN32)
