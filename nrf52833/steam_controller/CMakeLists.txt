@@ -20,6 +20,18 @@ add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_TIMESTAMP_GEN)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
+# Bench: a Pro Controller 2 for a Switch 2 over Bluetooth LE, started beside USB. With it comes the
+# log read over the config interface (HOJA_BENCH_LOG): see "Bluetooth (bench)" in README.md.
+option(STEAM_CONTROLLER_NS2_BLE_TEST "Bench: a Pro Controller 2 for a Switch 2 over Bluetooth LE, beside USB" OFF)
+if(STEAM_CONTROLLER_NS2_BLE_TEST)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE STEAM_CONTROLLER_NS2_BLE_TEST=1 HOJA_BENCH_LOG=1)
+endif()
+
+option(STEAM_CONTROLLER_BLE_SNOOP "Bench: with the test above, every HCI packet in the log (slows the main loop)" OFF)
+if(STEAM_CONTROLLER_BLE_SNOOP)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE STEAM_CONTROLLER_BLE_SNOOP=1)
+endif()
+
 hoja_nrf52_firmware(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/steam_controller.ld)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)

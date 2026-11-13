@@ -369,6 +369,97 @@ static const hoja_config_s _hoja_config = {
     },
 };
 
+#if defined(STEAM_CONTROLLER_NS2_BLE_TEST)
+// Bench: a Pro Controller 2 for a Switch 2 over Bluetooth LE, beside USB (transport/ns2_ble.h). It
+// is the only way into that mode until it is one the gamepad starts in. FLOSS's log and the link's
+// counters go to the log read over the config interface (utilities/bench_log.h).
+#include <stdio.h>
+
+#include "hal/nrf52/ble_controller.h"
+#include "hal/nrf52/ble_floss.h"
+#include "ns2_lib_gatt.h"
+#include "transport/ns2_ble.h"
+#include "utilities/bench_log.h"
+
+#define BLE_TEST_ATT_NOTIFY     0x1Bu
+#define BLE_TEST_LINE_US        2000000u
+#define BLE_TEST_LINK_LINE_EVERY 5u
+
+static bool _ble_test_running = false;
+
+#if defined(STEAM_CONTROLLER_BLE_SNOOP)
+// Every HCI packet but the input reports, which would bury the rest
+static void _ble_test_snoop(uint8_t type, bool is_rx, const uint8_t *pkt, uint16_t len, uint32_t t_us)
+{
+    // ACL header (4), L2CAP header (4), then the ATT opcode and the handle it is about
+    if ((type == FLOSS_PKT_ACL) && !is_rx && (len > 10u) && (pkt[8] == BLE_TEST_ATT_NOTIFY) &&
+        (pkt[9] == NS2_HANDLE_PRO2_INPUT_VALUE) && (pkt[10] == 0))
+        return;
+    floss_snoop_log_hook(type, is_rx, pkt, len, t_us);
+}
+#endif
+
+static void _ble_test_start(void)
+{
+    const floss_init_t init = {.transport = nrf52_ble_floss_transport()};
+    if (floss_init(&init) != FLOSS_OK)
+        return;
+
+    // The library takes the address most significant byte first
+    uint8_t address[6];
+    uint8_t mac[6];
+    nrf52_ble_controller_address(address);
+    for (uint8_t i = 0; i < sizeof(mac); i++)
+        mac[i] = address[sizeof(mac) - 1u - i];
+
+#if defined(STEAM_CONTROLLER_BLE_SNOOP)
+    floss_snoop_set_hook(_ble_test_snoop);
+#endif
+    if (!ns2_ble_start(mac))
+    {
+        static const char failed[] = "BENCH Pro Controller 2 start failed\n";
+        bench_log_write(failed, sizeof(failed) - 1u);
+        return;
+    }
+    _ble_test_running = floss_start() == FLOSS_OK;
+}
+
+static void _ble_test_task(void)
+{
+    if (!_ble_test_running)
+        return;
+    floss_poll();
+    ns2_ble_task();
+
+    // How the main loop kept up (passes, and the longest wait between two) and the link layer's
+    // counters, every tenth second
+    static uint64_t next_us = 0;
+    static uint64_t last_us = 0;
+    static uint32_t passes = 0;
+    static uint32_t longest_us = 0;
+    static uint8_t turn = 0;
+    const uint64_t now = sys_hal_now_us();
+    if (last_us && ((now - last_us) > longest_us))
+        longest_us = (uint32_t)(now - last_us);
+    last_us = now;
+    passes++;
+    if (now < next_us)
+        return;
+    next_us = now + BLE_TEST_LINE_US;
+
+    if (!(turn++ % BLE_TEST_LINK_LINE_EVERY))
+    {
+        char line[260];
+        int n = snprintf(line, sizeof(line), "LOOP linked %u passes %lu longest %lu us | ", ns2_ble_linked(),
+                         (unsigned long)passes, (unsigned long)longest_us);
+        n += nrf52_ble_bench_stats(&line[n], sizeof(line) - (size_t)n);
+        bench_log_write(line, (size_t)n);
+    }
+    passes = 0;
+    longest_us = 0;
+}
+#endif
+
 static void _local_output(uint32_t gpio, bool level)
 {
     gpio_hal_write(gpio, level);
@@ -431,6 +522,10 @@ void cb_hoja_init()
     gpio_hal_init(PGPIO_BTN_VIEW, true, true);
     gpio_hal_init(PGPIO_BTN_STEAM, true, true);
     nrf52_gpio_init_input(PGPIO_BUTTONS_INT, false, false);
+
+#if defined(STEAM_CONTROLLER_NS2_BLE_TEST)
+    _ble_test_start();
+#endif
 }
 
 void cb_hoja_shutdown()
@@ -459,6 +554,10 @@ static uint16_t _local_read_buttons(void)
 void cb_hoja_read_input(mapper_input_s *input)
 {
     bool *out = input->presses;
+
+#if defined(STEAM_CONTROLLER_NS2_BLE_TEST)
+    _ble_test_task();
+#endif
 
     out[INPUT_CODE_SOUTH]  = !gpio_hal_read(PGPIO_BTN_A);
     out[INPUT_CODE_EAST]   = !gpio_hal_read(PGPIO_BTN_B);
