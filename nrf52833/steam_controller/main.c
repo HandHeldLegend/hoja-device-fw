@@ -453,6 +453,18 @@ static void _ble_test_task(void)
 {
     const bool wireless = core_current_params()->transport_type == GAMEPAD_TRANSPORT_BLUETOOTH;
 
+#if defined(STEAM_CONTROLLER_BLE_SESSION_S)
+    // A Bluetooth mode runs for this long, whatever its link is doing, then restarts: on the cable
+    // that is back to USB with the log kept. For a test nobody is there to end.
+    if (wireless && (sys_hal_now_us() >= (STEAM_CONTROLLER_BLE_SESSION_S * 1000000ull)))
+    {
+        static const char over[] = "BENCH session over, back to USB\n";
+        bench_log_write(over, sizeof(over) - 1u);
+        transport_bt_stop();
+        sys_hal_reboot();
+    }
+#endif
+
 #if defined(STEAM_CONTROLLER_BLE_RETURN_S)
     // The Bluetooth mode has no USB to read its log over. It says where it stands and restarts,
     // which on the cable is back to USB with the log kept: a little after a console that had the

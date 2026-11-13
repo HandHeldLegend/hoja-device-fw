@@ -8,9 +8,10 @@
 
 #define HOJA_TRANSPORT_USB_DRIVER   USB_DRIVER_HAL
 
-// The radio has one mode: Switch, as a Switch 2's Pro Controller 2. A build without that mode
-// (HOJA_NS2_BLE off) has no wireless mode at all.
-#if defined(HOJA_NS2_BLE)
+// The radio carries SInput, as a Bluetooth LE HID gamepad, and Switch, as a Switch 2's Pro
+// Controller 2 (a build with HOJA_NS2_BLE). A build without the controller (HOJA_NRF52_BLE off) has
+// no wireless mode at all.
+#if defined(HOJA_NRF52_BLE)
 #define HOJA_TRANSPORT_BT_DRIVER    BT_DRIVER_NRF52
 #endif
 

@@ -26,7 +26,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 # log read over the config interface (HOJA_BENCH_LOG): see "Bluetooth (bench)" in README.md.
 option(STEAM_CONTROLLER_NS2_BLE_TEST "Bench: a Pro Controller 2 for a Switch 2 over Bluetooth LE, beside USB" OFF)
 if(STEAM_CONTROLLER_NS2_BLE_TEST)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE STEAM_CONTROLLER_NS2_BLE_TEST=1 HOJA_BENCH_LOG=1)
+    # The log is kept in RAM the linker script sets aside (__bench_log_keep): the library's own
+    # buffer for it would only take room from the settings kept over an update
+    target_compile_definitions(${PROJECT_NAME} PRIVATE STEAM_CONTROLLER_NS2_BLE_TEST=1 HOJA_BENCH_LOG=1
+        BENCH_LOG_LEN=16u)
 endif()
 
 option(STEAM_CONTROLLER_BLE_SNOOP "Bench: with the test above, every HCI packet in the log (slows the main loop)" OFF)
@@ -39,6 +42,13 @@ set(STEAM_CONTROLLER_BLE_RETURN_S 0 CACHE STRING
 if(STEAM_CONTROLLER_BLE_RETURN_S)
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         STEAM_CONTROLLER_BLE_RETURN_S=${STEAM_CONTROLLER_BLE_RETURN_S})
+endif()
+
+set(STEAM_CONTROLLER_BLE_SESSION_S 0 CACHE STRING
+    "Bench: with the test above, a Bluetooth mode restarts back to USB this many seconds after it started, whatever its link is doing (0: stays)")
+if(STEAM_CONTROLLER_BLE_SESSION_S)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        STEAM_CONTROLLER_BLE_SESSION_S=${STEAM_CONTROLLER_BLE_SESSION_S})
 endif()
 
 hoja_nrf52_firmware(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/steam_controller.ld)
