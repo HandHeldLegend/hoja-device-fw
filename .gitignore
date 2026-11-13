@@ -9,3 +9,6 @@ __pycache__/
 
 # The bench BLE client's saved token
 scripts/ble_cfg_token.bin
+
+# nRF52 dependencies, cloned at configure time (nrfx, CMSIS)
+nrf52833/deps/

@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.20)
+
+# Valve Steam Controller (2026). The output is steam_controller.fw: the firmware in the container
+# Valve's bootloader takes over USB (scripts/steam_controller_fw.py packs and sends it).
+
+add_custom_target(
+    ${PROJECT_NAME}_TIMESTAMP_GEN ALL
+    COMMAND ${CMAKE_COMMAND}
+    -DOUTPUTDIR=${CMAKE_CURRENT_LIST_DIR}
+    -P ${SCRIPTS_DIR}/timestamp.cmake
+    BYPRODUCTS ${CMAKE_CURRENT_LIST_DIR}/timestamp.h
+    COMMENT "Generating build timestamp"
+    VERBATIM
+)
+
+add_executable(${PROJECT_NAME}
+    main.c
+)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_TIMESTAMP_GEN)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+hoja_nrf52_firmware(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/steam_controller.ld)
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${Python3_EXECUTABLE} ${SCRIPTS_DIR}/steam_controller_fw.py pack
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/${PROJECT_NAME}.bin
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/${PROJECT_NAME}.fw
+    COMMENT "Packing ${PROJECT_NAME}.fw"
+    VERBATIM
+)
