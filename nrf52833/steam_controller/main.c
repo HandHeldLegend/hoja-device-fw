@@ -1,6 +1,8 @@
 #include "hoja.h"
 #include "board_config.h"
 #include "main.h"
+#include "trackpad.h"
+#include "trackpad_haptics.h"
 
 #include "hal/gpio_hal.h"
 #include "hal/i2c_hal.h"
@@ -10,9 +12,9 @@
 #include "input/input_config.h"
 #include "input_shared_types.h"
 
-// Valve Steam Controller (2026). What isn't read yet: the trackpads, the grip sensors and the
-// sticks' touch sensing (all behind the trackpad controller, which is left idle), and the
-// trackpads' own haptics. Off the cable it is a Switch 2's Pro Controller 2 over Bluetooth LE, the
+// Valve Steam Controller (2026). The trackpads are read (trackpad.h) and reach a host as SInput's
+// touchpads. What isn't used yet: the grip sensors and the sticks' touch sensing, which the same
+// controller reads. The trackpads' actuators play only a pad's click. Off the cable it is a Switch 2's Pro Controller 2 over Bluetooth LE, the
 // one mode its radio carries here (HOJA_NS2_BLE); on the cable, the library's USB modes.
 //
 // The pins and the parts on them come from the community's work on the stock firmware. Buttons,
@@ -196,6 +198,9 @@ static const hoja_config_s _hoja_config = {
             { .code = INPUT_CODE_LY_UP,     .type = INPUT_TYPE_JOYSTICK, .name = "LY+" },
             { .code = INPUT_CODE_LY_DOWN,   .type = INPUT_TYPE_JOYSTICK, .name = "LY-" },
             { .code = INPUT_CODE_RS,        .type = INPUT_TYPE_DIGITAL,  .name = "R3" },
+            // A trackpad pushed down (trackpad.h)
+            { .code = INPUT_CODE_TP1,       .type = INPUT_TYPE_DIGITAL,  .name = "L Pad" },
+            { .code = INPUT_CODE_TP2,       .type = INPUT_TYPE_DIGITAL,  .name = "R Pad" },
             { .code = INPUT_CODE_RX_RIGHT,  .type = INPUT_TYPE_JOYSTICK, .name = "RX+" },
             { .code = INPUT_CODE_RX_LEFT,   .type = INPUT_TYPE_JOYSTICK, .name = "RX-" },
             { .code = INPUT_CODE_RY_UP,     .type = INPUT_TYPE_JOYSTICK, .name = "RY+" },
@@ -357,6 +362,8 @@ static const hoja_config_s _hoja_config = {
             INPUT_DEFAULT(INPUT_CODE_SELECT,    SINPUT_CODE_SELECT),
             INPUT_DEFAULT(INPUT_CODE_HOME,      SINPUT_CODE_GUIDE),
             INPUT_DEFAULT(INPUT_CODE_SHARE,     SINPUT_CODE_SHARE),
+            INPUT_DEFAULT(INPUT_CODE_TP1,       SINPUT_CODE_TP_1),
+            INPUT_DEFAULT(INPUT_CODE_TP2,       SINPUT_CODE_TP_2),
             INPUT_DEFAULT(INPUT_CODE_LS,        SINPUT_CODE_LS),
             INPUT_DEFAULT(INPUT_CODE_LX_RIGHT,  SINPUT_CODE_LX_RIGHT),
             INPUT_DEFAULT(INPUT_CODE_LX_LEFT,   SINPUT_CODE_LX_LEFT),
@@ -552,9 +559,8 @@ void cb_hoja_read_joystick(uint16_t *input)
 
 void cb_hoja_init()
 {
-    // Parts this firmware doesn't drive, held quiet. The trackpad controller shares the buttons'
-    // I2C bus: it is reset and left running, never spoken to, which is the state the bus is known
-    // to work in.
+    // The trackpad controller, on the buttons' I2C bus, is reset here and set up once the main
+    // loop runs (trackpad_start, below). The trackpads' actuators rest until a click plays.
     _local_output(PGPIO_TRACKPAD_RESET, false);
     sys_hal_sleep_ms(TRACKPAD_RESET_MS);
     gpio_hal_write(PGPIO_TRACKPAD_RESET, true);
@@ -575,6 +581,9 @@ void cb_hoja_init()
     gpio_hal_init(PGPIO_BTN_STEAM, true, true);
     nrf52_gpio_init_input(PGPIO_BUTTONS_INT, false, false);
 
+    trackpad_start();
+    trackpad_haptics_start();
+
 #if defined(STEAM_CONTROLLER_NS2_BLE_TEST)
     _ble_test_start();
 #endif
@@ -585,12 +594,19 @@ void cb_hoja_shutdown()
     gpio_hal_write(PGPIO_ANALOG_ENABLE, false);
     gpio_hal_write(PGPIO_BATTERY_SENSE_EN, false);
     gpio_hal_write(PGPIO_HAPTIC_AMP_ENABLE, false);
+    gpio_hal_write(PGPIO_PAD_HAPTIC_ENABLE, false);
 }
 
 // The buttons behind the GreenPAK: bit n low while button n is pressed. A read that fails gives
-// every button released.
+// every button released. While the trackpads' controller has the bus for a frame (up to 2 ms)
+// the buttons are as they last read: waiting for the bus would hold the main loop that long.
 static uint16_t _local_read_buttons(void)
 {
+    static uint16_t last = BUTTONS_ALL_RELEASED;
+
+    if (trackpad_busy())
+        return last;
+
     const uint8_t command = BUTTONS_READ_COMMAND;
     uint8_t raw[2] = {0xFF, 0xFF};
 
@@ -598,7 +614,8 @@ static uint16_t _local_read_buttons(void)
                                       BUTTONS_I2C_TIMEOUT_US) != 2)
         return BUTTONS_ALL_RELEASED;
 
-    return (uint16_t)(raw[0] | (raw[1] << 8));
+    last = (uint16_t)(raw[0] | (raw[1] << 8));
+    return last;
 }
 
 #define BUTTON_PRESSED(word, bit) (((word) & (1u << (bit))) == 0)
@@ -634,11 +651,47 @@ void cb_hoja_read_input(mapper_input_s *input)
     out[INPUT_CODE_LS]    = BUTTON_PRESSED(buttons, BUTTONS_BIT_LS);
     out[INPUT_CODE_RS]    = BUTTON_PRESSED(buttons, BUTTONS_BIT_RS);
 
+    // After the buttons, so a frame it starts reading does not put their read off a pass
+    trackpad_pad_s pad_left;
+    trackpad_pad_s pad_right;
+    trackpad_task(sys_hal_now_us());
+    trackpad_get(&pad_left, &pad_right);
+    out[INPUT_CODE_TP1] = pad_left.pressed;
+    out[INPUT_CODE_TP2] = pad_right.pressed;
+
+    // A pad has no switch: its click is played under it as the push registers, and a lighter one
+    // as it lets go
+    static bool was_left = false;
+    static bool was_right = false;
+    trackpad_haptics_click(pad_left.pressed && !was_left, pad_right.pressed && !was_right, true);
+    trackpad_haptics_click(!pad_left.pressed && was_left, !pad_right.pressed && was_right, false);
+    was_left = pad_left.pressed;
+    was_right = pad_right.pressed;
+    trackpad_haptics_task();
+
     // A pull lowers the reading (board_config.h HOJA_HOVER_INVERTS turns it round)
     uint16_t triggers[2] = {0};
     nrf52_adc_read(_trigger_channels, 2, ANALOG_SAMPLES, triggers);
     input->inputs[INPUT_CODE_LT_ANALOG] = triggers[0];
     input->inputs[INPUT_CODE_RT_ANALOG] = triggers[1];
+}
+
+static void _local_touchpad(touchpad_data_s *out, const trackpad_pad_s *pad)
+{
+    out->touched = pad->touched;
+    out->x = pad->x;
+    out->y = pad->y;
+    out->pressure = pad->pressure;
+}
+
+bool cb_hoja_read_touchpads(touchpad_data_s *left, touchpad_data_s *right)
+{
+    trackpad_pad_s pad_left;
+    trackpad_pad_s pad_right;
+    trackpad_get(&pad_left, &pad_right);
+    _local_touchpad(left, &pad_left);
+    _local_touchpad(right, &pad_right);
+    return true;
 }
 
 int main()

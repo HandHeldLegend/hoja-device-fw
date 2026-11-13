@@ -15,6 +15,8 @@ add_custom_target(
 
 add_executable(${PROJECT_NAME}
     main.c
+    trackpad.c
+    trackpad_haptics.c
 )
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_TIMESTAMP_GEN)
 

@@ -13,6 +13,7 @@ battery level, the status LED's colours, rumble on the correct sides and the app
 - USB modes: SInput, XInput, Switch, and the others the library offers over USB, with the config app
 - Off the cable: Switch mode as a Switch 2's Pro Controller 2, over Bluetooth LE (below)
 - Buttons (A B X Y, d-pad, L1 R1, L4 L5 R4 R5, View, Menu, Steam, Quick Access, stick clicks)
+- Trackpads: where a finger is, how hard it presses, and a click with its haptic pulse (below)
 - Sticks and analog triggers
 - Motion (LSM6DSV16X)
 - Rumble through the two grip motors (I2S amplifier)
@@ -23,8 +24,9 @@ battery level, the status LED's colours, rumble on the correct sides and the app
 
 ## What is not
 
-- Trackpads, grip sensing and stick touch (all behind the trackpad controller)
-- Trackpad haptics
+- Grip sensing and stick touch: the trackpad controller reads them, nothing uses them yet
+- Trackpad haptics beyond a pad's own click
+- The trackpads in any mode but SInput: only their clicks can be mapped elsewhere
 - Any wireless mode but the Switch 2's. The chip has no Bluetooth Classic, so no first-Switch or Wii
   mode whatever is added later; Valve's 2.4 GHz link is not used
 - The config app off the cable
@@ -55,6 +57,28 @@ cmake --build nrf52833/build
 ```
 
 The result is `nrf52833/steam_controller/build/steam_controller.fw`.
+
+## Trackpads
+
+Both pads, the grips and the sticks' touch sensing are read by one Cirque touch controller on the
+buttons' I2C bus (`trackpad.c`). It keeps no set-up over a reset, so the firmware gives it the stock
+one at every start (86 commands, spread over the first quarter second), and it then sends a frame
+250 times a second while something is touched or held. A frame is raw electrode readings: the
+position, the touch and the click are worked out in the firmware.
+
+- SInput reports them as two touchpads, each with a position, a pressure and a click.
+- A pad has no switch. Its click is the pressure passing a threshold, and the pulse felt under the
+  thumb is played by the firmware through the pad's actuator (`trackpad_haptics.c`), on the push
+  and, a little lighter, on letting go.
+- The clicks are inputs like any button ("L Pad", "R Pad"), mapped in the SInput profile by
+  default and free to map in the others.
+- Frames are read in the background: SInput stays at about 850 reports a second with the pads in
+  use.
+
+Checked on a controller (2026-11-13), from the reports on a PC and by feel: both pads track from
+edge to edge the right way round, the click force and the two pulses. Not checked: what Steam or
+SDL make of the touchpads, and the pads while in the Switch 2 mode. The click threshold is one
+number for both pads, not each pad's factory range as on the stock firmware.
 
 ## Switch 2 (Bluetooth)
 

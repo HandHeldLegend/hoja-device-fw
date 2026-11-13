@@ -53,9 +53,13 @@
 #define PGPIO_I2C1_SDA          NRF52_PIN(0, 14)
 #define PGPIO_I2C1_SCL          NRF52_PIN(0, 26)
 
-// Trackpad controller ("Olympus"): low holds it in reset. The trackpads aren't read yet.
+// Trackpad controller ("Olympus", trackpad.h): low holds it in reset, and it pulls its ready pin low
+// while a frame waits to be read
 #define PGPIO_TRACKPAD_RESET    NRF52_PIN(0, 15)
+#define PGPIO_TRACKPAD_READY    NRF52_PIN(0, 6)
 #define TRACKPAD_RESET_MS       2
+#define TRACKPAD_I2C_INSTANCE   1
+#define TRACKPAD_I2C_ADDRESS    0x2C
 
 // Trackpad haptics (PWM driven): held off, not used yet
 #define PGPIO_PAD_HAPTIC_ENABLE NRF52_PIN(0, 9)
