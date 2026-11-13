@@ -9,6 +9,8 @@ transport, flashes UF2 images through the bootloader drive, and reports what is 
     python -I scripts/hoja_bench.py dongle-mode <mode>          # the dongle's mode on a computer:
                                                                 # switch sinput xinput slippi
     python -I scripts/hoja_bench.py pad-boot                    # gamepad -> bootloader (cable in)
+    python -I scripts/hoja_bench.py pad-log [seconds]           # gamepad: its bench log (a build with
+                                                                # HOJA_BENCH_LOG), until it runs dry
     python -I scripts/hoja_bench.py pad-dongle [mode]           # gamepad: reboot onto the dongle link
     python -I scripts/hoja_bench.py pad-bt [mode]               # gamepad: reboot into Bluetooth
                                        [--pair]   # either: and start pairing
@@ -748,6 +750,36 @@ def flash_pad(image, then_dongle, in_bootloader=False):
         print("gamepad connected through the dongle")
 
 
+WEBUSB_ID_BENCH_LOG = 0xB0
+
+
+def pad_log(seconds):
+    """The gamepad's bench log (utilities/bench_log.h): the newest text it kept, then what it adds for
+    this many seconds. Read without a pause: the gamepad's main loop waits on packets nobody collects."""
+    path = find_webusb("pad")
+    if not path:
+        raise RuntimeError("no gamepad config interface")
+    dev = WebUsb(path)
+    end = time.perf_counter() + seconds
+    dry = 0
+    while True:
+        dev.write([WEBUSB_ID_BENCH_LOG])
+        reply = None
+        for _ in range(20):
+            reply = dev.read()
+            if reply and reply[0] == WEBUSB_ID_BENCH_LOG:
+                break
+            reply = None
+        if reply is None:
+            raise RuntimeError("no reply: is the firmware built with HOJA_BENCH_LOG?")
+        count = reply[1]
+        sys.stdout.write(bytes(reply[2:2 + count]).decode("utf-8", "replace"))
+        dry = dry + 1 if count == 0 else 0
+        if count == 0 and time.perf_counter() >= end and dry >= 2:
+            break
+    sys.stdout.flush()
+
+
 def main():
     global DONGLE_SEL
     a = sys.argv[1:]
@@ -781,6 +813,8 @@ def main():
                                        reply=DONGLE_WEBUSB_INFO)))
         elif cmd == "pad-boot":
             print("via", pad_command(GAMEPAD_CMD_RESET_TO_BOOTLOADER))
+        elif cmd == "pad-log":
+            pad_log(float(a[1]) if len(a) > 1 else 0.0)
         elif cmd in ("pad-dongle", "pad-bt"):
             pair = "--pair" in a
             names = [x for x in a[1:] if x != "--pair"]
