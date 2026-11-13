@@ -442,19 +442,293 @@ static int16_t _trackpad_position(int32_t centre)
     return (int16_t)along;
 }
 
-static void _trackpad_pad_update(trackpad_pad_s *pad, const int16_t *x, const int16_t *y, int16_t pressure)
+// ---- A flick off a pad ----
+//
+// A thumb flicked off a pad leaves it over some 40 ms, and what its electrodes read in that time
+// says less and less about where it is: across the pad the position slows and stops at the edge,
+// and along the edge it runs away (off the left edge, downwards at up to 6000 a frame; off the top,
+// to the right for as long as the thumb's base stays near). A host that carries a flick on by the
+// speed it ended with (Steam's trackball) took that as the flick: of 39 flicks recorded on a right
+// pad, the last four frames pointed a median of 46 degrees off the flick's own direction, at 0.65
+// of its speed.
+//
+// What tells a thumb leaving is the signal itself, every electrode's reading over the floor added
+// up: under three quarters of its high of the last 12 frames, and falling by three tenths in two
+// frames. From there a flick is not followed but carried on, by the step it had before the fade
+// began, from where that step puts it now; and once that takes it off the pad the touch is over,
+// whatever the electrodes still read, until the signal is back near the high it left from (the
+// thumb stayed after all) or it is gone. Run over the same recording, the 39 flicks ended 8
+// degrees off at the median, at 1.05 of their speed. A finger moving slower than a flick is left
+// alone: it reads the edge of the pad truly enough.
+//
+// The fall is what keeps this to a thumb leaving. The level alone also called it 34 times in 40 s
+// of circles and of quick swipes that stop at an edge, each one a touch ended and a flick the
+// host carried on that nobody made: a thumb circling the rim, or stopped half off the pad, reads
+// 30 to 55 percent of its high, but gets there by 4 points a frame (a circle) or by a quarter in
+// two frames at most (a stop), where one leaving loses a third to a half. With the fall asked
+// for, none of those was called. The cost is the flick whose thumb fades as slowly as a stop: 3
+// of the 39 are not caught, and end as they did.
+#define TRACKPAD_FLICK_WINDOW       12u  // Frames the signal's recent high is taken over
+#define TRACKPAD_FLICK_LEAVE_PCT    75   // Leaving: under this much of that high ...
+#define TRACKPAD_FLICK_FALL_PCT     70   // ... and under this much of what it was two frames ago
+#define TRACKPAD_FLICK_FALL_FRAMES  2u
+#define TRACKPAD_FLICK_BACK_PCT     90   // Back: this much of the high it left from
+#define TRACKPAD_FLICK_STEPS        6u   // Steps kept: the last three are the fade's, by then
+#define TRACKPAD_FLICK_OLD          3u   // The flick's own step is the mean of the three before
+// A step that makes a flick, positions a frame: the pad's width in 220 ms. The recorded flicks
+// stepped 2800 to 5500, a quick drag along an edge 1300.
+#define TRACKPAD_FLICK_STEP         1200
+
+// ---- A finger lifting ----
+//
+// A finger lifted off a pad takes the position with it as it goes: what is left of its contact
+// in the last 15 to 20 ms is not centred where the finger was. Of 122 lifts recorded on a right
+// pad (quick touches, each let go in place) the position moved a median of 1300 over the last
+// eight frames and 2500 at the 90th percentile, 2 to 4 percent of the pad's width, nearly all of
+// it with the signal under 80 percent of its high, and ended at 230 a frame: enough for a host to
+// move its cursor at every lift, and to carry that on as a flick.
+//
+// So a finger that is moving slowly when its signal goes under 80 percent of its recent high is
+// held where it was three frames before, for as long as the electrodes keep it within reach of
+// there. Run over the same recording the lifts then moved a median of 130 over those eight frames
+// (560 at the 90th percentile) and ended at 0 a frame. If the signal comes back, or the finger
+// goes out of reach, it was not lifting: it is followed again from where it was held, and what was
+// held back is given up a quarter of a step at a time as it moves, so the position neither jumps
+// nor stays off for good.
+#define TRACKPAD_HOLD_PCT           80   // Falling: under this much of the signal's recent high
+// Slow: no further than this from where it was three frames before. Lifting moved it 850 a frame
+// at the most.
+#define TRACKPAD_HOLD_SLOW          1800
+#define TRACKPAD_HOLD_BACK          3u   // Frames back the held position is taken from
+// Out of reach: this far from the held position. One lift of the 122 crept further.
+#define TRACKPAD_HOLD_REACH         4000
+#define TRACKPAD_HOLD_GIVE          4    // The share of a step the held-back distance is given up by
+
+typedef enum
+{
+    TRACKPAD_FLICK_FOLLOWED, // The position is the electrodes'
+    TRACKPAD_FLICK_CARRIED,  // The thumb is leaving: the position is the flick's, carried on
+    TRACKPAD_FLICK_GONE,     // Carried off the pad: no touch
+} trackpad_flick_phase_t;
+
+typedef struct
+{
+    bool contact;            // What the electrodes say: a finger is on the pad
+    int16_t x;               // Where they put it
+    int16_t y;
+    trackpad_flick_phase_t phase;
+    int32_t recent[TRACKPAD_FLICK_WINDOW]; // The signal, frame by frame (a ring)
+    uint8_t recent_at;
+    uint8_t recent_count;
+    int16_t points[TRACKPAD_FLICK_STEPS + 1u][2]; // The last positions, oldest first
+    uint8_t points_count;
+    int32_t recent_high;     // The signal's high of the frames before this one
+    int32_t high;            // The signal's high the thumb left from
+    int32_t at[2];           // Where the flick has been carried to
+    int32_t step[2];         // A frame's worth of it
+    bool holding;            // A lift: the position is held
+    bool hold_spent;         // This fall of the signal was not a lift: no hold until it is over
+    int16_t hold_from[2];    // Where the electrodes had the finger when the hold began
+    int32_t hold_at[2];      // The position held
+    int32_t offset[2];       // What the reported position is behind the electrodes' by
+} trackpad_flick_s;
+
+static void _trackpad_flick_reset(trackpad_flick_s *flick)
+{
+    flick->phase = TRACKPAD_FLICK_FOLLOWED;
+    flick->recent_count = 0;
+    flick->recent_at = 0;
+    flick->points_count = 0;
+    flick->holding = false;
+    flick->hold_spent = false;
+    flick->offset[0] = 0;
+    flick->offset[1] = 0;
+}
+
+static bool _trackpad_within(int32_t dx, int32_t dy, int32_t reach)
+{
+    return (((int64_t)dx * dx) + ((int64_t)dy * dy)) <= ((int64_t)reach * reach);
+}
+
+// A frame of a finger that is followed: holds it through a lift, and keeps what is reported as
+// far behind the electrodes' position as holding has left it
+static void _trackpad_hold_frame(trackpad_flick_s *flick, int32_t signal, int16_t *x, int16_t *y)
+{
+    const uint8_t now = (uint8_t)(flick->points_count - 1u);
+    const uint8_t back = (now > TRACKPAD_HOLD_BACK) ? (uint8_t)(now - TRACKPAD_HOLD_BACK) : 0u;
+    const bool falling = (signal * 100) < (flick->recent_high * TRACKPAD_HOLD_PCT);
+
+    if (!falling)
+    {
+        flick->holding = false;
+        flick->hold_spent = false;
+    }
+    else if (!flick->holding && !flick->hold_spent)
+    {
+        if (_trackpad_within(*x - flick->points[back][0], *y - flick->points[back][1], TRACKPAD_HOLD_SLOW))
+        {
+            flick->holding = true;
+            flick->hold_from[0] = flick->points[back][0];
+            flick->hold_from[1] = flick->points[back][1];
+            flick->hold_at[0] = flick->points[back][0] - flick->offset[0];
+            flick->hold_at[1] = flick->points[back][1] - flick->offset[1];
+        }
+        else
+            flick->hold_spent = true;
+    }
+
+    if (flick->holding)
+    {
+        if (_trackpad_within(*x - flick->hold_from[0], *y - flick->hold_from[1], TRACKPAD_HOLD_REACH))
+        {
+            flick->offset[0] = *x - flick->hold_at[0];
+            flick->offset[1] = *y - flick->hold_at[1];
+        }
+        else
+        {
+            flick->holding = false;
+            flick->hold_spent = true;
+        }
+    }
+
+    if (!flick->holding && now)
+    {
+        // Followed: the distance held back shrinks by a share of how far the finger just moved
+        int32_t step_x = *x - flick->points[now - 1u][0];
+        int32_t step_y = *y - flick->points[now - 1u][1];
+        if (step_x < 0)
+            step_x = -step_x;
+        if (step_y < 0)
+            step_y = -step_y;
+        const int32_t give = ((step_x > step_y) ? step_x : step_y) / TRACKPAD_HOLD_GIVE;
+        for (uint8_t axis = 0; axis < 2u; axis++)
+        {
+            if (flick->offset[axis] > give)
+                flick->offset[axis] -= give;
+            else if (flick->offset[axis] < -give)
+                flick->offset[axis] += give;
+            else
+                flick->offset[axis] = 0;
+        }
+    }
+}
+
+// One more frame of the flick carried on. False once that leaves the pad.
+static bool _trackpad_flick_carry(trackpad_flick_s *flick, int16_t *x, int16_t *y)
+{
+    const int32_t next_x = flick->at[0] + flick->step[0];
+    const int32_t next_y = flick->at[1] + flick->step[1];
+
+    if ((next_x >= TRACKPAD_EDGE) || (next_x <= -TRACKPAD_EDGE) || (next_y >= TRACKPAD_EDGE) || (next_y <= -TRACKPAD_EDGE))
+    {
+        flick->phase = TRACKPAD_FLICK_GONE;
+        return false;
+    }
+
+    flick->at[0] = next_x;
+    flick->at[1] = next_y;
+    *x = (int16_t)next_x;
+    *y = (int16_t)next_y;
+    return true;
+}
+
+// A frame with a finger on the pad: where the electrodes put it and their signal. Gives the
+// position to report, or false for no touch.
+static bool _trackpad_flick_frame(trackpad_flick_s *flick, int32_t signal, int16_t *x, int16_t *y)
+{
+    // The high of the frames before this one, and what it was two frames ago
+    int32_t high = signal;
+    for (uint8_t i = 0; i < flick->recent_count; i++)
+    {
+        if (flick->recent[i] > high)
+            high = flick->recent[i];
+    }
+    flick->recent_high = high;
+    int32_t before = signal;
+    if (flick->recent_count >= TRACKPAD_FLICK_FALL_FRAMES)
+        before = flick->recent[(flick->recent_at + TRACKPAD_FLICK_WINDOW - TRACKPAD_FLICK_FALL_FRAMES) % TRACKPAD_FLICK_WINDOW];
+    flick->recent[flick->recent_at] = signal;
+    flick->recent_at = (uint8_t)((flick->recent_at + 1u) % TRACKPAD_FLICK_WINDOW);
+    if (flick->recent_count < TRACKPAD_FLICK_WINDOW)
+        flick->recent_count++;
+
+    if (flick->points_count > TRACKPAD_FLICK_STEPS)
+    {
+        memmove(flick->points[0], flick->points[1], sizeof(flick->points[0]) * TRACKPAD_FLICK_STEPS);
+        flick->points_count = TRACKPAD_FLICK_STEPS;
+    }
+    flick->points[flick->points_count][0] = *x;
+    flick->points[flick->points_count][1] = *y;
+    flick->points_count++;
+
+    if (flick->phase != TRACKPAD_FLICK_FOLLOWED)
+    {
+        if ((signal * 100) >= (flick->high * TRACKPAD_FLICK_BACK_PCT))
+        {
+            // The thumb stayed: followed again, with nothing known of how it is moving
+            flick->phase = TRACKPAD_FLICK_FOLLOWED;
+            flick->points[0][0] = *x;
+            flick->points[0][1] = *y;
+            flick->points_count = 1;
+            return true;
+        }
+        if (flick->phase == TRACKPAD_FLICK_GONE)
+            return false;
+        return _trackpad_flick_carry(flick, x, y);
+    }
+
+    if ((flick->points_count <= TRACKPAD_FLICK_STEPS) || ((signal * 100) >= (high * TRACKPAD_FLICK_LEAVE_PCT)) ||
+        ((signal * 100) >= (before * TRACKPAD_FLICK_FALL_PCT)))
+        return true;
+
+    const int32_t step_x = (flick->points[TRACKPAD_FLICK_OLD][0] - flick->points[0][0]) / (int32_t)TRACKPAD_FLICK_OLD;
+    const int32_t step_y = (flick->points[TRACKPAD_FLICK_OLD][1] - flick->points[0][1]) / (int32_t)TRACKPAD_FLICK_OLD;
+    if ((((int64_t)step_x * step_x) + ((int64_t)step_y * step_y)) < ((int64_t)TRACKPAD_FLICK_STEP * TRACKPAD_FLICK_STEP))
+        return true;
+
+    // On from the last position the fade had not bent, as if the flick had kept its step since
+    const int32_t since = (int32_t)(TRACKPAD_FLICK_STEPS - TRACKPAD_FLICK_OLD) - 1;
+    flick->phase = TRACKPAD_FLICK_CARRIED;
+    flick->high = high;
+    flick->step[0] = step_x;
+    flick->step[1] = step_y;
+    flick->at[0] = flick->points[TRACKPAD_FLICK_OLD][0] + (since * step_x);
+    flick->at[1] = flick->points[TRACKPAD_FLICK_OLD][1] + (since * step_y);
+    return _trackpad_flick_carry(flick, x, y);
+}
+
+static void _trackpad_pad_update(trackpad_pad_s *pad, trackpad_flick_s *flick, const int16_t *x, const int16_t *y,
+                                 int16_t pressure)
 {
     int16_t strongest = 0;
+    int32_t signal = 0;
     for (uint8_t i = 0; i < TRACKPAD_ELECTRODES; i++)
     {
         if (x[i] > strongest)
             strongest = x[i];
         if (y[i] > strongest)
             strongest = y[i];
+        if (x[i] > TRACKPAD_FLOOR)
+            signal += x[i] - TRACKPAD_FLOOR;
+        if (y[i] > TRACKPAD_FLOOR)
+            signal += y[i] - TRACKPAD_FLOOR;
     }
 
     // A finger arriving has to read more than one staying does
-    pad->touched = strongest >= (pad->touched ? TRACKPAD_TOUCH_STAY : TRACKPAD_TOUCH_START);
+    flick->contact = strongest >= (flick->contact ? TRACKPAD_TOUCH_STAY : TRACKPAD_TOUCH_START);
+    if (!flick->contact)
+        _trackpad_flick_reset(flick);
+
+    // An axis with nothing to go on keeps where it was
+    int32_t centre;
+    if (flick->contact && _trackpad_centre(x, &centre))
+        flick->x = _trackpad_position(centre);
+    if (flick->contact && _trackpad_centre(y, &centre))
+        flick->y = _trackpad_position(centre);
+
+    int16_t report_x = flick->x;
+    int16_t report_y = flick->y;
+    pad->touched = flick->contact && _trackpad_flick_frame(flick, signal, &report_x, &report_y);
     if (!pad->touched)
     {
         pad->pressed = false;
@@ -462,12 +736,24 @@ static void _trackpad_pad_update(trackpad_pad_s *pad, const int16_t *x, const in
         return;
     }
 
-    // An axis with nothing to go on keeps where it was
-    int32_t centre;
-    if (_trackpad_centre(x, &centre))
-        pad->x = _trackpad_position(centre);
-    if (_trackpad_centre(y, &centre))
-        pad->y = _trackpad_position(centre);
+    // A flick carried on is not held, and starts no hold
+    if (flick->phase == TRACKPAD_FLICK_FOLLOWED)
+        _trackpad_hold_frame(flick, signal, &report_x, &report_y);
+    else
+        flick->holding = false;
+
+    int32_t out_x = report_x - flick->offset[0];
+    int32_t out_y = report_y - flick->offset[1];
+    if (out_x > TRACKPAD_EDGE)
+        out_x = TRACKPAD_EDGE;
+    if (out_x < -TRACKPAD_EDGE)
+        out_x = -TRACKPAD_EDGE;
+    if (out_y > TRACKPAD_EDGE)
+        out_y = TRACKPAD_EDGE;
+    if (out_y < -TRACKPAD_EDGE)
+        out_y = -TRACKPAD_EDGE;
+    pad->x = (int16_t)out_x;
+    pad->y = (int16_t)out_y;
 
     pad->pressed = pressure >= (pad->pressed ? TRACKPAD_PRESS_STAY : TRACKPAD_PRESS_START);
 
@@ -498,6 +784,17 @@ static uint64_t _trackpad_frame_us = 0;  // When the last frame came
 static uint8_t _trackpad_frame[TRACKPAD_FRAME_HEAD_LEN + TRACKPAD_FRAME_PAYLOAD_LEN];
 static trackpad_pad_s _trackpad_left;
 static trackpad_pad_s _trackpad_right;
+static trackpad_flick_s _trackpad_flick_left;
+static trackpad_flick_s _trackpad_flick_right;
+
+// Nothing touched, and nothing remembered of a touch
+static void _trackpad_pads_clear(void)
+{
+    memset(&_trackpad_left, 0, sizeof(_trackpad_left));
+    memset(&_trackpad_right, 0, sizeof(_trackpad_right));
+    memset(&_trackpad_flick_left, 0, sizeof(_trackpad_flick_left));
+    memset(&_trackpad_flick_right, 0, sizeof(_trackpad_flick_right));
+}
 
 static void _trackpad_reset(uint64_t now_us)
 {
@@ -520,8 +817,7 @@ void trackpad_start(void)
     _trackpad_tries = 0;
     _trackpad_reading = false;
     _trackpad_next_us = sys_hal_now_us() + (TRACKPAD_AWAKE_MS * 1000u);
-    memset(&_trackpad_left, 0, sizeof(_trackpad_left));
-    memset(&_trackpad_right, 0, sizeof(_trackpad_right));
+    _trackpad_pads_clear();
 }
 
 static void _trackpad_frame_done(uint64_t now_us)
@@ -546,8 +842,8 @@ static void _trackpad_frame_done(uint64_t now_us)
 
     trackpad_frame_s frame;
     memcpy(&frame, &_trackpad_frame[TRACKPAD_FRAME_HEAD_LEN], sizeof(frame));
-    _trackpad_pad_update(&_trackpad_left, frame.left_x, frame.left_y, frame.left_pressure);
-    _trackpad_pad_update(&_trackpad_right, frame.right_x, frame.right_y, frame.right_pressure);
+    _trackpad_pad_update(&_trackpad_left, &_trackpad_flick_left, frame.left_x, frame.left_y, frame.left_pressure);
+    _trackpad_pad_update(&_trackpad_right, &_trackpad_flick_right, frame.right_x, frame.right_y, frame.right_pressure);
     _trackpad_frame_us = now_us;
 }
 
@@ -585,10 +881,7 @@ void trackpad_task(uint64_t now_us)
 
             // Frames stop when nothing is touched or held, and the last one may have had a finger in it
             if ((now_us - _trackpad_frame_us) > TRACKPAD_STALE_US)
-            {
-                memset(&_trackpad_left, 0, sizeof(_trackpad_left));
-                memset(&_trackpad_right, 0, sizeof(_trackpad_right));
-            }
+                _trackpad_pads_clear();
             break;
 
         case TRACKPAD_FAILED:
