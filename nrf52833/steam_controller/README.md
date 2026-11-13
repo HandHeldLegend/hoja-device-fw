@@ -76,9 +76,11 @@ position, the touch and the click are worked out in the firmware.
   use.
 
 Checked on a controller (2026-11-13), from the reports on a PC and by feel: both pads track from
-edge to edge the right way round, the click force and the two pulses. Not checked: what Steam or
-SDL make of the touchpads, and the pads while in the Switch 2 mode. The click threshold is one
-number for both pads, not each pad's factory range as on the stock firmware.
+edge to edge the right way round, the click force and the two pulses. SDL (the copy Steam ships,
+3.5.0) opens the gamepad as the Steam type with two touchpads, their clicks as `touchpad` and
+`misc2`. The Steam client of 2026-11-11 showed no trackpads for it. Not checked: the pads while in
+the Switch 2 mode. The click threshold is one number for both pads, not each pad's factory range
+as on the stock firmware.
 
 ## Switch 2 (Bluetooth)
 
@@ -180,6 +182,21 @@ python scripts/steam_controller_fw.py flash IBEX_FW_xxxxxxxx.fw
 Every restart passes through the bootloader, which uses the bottom of RAM: a note left there for
 the firmware that follows (which mode to come back in) did not survive. The firmware's RAM ends
 8 KB early (`steam_controller.ld`), and the note is kept at that end, where it does.
+
+## Settings over an update
+
+The bootloader erases everything it can write before an update, the firmware's saved settings
+with it. So the firmware copies them into spare RAM as it hands over to the bootloader (18 KB
+under its stack, `__record_carry` in `steam_controller.ld`), and the firmware that starts after
+the update, finding nothing saved, writes them back. The gamepad's identity rides along, so the
+PC sees the same device afterwards.
+
+Checked on a controller (2026-11-13): a name, a stick calibration, a profile's name and the
+identity all came back the same after an update.
+
+It only works for an update started from the firmware (`hoja_bench.py pad-boot`, or the app).
+The bootloader's own button combination, an update from firmware older than this, and a
+controller that loses power part way all start with settings cleared.
 
 ## If it goes wrong
 

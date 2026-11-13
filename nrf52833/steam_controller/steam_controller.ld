@@ -12,6 +12,10 @@
  * Every restart goes through the bootloader, which uses RAM of its own: a mode request left at
  * the bottom of RAM (0x20000F64) did not survive one. The firmware's RAM ends 8 KB early, and
  * the request is kept at that end (__boot_memory), clear of the bottom and of a stack at the top.
+ *
+ * An update erases 0x08000 to 0x7CFFF, what the firmware saves included. The saved records wait
+ * in RAM meanwhile (__record_carry, the library's nrf52 record_hal.c): 18 KB under the stack,
+ * which the firmware's own memory must stay below.
  */
 
 SEARCH_DIR(.)
@@ -28,3 +32,8 @@ PROVIDE(__boot_memory = ORIGIN(RAM) + LENGTH(RAM));
 PROVIDE(__bench_log_keep = __boot_memory + 16);
 
 INCLUDE "nrf_common.ld"
+
+/* The global settings (3.9 KB) and four profiles (3.1 KB each), back to back */
+PROVIDE(__record_carry_size = 0x4800);
+PROVIDE(__record_carry = __StackLimit - __record_carry_size);
+ASSERT(__HeapLimit <= __record_carry, "the firmware's memory reaches the records kept over an update")
