@@ -31,6 +31,18 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-11-14 - Full speed through the dongle once the config app closes
+Boards: esp32, gcu_2, progcc_4, dongle_hoja, dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w
+
+### Wireless
+- Fix: [gcu_2, progcc_4, dongle_hoja, dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w] In SInput
+  on a computer through the dongle, your controller gets its full report rate back about a second
+  after you close the config app. Before, it stayed about 15% slower until you turned the controller
+  off. The app's live view works as before while it is open.
+- Fix: [esp32] Internal fixes.
+- Action: [gcu_2, progcc_4, dongle_hoja, dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w] Update
+  both your controller and your dongle. With only one of them updated, things work as before.
+
 ## 2026-11-14 - Full speed through the dongle after using the config app
 Boards: esp32, gcu_2, progcc_4
 
