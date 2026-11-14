@@ -31,6 +31,42 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-11-14 - Smooth motion through the dongle on Switch
+Boards: dongle_hoja, dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w
+
+### Motion
+- Fix: On Nintendo Switch, every motion report from your controller now reaches the console once.
+  Before, about half were lost on the way, so motion through the dongle was less smooth than over a
+  cable.
+- Change: In Switch mode the dongle runs at 125 reports a second, as a Switch Pro Controller does.
+- Action: Update your controller too, so slow turns stop drifting back on Switch.
+
+## 2026-11-14 - Motion that matches a Pro Controller, drift that corrects itself
+Boards: esp32, gcu_2, gcu_2s, latte_pro, padbox_gs_c, phob_2, pico_w, progcc_3, progcc_3s, progcc_4
+
+### Motion
+- New: [gcu_1, gcu_2, gcu_2s, gcu_proto, gcu_r4k, latte_pro, progcc_3, progcc_3.1, progcc_3.2, progcc_3p,
+  progcc_3s, progcc_4] Gyro drift corrects itself. Whenever the controller is still for a moment, its
+  drift is measured and taken out, and while you play it keeps correcting against gravity. No
+  recalibrating and no pause in play.
+- Change: [gcu_1, gcu_2, gcu_2s, gcu_proto, gcu_r4k, latte_pro, progcc_3, progcc_3.1, progcc_3.2,
+  progcc_3p, progcc_3s, progcc_4] Motion sensitivity 1.00 now turns exactly as far as a Switch Pro
+  Controller, on Switch and on a computer. The old default of 1.20 becomes the new default of 1.00. If
+  you set your own sensitivity, it is converted when you update so it keeps the same feel, in every
+  profile.
+- Fix: [gcu_1, gcu_2, gcu_2s, gcu_proto, gcu_r4k, latte_pro, progcc_3, progcc_3.1, progcc_3.2,
+  progcc_3p, progcc_3s, progcc_4] On Nintendo Switch, slow turns no longer drift back. Motion now
+  reaches the console the way a Pro Controller's does, so games like Splatoon 2 no longer mistake a
+  slow, steady aim for drift and correct it away.
+
+### Input
+- Fix: Triggers and other analog inputs that were not calibrated in the app yet keep working after a
+  restart, and keep the range they have learned.
+
+### Modes
+- Fix: On a computer, the controller no longer sometimes shows up without its SInput layout and motion
+  until it is plugged in again.
+
 ## 2026-11-05 - ProGCC 4 triggers (in development)
 Boards: progcc_4
 

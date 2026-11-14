@@ -2,6 +2,6 @@
 #define BUILD_TIMESTAMP_H
 
 #include <stdint.h>
-#define BUILD_TIMESTAMP ((uint32_t)1793864247)
+#define BUILD_TIMESTAMP ((uint32_t)1794641587)
 
 #endif /* BUILD_TIMESTAMP_H */
