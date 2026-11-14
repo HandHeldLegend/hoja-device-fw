@@ -31,6 +31,15 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-11-14 - Full speed through the dongle after using the config app
+Boards: esp32, gcu_2, progcc_4
+
+### Wireless
+- Fix: Using the config app through the dongle no longer halves your controller's reports until you
+  turn it off. On Switch every report, motion included, now reaches the console even after the app
+  was open.
+- Fix: [esp32] The same in SInput on a computer through the dongle.
+
 ## 2026-11-14 - Smooth motion through the dongle on Switch
 Boards: dongle_hoja, dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w
 
