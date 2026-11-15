@@ -31,6 +31,24 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-11-15 - ProGCC 4 triggers, sticks and trigger bumps (in development)
+Boards: progcc_4
+
+### Input
+- Fix: L and ZL, and R and ZR, are no longer swapped.
+- Fix: The controller no longer starts in Bluetooth on its own, even on the cable, when a bumper
+  rests a little past its calibrated position.
+- Action: Calibrate the triggers and bumpers again after updating.
+
+### Joysticks
+- Fix: Both sticks move the right way. The left stick's directions were reversed, and the right
+  stick had up and down swapped with left and right.
+- Action: Calibrate both sticks again after updating.
+
+### Haptics
+- Fix: The bump when a trigger bottoms out plays on that trigger's side. Before, ZL had no bump and
+  ZR bumped on both sides.
+
 ## 2026-11-14 - Full speed through the dongle once the config app closes
 Boards: esp32, gcu_2, progcc_4, dongle_hoja, dongle_pico_w, dongle_pico2_w, dongle_rp2350b_plus_w
 

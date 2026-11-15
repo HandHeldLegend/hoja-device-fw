@@ -446,14 +446,15 @@ static void _pgc4_scan_sewn(uint16_t *a_vals)
 }
 
 // Each trigger FPC has its own enable and two outputs (left: ADC_0/ADC_1 on J11, right: ADC_2/ADC_3
-// on J7), so both sides read in one pass
+// on J7), so both sides read in one pass. Which output is the bumper was measured on the assembled
+// prototype; the FPC netlist only shows which pairs share a function
 static void _pgc4_scan_triggers(uint16_t *a_vals)
 {
     _pgc4_read_bank(PGPIO_EN_TRIGGER_L, PGPIO_EN_TRIGGER_R);
-    a_vals[INPUT_CODE_LB]        = hover_driver_0.output;
-    a_vals[INPUT_CODE_LT_ANALOG] = hover_driver_1.output;
-    a_vals[INPUT_CODE_RT_ANALOG] = hover_driver_2.output;
-    a_vals[INPUT_CODE_RB]        = hover_driver_3.output;
+    a_vals[INPUT_CODE_LT_ANALOG] = hover_driver_0.output;
+    a_vals[INPUT_CODE_LB]        = hover_driver_1.output;
+    a_vals[INPUT_CODE_RB]        = hover_driver_2.output;
+    a_vals[INPUT_CODE_RT_ANALOG] = hover_driver_3.output;
 }
 
 // Sensor to output from the schematic: U11 Right, U9 Down, U8 Up, U10 Left
@@ -526,10 +527,12 @@ void cb_hoja_read_joystick(uint16_t *input)
     adc_hal_read(&stick_rx_driver);
     adc_hal_read(&stick_ry_driver);
 
-    input[0] = stick_lx_driver.output;
-    input[1] = stick_ly_driver.output;
-    input[2] = stick_rx_driver.output;
-    input[3] = stick_ry_driver.output;
+    // Measured on the assembled prototype: the left stick reads both axes backwards, and the right
+    // stick's GPIO 46/47 carry its Y (backwards) and X, not X and Y
+    input[0] = 0xFFF - stick_lx_driver.output;
+    input[1] = 0xFFF - stick_ly_driver.output;
+    input[2] = stick_ry_driver.output;
+    input[3] = 0xFFF - stick_rx_driver.output;
 }
 
 int main()
