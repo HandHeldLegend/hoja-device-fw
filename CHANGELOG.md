@@ -31,6 +31,13 @@ How to add to this changelog (the HHL Gamepad Config app reads this file straigh
 ## Board groups
 - esp32: gcu_1, gcu_proto, gcu_r4k, progcc_3.1, progcc_3.2, progcc_3p, super_gamepad
 
+## 2026-11-15 - ProGCC 4 motion controls (in development)
+Boards: progcc_4
+
+### Motion
+- Fix: Motion controls tilt the right way. Tilting forward and back and rolling side to side were
+  reversed.
+
 ## 2026-11-15 - ProGCC 4 triggers, sticks and trigger bumps (in development)
 Boards: progcc_4
 

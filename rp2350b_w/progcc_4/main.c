@@ -56,20 +56,20 @@ static const hoja_config_s _hoja_config = {
         .taper_ma     = 100,
     },
 
-    // Dual LSM6DSR on SPI instance 0, one CS each. Both sit on the back of the board turned 180
-    // degrees, which flips their Y and Z against the Latte Pro's front-mounted pair: the Latte Pro
-    // inverts Y, so this board inverts Z.
+    // Dual LSM6DSR on SPI instance 0, one CS each. Both sit on the back of the board flipped left to
+    // right against the Latte Pro's front-mounted pair, which turns their X and Z around: the Latte
+    // Pro inverts Y, so this board inverts all three (measured on the assembled prototype).
     .imu = {
         .channel_count = 2,
         .channel_a = {
             .bus = LSM6DSR_BUS_SPI, .spi_instance = 0, .cs_gpio = 17,
-            .gyro  = { .invert_z = true },
-            .accel = { .invert_z = true },
+            .gyro  = { .invert_x = true, .invert_y = true, .invert_z = true },
+            .accel = { .invert_x = true, .invert_y = true, .invert_z = true },
         },
         .channel_b = {
             .bus = LSM6DSR_BUS_SPI, .spi_instance = 0, .cs_gpio = 21,
-            .gyro  = { .invert_z = true },
-            .accel = { .invert_z = true },
+            .gyro  = { .invert_x = true, .invert_y = true, .invert_z = true },
+            .accel = { .invert_x = true, .invert_y = true, .invert_z = true },
         },
     },
 
